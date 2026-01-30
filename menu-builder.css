@@ -101,3 +101,52 @@
 .menu-table tr.saved {
   outline: 1px solid #22c55e;
 }
+
+/* ================= IMAGE CELL ================= */
+.image-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 260px;
+}
+
+/* Thumbnail */
+.menu-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: #f2f2f2;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+/* Image URL input */
+.image-url-input {
+  flex: 1;
+  min-width: 160px;
+  padding: 6px 8px;
+  font-size: 13px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  outline: none;
+}
+
+.image-url-input:focus {
+  border-color: #000;
+}
+
+/* Actions spacing */
+.image-cell .btn {
+  white-space: nowrap;
+}
+
+.menu-thumb {
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.menu-thumb:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}

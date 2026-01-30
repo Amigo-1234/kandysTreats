@@ -86,10 +86,24 @@ document.addEventListener("DOMContentLoaded", () => {
           </button>
         </td>
 
-        <td class="actions">
-          <button class="btn btn-ghost btn-sm save-btn">Save</button>
-          <button class="btn btn-ghost btn-sm delete-btn">🗑️</button>
-        </td>
+       <td class="actions image-cell">
+        <img
+          src="${item.image || 'https://via.placeholder.com/80'}"
+          class="menu-thumb"
+        />
+
+        <input
+          type="text"
+          class="image-url-input"
+          placeholder="Paste image URL here"
+          value="${item.image || ''}"
+        />
+
+        <button class="btn btn-ghost btn-sm save-btn">Save</button>
+        <button class="btn btn-ghost btn-sm delete-btn">🗑️</button>
+      </td>
+
+
       `;
 
       const nameInput = tr.querySelector(".name-input");
@@ -97,12 +111,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const statusBtn = tr.querySelector(".status-toggle");
       const saveBtn = tr.querySelector(".save-btn");
       const deleteBtn = tr.querySelector(".delete-btn");
+      const imageInput = tr.querySelector(".image-url-input");
+      const imgPreview = tr.querySelector(".menu-thumb");
+
+
 
       let draft = {
-        name: item.name,
-        price: item.price,
-        status: item.status,
-      };
+      name: item.name,
+      price: item.price,
+      status: item.status,
+      image: item.image || "",
+    };
+
+
 
       nameInput.oninput = () => {
         draft.name = nameInput.value.trim();
@@ -122,6 +143,18 @@ document.addEventListener("DOMContentLoaded", () => {
         statusBtn.classList.toggle("on", draft.status === "available");
         statusBtn.classList.toggle("off", draft.status === "sold-out");
       };
+
+        imageInput.oninput = () => {
+        const url = imageInput.value.trim();
+        if (url.startsWith("http")) {
+          imgPreview.src = url;
+          draft.image = url;
+        }
+      };
+
+      imgPreview.onerror = () => {
+        imgPreview.src = "https://via.placeholder.com/80";
+      }
 
       saveBtn.onclick = async () => {
         await updateDoc(doc(window.db, "menus", item.id), {
