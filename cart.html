@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" data-page="cart">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cart & Checkout | Kandys Treats Eatery</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="styles.css" rel="stylesheet" />
+</head>
+<body class="page page-cart">
+  <div class="page-shell">
+    <header class="section fade-in-up">
+      <h1>Your Order</h1>
+      <p>Review your treats and complete your order.</p>
+    </header>
+
+    <main class="section section-stack fade-in-up delay-1">
+      <section class="glass-card cart-panel" aria-label="Cart items">
+        <div class="section-header inline">
+          <h2>Cart</h2>
+          <button class="link-inline" id="clear-cart">Clear all</button>
+        </div>
+        <div id="cart-items" class="cart-items" aria-live="polite">
+          <!-- Items injected -->
+        </div>
+        <p id="cart-empty" class="empty-state">Your cart is empty. Add something delicious from the menu.</p>
+      </section>
+
+      <section class="glass-card summary-panel" aria-label="Order summary and checkout">
+        <h2>Checkout</h2>
+        <div class="order-summary">
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span id="summary-subtotal">₦0</span>
+          </div>
+          <div class="summary-row">
+            <span>Estimated Delivery</span>
+            <span id="summary-delivery">₦800</span>
+          </div>
+
+          <div class="summary-row summary-total">
+            <span>Total</span>
+            <span id="summary-total">₦0</span>
+          </div>
+        </div>
+
+        <form id="checkout-form" class="checkout-form">
+          <div class="field-group">
+            <label for="customer-name">Full name</label>
+            <input id="customer-name" name="name" required autocomplete="name" />
+          </div>
+          <div class="field-group">
+            <label for="customer-phone">Phone number</label>
+            <input
+              id="customer-phone"
+              name="phone"
+              required
+              inputmode="tel"
+              autocomplete="tel"
+              placeholder="+234..."
+            />
+          </div>
+          <div class="field-group">
+            <label>Delivery or pickup</label>
+            <div class="toggle-group">
+              <button type="button" class="toggle-option is-active" data-fulfilment="delivery">Delivery</button>
+              <button type="button" class="toggle-option" data-fulfilment="pickup">Pickup</button>
+            </div>
+          </div>
+          <div class="field-group" id="address-field">
+            <label for="customer-address">Delivery address</label>
+            <textarea id="customer-address" name="address" rows="2" required></textarea>
+          </div>
+          <div class="field-group">
+            <label for="customer-time">Preferred time</label>
+            <input id="customer-time" name="time" type="time" />
+          </div>
+          <div class="field-group">
+            <label for="customer-notes">Order notes (optional)</label>
+            <textarea
+              id="customer-notes"
+              name="notes"
+              rows="2"
+              placeholder="E.g. less pepper, extra plantain, call on arrival..."
+            ></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="place-order-btn">
+            <span class="btn-label-default">Place Order</span>
+            <span class="btn-label-loading">Placing order…</span>
+          </button>
+        </form>
+
+        <section class="order-confirmation" id="order-confirmation" hidden>
+          <h3>Order confirmed!</h3>
+
+          <p>
+            Your order ID is <strong><span id="order-id"></span></strong>.
+          </p>
+
+          <div id="order-summary-text" class="order-summary-text"></div>
+
+          <div class="confirm-actions">
+            <a id="track-order-link" class="btn btn-outline btn-block" style="margin-top: 10px;" hidden>
+              Track this order
+            </a>
+
+            <button id="copy-order-code" type="button" class="btn btn-outline btn-block" hidden>
+              Copy order code
+            </button>
+
+            <button id="copy-tracking-link" type="button" class="btn btn-outline btn-block" hidden>
+              Copy tracking link
+            </button>
+            </div>
+          </section>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav glass-card">
+    <a href="index.html" class="bottom-nav-item">
+      <span>Home</span>
+    </a>
+    <a href="menu.html" class="bottom-nav-item">
+      <span>Menu</span>
+    </a>
+    <a href="cart.html" class="bottom-nav-item is-active">
+      <span>Cart</span>
+      <span class="bottom-nav-badge js-cart-count">0</span>
+    </a>
+    <a href="contact.html" class="bottom-nav-item">
+      <span>Contact</span>
+    </a>
+  </nav>
+
+  <div class="toast-container" aria-live="polite" aria-atomic="true"></div>
+  <script src="app.js" type="module"></script>
+</body>
+</html>
+

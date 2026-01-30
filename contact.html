@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" data-page="contact">
+<head>
+  <meta charset="UTF-8" />
+  <title>Contact | Kandys Treats Eatery</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="styles.css" rel="stylesheet" />
+</head>
+<body class="page page-contact">
+  <div class="page-shell">
+    <header class="section fade-in-up">
+      <h1>Contact & Visit</h1>
+      <p>We’d love to serve you. Reach out or stop by.</p>
+    </header>
+
+    <main class="section section-stack fade-in-up delay-1">
+      <section class="glass-card interactive-card">
+        <h2>Talk to us</h2>
+        <p>Bookings, catering, feedback — we respond fast.</p>
+
+        <form id="contact-form" class="checkout-form">
+          <div class="field-group">
+            <label for="contact-name">Name</label>
+            <input id="contact-name" required autocomplete="name" />
+          </div>
+          <div class="field-group">
+            <label for="contact-phone">Phone</label>
+            <input id="contact-phone" required inputmode="tel" autocomplete="tel" />
+          </div>
+          <div class="field-group">
+            <label for="contact-message">Message</label>
+            <textarea id="contact-message" rows="3" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">
+            Send Message
+          </button>
+        </form>
+      </section>
+
+      <section class="glass-card interactive-card">
+        <h2>Location & Hours</h2>
+        <div class="info-list">
+          <div>
+            <span class="label">Phone</span>
+            <a href="tel:+2348134641796" class="value link-inline">+234 813 464 1796</a>
+          </div>
+          <div>
+            <span class="label">Open</span>
+            <span class="value">Daily • 9:00AM – 10:30PM</span>
+          </div>
+          <div>
+            <span class="label">Service</span>
+            <span class="value">Pickup • Delivery • Small events</span>
+          </div>
+        </div>
+        <div class="map-placeholder map-placeholder-sm">
+          <div class="map-grid"></div>
+          <div class="map-marker"></div>
+          <span class="map-label">P782+WVQ, Iworoko 362103, Ekiti, Nigeria</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="bottom-nav glass-card">
+    <a href="index.html" class="bottom-nav-item">
+      <span>Home</span>
+    </a>
+    <a href="menu.html" class="bottom-nav-item">
+      <span>Menu</span>
+    </a>
+    <a href="cart.html" class="bottom-nav-item">
+      <span>Cart</span>
+      <span class="bottom-nav-badge js-cart-count">0</span>
+    </a>
+    <a href="contact.html" class="bottom-nav-item is-active">
+      <span>Contact</span>
+    </a>
+  </nav>
+
+  <div class="toast-container" aria-live="polite" aria-atomic="true"></div>
+  <script src="app.js" type="module"></script>
+</body>
+</html>
+

@@ -1,0 +1,248 @@
+/* ================================
+   ADMIN ONLY STYLES
+   ================================ */
+
+.page-admin {
+  overflow: hidden;
+}
+
+/* Full width shell */
+.page-admin .page-shell {
+  max-width: 1200px; /* 👈 tighter */
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.page-admin .section {
+  margin-bottom: 24px;
+}
+
+
+/* Kill mobile layout assumptions */
+.page-admin .section-stack {
+  display: block;
+}
+
+/* Hide mobile nav */
+.page-admin .bottom-nav {
+  display: none;
+}
+
+/* Admin panel container */
+.page-admin .admin-panel {
+  display: block;
+}
+
+/* Main admin layout */
+.page-admin .admin-main-layout {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+/* Orders table area */
+.page-admin .table-wrapper {
+  max-height: calc(100vh - 260px);
+  overflow-y: auto;
+}
+
+/* Sticky order details */
+.page-admin .order-detail-panel {
+  position: sticky;
+  top: 16px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
+/* Admin header spacing */
+.page-admin header.section {
+  margin-bottom: 16px;
+}
+
+/* Prevent body scroll bleed */
+.page-admin body {
+  overflow: hidden;
+}
+
+.page-admin {
+  overflow-y: auto;
+}
+
+.page-admin body {
+  overflow-y: auto;
+}
+
+/* ===== Order Details Panel ===== */
+.order-detail-panel {
+  background: linear-gradient(180deg, rgba(15,23,42,.95), rgba(2,6,23,.95));
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.order-detail-panel h3 {
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.order-detail-panel p {
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.order-detail-panel strong {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Items list */
+.detail-items-list {
+  margin: 6px 0;
+  padding-left: 18px;
+}
+
+.detail-items-list li {
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+/* Status section */
+.status-actions {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,.1);
+}
+
+.status-actions p {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.status-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Print button alignment */
+.detail-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.order-detail-panel p + p {
+  border-top: 1px dashed rgba(255,255,255,.08);
+  padding-top: 6px;
+}
+
+
+.menu-builder {
+  margin-top: 20px;
+}
+
+.menu-builder-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 16px;
+}
+
+.menu-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu-section {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.12);
+  color: var(--text-muted);
+  cursor: pointer;
+  text-align: left;
+}
+
+.menu-section.is-active {
+  color: var(--accent);
+  border-color: rgba(255,59,167,.6);
+  box-shadow: 0 0 12px rgba(255,59,167,.35);
+}
+
+.menu-items {
+  background: rgba(15,23,42,.6);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.menu-items-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.menu-item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.menu-item-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr auto;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.04);
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.menu-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.menu-table th,
+.menu-table td {
+  padding: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  text-align: left;
+}
+
+.price-input {
+  width: 100px;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: transparent;
+  color: inherit;
+}
+
+.status-toggle {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+}
+
+.status-toggle.on {
+  background: #16a34a;
+  color: white;
+}
+
+.status-toggle.off {
+  background: #dc2626;
+  color: white;
+}
+
+.menu-table tr.saved {
+  outline: 1px solid #22c55e;
+}

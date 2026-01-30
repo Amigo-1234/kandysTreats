@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" data-page="admin">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin | Kandys Treats Eatery</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="styles.css" rel="stylesheet" />
+  <link href="admin.css" rel="stylesheet" />
+
+</head>
+<body class="page page-admin">
+  <div class="page-shell">
+    <header class="section fade-in-up">
+      <h1>Admin Console</h1>
+      <p>Internal order view (secured with admin login).</p>
+
+    </header>
+
+    <main class="section section-stack fade-in-up delay-1">
+      <!-- Mock login -->
+      <section class="glass-card admin-login" id="admin-login">
+        <h2>Admin Login</h2>
+        <form id="admin-login-form" class="checkout-form">
+          <div class="field-group">
+            <label for="admin-email">Email</label>
+            <input id="admin-email" type="email" required placeholder="admin@example.com" />
+          </div>
+          <div class="field-group">
+            <label for="admin-password">Password</label>
+            <input id="admin-password" type="password" required />
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">
+            Sign in
+          </button>
+          <!-- TODO: Auth: admin login -->
+        </form>
+      </section>
+
+      <!-- Orders table -->
+      <div class="glass-card admin-panel" id="admin-panel" hidden>
+      
+              <div class="admin-panel-header">
+        <div>
+          <h2>Live Orders</h2>
+          <p class="muted">Real-time order feed (admin only).</p>
+        </div>
+
+        <div class="admin-actions">
+          <button id="toggle-sound" class="btn btn-outline btn-sm" type="button">Sound: On</button>
+          <span class="live-indicator" title="Listening…"><span class="dot"></span> Live</span>
+          <button id="admin-logout" class="btn btn-outline btn-sm" type="button">Sign out</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="admin-stats">
+        <div class="stat-card glass-card">
+          <div class="stat-label">Total Orders</div>
+          <div class="stat-value" id="stat-total">0</div>
+        </div>
+        <div class="stat-card glass-card">
+          <div class="stat-label">New</div>
+          <div class="stat-value" id="stat-new">0</div>
+        </div>
+        <div class="stat-card glass-card">
+          <div class="stat-label">Preparing</div>
+          <div class="stat-value" id="stat-preparing">0</div>
+        </div>
+        <div class="stat-card glass-card">
+          <div class="stat-label">Completed</div>
+          <div class="stat-value" id="stat-completed">0</div>
+        </div>
+        <div class="stat-card glass-card">
+          <div class="stat-label">Today Revenue</div>
+          <div class="stat-value" id="stat-revenue">₦0</div>
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="admin-toolbar glass-card">
+        <input id="order-search" class="admin-search" placeholder="Search by ID, name, phone…" />
+        <div class="admin-filters" id="status-filters">
+          <button type="button" class="chip chip-filter is-active" data-filter="All">All</button>
+          <button type="button" class="chip chip-filter" data-filter="New">New</button>
+          <button type="button" class="chip chip-filter" data-filter="Preparing">Preparing</button>
+          <button type="button" class="chip chip-filter" data-filter="Out">Out</button>
+          <button type="button" class="chip chip-filter" data-filter="Completed">Completed</button>
+        </div>
+      </div>
+
+      <div class="admin-main-layout">
+        <div class="table-wrapper">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Customer</th>
+                <th>Total</th>
+                <th>Type</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="orders-tbody">
+              <!-- Rows injected, slide-in animation -->
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="order-detail-panel" id="order-detail-panel" aria-live="polite">
+          <h3>Order Details</h3>
+          <p id="order-detail-empty">Select an order to view details.</p>
+          <div id="order-detail-content" hidden>
+            <p><strong>Order ID:</strong> <span data-detail-id></span></p>
+            <p><strong>Name:</strong> <span data-detail-name></span></p>
+            <p><strong>Phone:</strong> <span data-detail-phone></span></p>
+            <p><strong>Type:</strong> <span data-detail-type></span></p>
+            <p><strong>Total:</strong> <span data-detail-total></span></p>
+            <p><strong>Items:</strong></p>
+            <ul data-detail-items class="detail-items-list"></ul>
+            <p><strong>Notes:</strong> <span data-detail-notes></span></p>
+
+            <div class="status-actions">
+              <p>Update status</p>
+              <div class="status-buttons">
+                <button class="chip chip-status" data-status="New">New</button>
+                <button class="chip chip-status" data-status="Preparing">Preparing</button>
+                <button class="chip chip-status" data-status="Out">Out</button>
+                <button class="chip chip-status" data-status="Completed">Completed</button>
+              </div>
+            <div class="detail-actions">
+  <button id="print-receipt" type="button" class="btn btn-primary btn-sm">Print Receipt</button>
+</div>
+
+            </div>
+          </div>
+        </aside>
+       </div>
+      </section>
+
+
+      <a href="menu-builder.html" 
+        class="btn btn-outline btn-sm">
+        Manage Menu →
+      </a>
+
+
+    </main>
+  </div>
+
+  <nav class="bottom-nav glass-card">
+    <a href="index.html" class="bottom-nav-item">
+      <span>Home</span>
+    </a>
+    <a href="menu.html" class="bottom-nav-item">
+      <span>Menu</span>
+    </a>
+    <a href="cart.html" class="bottom-nav-item">
+      <span>Cart</span>
+      <span class="bottom-nav-badge js-cart-count">0</span>
+    </a>
+    <a href="contact.html" class="bottom-nav-item">
+      <span>Contact</span>
+    </a>
+  </nav>
+
+  <div class="toast-container" aria-live="polite" aria-atomic="true"></div>
+  <script src="app.js" type="module"></script>
+  <script src="js/admin.js" type="module"></script>
+  <script src="js/seedMenu.js" type="module"></script>
+</body>
+</html>
+

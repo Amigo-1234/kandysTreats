@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" data-page="menu-builder">
+<head>
+  <meta charset="UTF-8" />
+  <title>Menu Builder | Kandys Treats</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="admin.css" />
+  <link rel="stylesheet" href="menu-builder.css" />
+
+</head>
+<body class="page page-admin">
+  <div class="page-shell">
+
+    <header class="section">
+      <h1>Menu Builder</h1>
+      <p class="muted">Manage menu sections, prices, availability & images</p>
+    </header>
+
+    <main class="section">
+      <section class="glass-card menu-builder">
+
+        <div class="section-header inline">
+          <h2 id="active-menu-title">Menu</h2>
+
+          <div>
+            <button id="add-menu-section" class="btn btn-primary btn-sm">
+              + Add Menu Section
+            </button>
+            <button id="add-menu-item" class="btn btn-outline btn-sm">
+              + Add Item
+            </button>
+          </div>
+        </div>
+
+        <div class="menu-builder-layout">
+          <aside class="menu-sections" id="menu-sections"></aside>
+
+          <div class="menu-items">
+            <table class="menu-table">
+              <thead>
+                <tr>
+                  <th>Dish</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="menu-item-list"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js" type="module"></script>
+  <script src="js/admin.js" type="module"></script>
+  <script src="js/seedMenu.js" type="module"></script>
+</body>
+</html>
