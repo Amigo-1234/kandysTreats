@@ -465,18 +465,33 @@ const initCartPage = () => {
   cartItems.forEach(item => {
     const name = item.name.toLowerCase();
 
-    // Non-food items → ignore completely
+    // ✅ Explicitly IGNORE drinks & non-food
     if (
-      name.includes("shawarma") ||
-      name.includes("burger") ||
-      name.includes("chicken") ||
-      name.includes("chips")
+      name.includes("coke") ||
+      name.includes("fanta") ||
+      name.includes("pepsi") ||
+      name.includes("soda") ||
+      name.includes("juice") ||
+      name.includes("chivita") ||
+      name.includes("hollandia") ||
+      name.includes("yogurt") ||
+      name.includes("water")
     ) {
       return;
     }
 
-    // Food detected
-    hasFood = true;
+    // ✅ Only real food reaches here
+    if (
+      name.includes("rice") ||
+      name.includes("beans") ||
+      name.includes("ofada") ||
+      name.includes("amala") ||
+      name.includes("swallow") ||
+      name.includes("semo") ||
+      name.includes("eba")
+    ) {
+      hasFood = true;
+    }
 
     if (name.includes("rice")) hasRice = true;
     if (name.includes("beans")) hasBeans = true;
@@ -493,7 +508,6 @@ const initCartPage = () => {
   // Any other food
   return 200;
 }
-
 
   /* ================= RENDER CART ================= */
   const render = () => {
