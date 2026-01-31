@@ -24,6 +24,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeSection = null;
   let menuItems = [];
 
+  
+
+
   /* ---------------- LISTEN ---------------- */
   onSnapshot(menusQuery, (snap) => {
     menuItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));

@@ -150,6 +150,11 @@ const PLACEHOLDER_IMAGES = [
 const getRandomImage = () =>
   PLACEHOLDER_IMAGES[Math.floor(Math.random() * PLACEHOLDER_IMAGES.length)];
 
+function normalizePhone(phone) {
+  if (!phone) return "";
+  return phone.replace(/\D/g, ""); // removes +, spaces, etc
+}
+
 
 // Menu rendering
 const initMenuPage = () => {
@@ -440,6 +445,10 @@ const initCartPage = () => {
   const fulfilmentButtons = document.querySelectorAll(".toggle-option[data-fulfilment]");
   const addressField = document.getElementById("address-field");
   const placeBtn = document.getElementById("place-order-btn");
+  const fulfilment =
+  document.querySelector(".toggle-option.is-active")?.dataset.fulfilment ||
+  "delivery";
+
 
   if (!itemsContainer || !subtotalEl) return;
 
@@ -609,40 +618,58 @@ totalEl.textContent = formatPrice(subtotal + deliveryFee + takeawayFee);
 
   };
 
+  
+
   /* ================= SUBMIT ORDER ================= */
-  form?.addEventListener("submit", async e => {
-    e.preventDefault();
+  form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const cart = readCart();
-    const ids = Object.keys(cart);
-    if (!ids.length) return showToast("Your cart is empty.");
+  const name = document.getElementById("customer-name")?.value.trim();
+  const phone = document.getElementById("customer-phone")?.value.trim();
+  const email = document.getElementById("customer-email")?.value.trim();
+  const notes = document.getElementById("order-notes")?.value.trim() || "";
 
-    placeBtn.disabled = true;
+  if (!name || !phone) {
+    showToast("Please fill in name and phone number");
+    return;
+  }
 
-    const fulfilment =
-      [...fulfilmentButtons].find(b => b.classList.contains("is-active"))
-        ?.dataset.fulfilment || "delivery";
+  const cart = readCart();
+  const ids = Object.keys(cart);
+  if (!ids.length) {
+    showToast("Your cart is empty");
+    return;
+  }
 
-    const items = ids.map(id => cart[id]);
-    const takeawayFee =
-      fulfilment === "delivery" ? calculateTakeawayFee(items) : 0;
+  placeBtn.disabled = true;
 
-    if (takeawayFee > 0) {
-      items.push({
-        id: "takeaway-pack",
-        name: "Takeaway Pack",
-        price: takeawayFee,
-        qty: 1,
-        system: true
-      });
-    }
-    
-    const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-    const deliveryFee = fulfilment === "delivery" ? DELIVERY_FEE : 0;
-    const total = subtotal + deliveryFee;
+  const orderId = `KD-${Date.now().toString().slice(-6)}`;
+  localStorage.setItem("kandys_last_order_code", orderId);
 
-    // Firestore save continues here (unchanged)
+  const items = ids.map(id => cart[id]);
+  const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+  const deliveryFee = DELIVERY_FEE;
+  const total = subtotal + deliveryFee;
+
+  await setDoc(doc(db, "orders", orderId), {
+    id: orderId,
+    customer: { name, phone, email },
+    fulfilment,
+    items,
+    subtotal,
+    deliveryFee,
+    total,
+    notes,
+    status: "New",
+    createdAt: serverTimestamp(),
   });
+
+  saveCart({});
+  showToast("Order placed successfully 🎉");
+  window.location.href = `/track.html?code=${orderId}`;
+});
+
+
 
   clearBtn?.addEventListener("click", () => {
     saveCart({});
@@ -690,6 +717,7 @@ const statPreparing = document.getElementById("stat-preparing");
 const statCompleted = document.getElementById("stat-completed");
 const statRevenue = document.getElementById("stat-revenue");
 
+
 let activeFilter = "All";
 let searchQuery = "";
 let soundOn = true;
@@ -704,6 +732,9 @@ let lastSeenIds = new Set(); // for "new order" detection
   const detailPanel = document.getElementById("order-detail-panel");
   const emptyDetail = document.getElementById("order-detail-empty");
   const detailContent = document.getElementById("order-detail-content");
+
+  // ⛔ STOP if this is not the admin page
+  if (!panel) return;
 
   if (!loginSection || !panel || !tbody || !detailPanel) return;
 
@@ -747,47 +778,130 @@ const renderTable = () => {
 
 
   const renderDetail = (order) => {
-    if (!detailContent || !emptyDetail) return;
-    emptyDetail.style.display = "none";
-    detailContent.hidden = false;
+  if (!detailContent || !emptyDetail) return;
 
-    detailContent.querySelector("[data-detail-id]").textContent = order.id;
-    detailContent.querySelector("[data-detail-name]").textContent = order.customer?.name || "-";
-    detailContent.querySelector("[data-detail-phone]").textContent = order.customer?.phone || "-";
-    detailContent.querySelector("[data-detail-type]").textContent =
+  emptyDetail.style.display = "none";
+  detailContent.hidden = false;
+
+  let el;
+
+  el = detailContent.querySelector("[data-detail-id]");
+  if (el) el.textContent = order.id || "-";
+
+  el = detailContent.querySelector("[data-detail-name]");
+  if (el) el.textContent = order.customer?.name || "-";
+
+  el = detailContent.querySelector("[data-detail-phone]");
+  if (el) el.textContent = order.customer?.phone || "-";
+
+  el = detailContent.querySelector("[data-detail-type]");
+  if (el) {
+    el.textContent =
       order.fulfilment === "delivery" ? "Delivery" : "Pickup";
-    detailContent.querySelector("[data-detail-total]").textContent = formatPrice(order.total || 0);
-    detailContent.querySelector("[data-detail-notes]").textContent = order.notes || "None";
+  }
 
-    const itemsList = detailContent.querySelector("[data-detail-items]");
+  el = detailContent.querySelector("[data-detail-total]");
+  if (el) el.textContent = formatPrice(order.total || 0);
+
+  el = detailContent.querySelector("[data-detail-notes]");
+  if (el) el.textContent = order.notes || "None";
+
+  const itemsList = detailContent.querySelector("[data-detail-items]");
+  if (itemsList) {
     itemsList.innerHTML = "";
     (order.items || []).forEach((i) => {
       const li = document.createElement("li");
       li.textContent = `${i.qty} × ${i.name}`;
       itemsList.appendChild(li);
     });
+  }
 
-    detailPanel.querySelectorAll(".chip-status").forEach((btn) => {
-      btn.classList.toggle("chip-glow", btn.dataset.status === order.status);
+  detailPanel
+    ?.querySelectorAll(".chip-status")
+    .forEach((btn) => {
+      btn.classList.toggle(
+        "chip-glow",
+        btn.dataset.status === order.status
+      );
     });
-  };
+};
+function buildWhatsAppMessage(order, status) {
+  return `
+Hello ${order.customer.name},
 
-  const bindStatusButtons = () => {
-    detailPanel.querySelectorAll(".chip-status").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const id = STATE.selectedOrderId;
-        if (!id) return;
-        const status = btn.dataset.status;
+Your order (${order.id}) is now *${status}*.
 
-        try {
-          await updateDoc(doc(db, "orders", id), { status });
-          showToast(`Order ${id} marked as ${status}`);
-        } catch {
-          showToast("Failed to update status");
+Items:
+${order.items.map(i => `• ${i.qty} × ${i.name}`).join("\n")}
+
+Thank you for ordering from Kandys Treats ❤️
+`.trim();
+}
+
+function sendWhatsApp(order, status) {
+  const phone = normalizePhone(order.customer?.phone);
+  if (!phone) {
+    showToast("Customer phone number missing");
+    return;
+  }
+
+  const message = buildWhatsAppMessage(order, status);
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+  window.open(url, "_blank");
+}
+
+
+ const bindStatusButtons = () => {
+  detailPanel.querySelectorAll(".chip-status").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = STATE.selectedOrderId;
+      if (!id) return;
+
+      const newStatus = btn.dataset.status;
+      const order = STATE.orders.find(o => o.id === id);
+      if (!order) return;
+
+      // Prevent duplicate action
+      if (order.status === newStatus) {
+        showToast(`Order already marked as ${newStatus}`);
+        return;
+      }
+
+      try {
+        // 1️⃣ Update Firestore (ONCE)
+        await updateDoc(doc(db, "orders", id), {
+          status: newStatus,
+        });
+
+        // 2️⃣ Try EmailJS (best effort)
+        if (order.customer?.email && window.emailjs) {
+          emailjs.send(
+            "service_b42kpvg",
+            "template_wgethvr",
+            {
+              customer_name: order.customer.name,
+              order_id: order.id,
+              status: newStatus,
+              customer_email: order.customer.email,
+            }
+          ).catch(err => {
+            console.warn("EmailJS failed (ignored):", err);
+          });
         }
-      });
+
+        // 3️⃣ WhatsApp = always works
+        sendWhatsApp(order, newStatus);
+
+        showToast(`Order ${id} marked as ${newStatus}`);
+      } catch (err) {
+        console.error(err);
+        showToast("Failed to update order status");
+      }
     });
-  };
+  });
+};
+
 
 const startOrdersListener = () => {
   const qy = query(collection(db, "orders"), orderBy("createdAt", "desc"));
@@ -851,9 +965,9 @@ soundBtn?.addEventListener("click", () => {
 });
 
 printBtn?.addEventListener("click", () => {
-  if (!STATE.selectedOrderId) return showToast("Select an order first.");
   window.print();
 });
+
 
   };
 
@@ -945,6 +1059,7 @@ const computeStats = () => {
   if (statPreparing) statPreparing.textContent = countPrep;
   if (statCompleted) statCompleted.textContent = countComp;
   if (statRevenue) statRevenue.textContent = formatPrice(revenueToday);
+
 };
 
 const getFilteredOrders = () => {
@@ -1027,17 +1142,6 @@ const initTrackPage = () => {
     if (result) result.hidden = !showResult;
   };
 
-  const renderTimeline = (status = "New") => {
-    const steps = stepsWrap.querySelectorAll(".step");
-    const activeIndex = ORDER_STATUSES.indexOf(status);
-
-    steps.forEach((step, index) => {
-      step.classList.remove("is-active", "is-done");
-
-      if (index < activeIndex) step.classList.add("is-done");
-      if (index === activeIndex) step.classList.add("is-active");
-    });
-  };
 
   const applyTimelineStatus = (status) => {
   const steps = document.querySelectorAll(".timeline-item");
