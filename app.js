@@ -612,9 +612,26 @@ if (takeawayFee > 0) {
 const deliveryFee =
   fulfilment === "delivery" && ids.length ? DELIVERY_FEE : 0;
 
+const takeawayRow = document.getElementById("summary-takeaway-row");
+const takeawayEl = document.getElementById("summary-takeaway");
+
 subtotalEl.textContent = formatPrice(subtotal);
-deliveryEl.textContent = formatPrice(deliveryFee + takeawayFee);
-totalEl.textContent = formatPrice(subtotal + deliveryFee + takeawayFee);
+
+// Takeaway
+if (takeawayFee > 0) {
+  takeawayRow.style.display = "flex";
+  takeawayEl.textContent = formatPrice(takeawayFee);
+} else {
+  takeawayRow.style.display = "none";
+}
+
+// Delivery ONLY
+deliveryEl.textContent = formatPrice(deliveryFee);
+
+// Total
+totalEl.textContent = formatPrice(
+  subtotal + deliveryFee + takeawayFee
+);
 
   };
 
@@ -652,17 +669,18 @@ totalEl.textContent = formatPrice(subtotal + deliveryFee + takeawayFee);
   const total = subtotal + deliveryFee;
 
   await setDoc(doc(db, "orders", orderId), {
-    id: orderId,
-    customer: { name, phone, email },
-    fulfilment,
-    items,
-    subtotal,
-    deliveryFee,
-    total,
-    notes,
-    status: "New",
-    createdAt: serverTimestamp(),
-  });
+  id: orderId,
+  customer: { name, phone, email },
+  fulfilment,
+  items,
+  subtotal,
+  takeawayFee,
+  deliveryFee,
+  total: subtotal + deliveryFee + takeawayFee,
+  notes,
+  status: "New",
+  createdAt: serverTimestamp(),
+});
 
   saveCart({});
   showToast("Order placed successfully 🎉");
