@@ -1883,3 +1883,16 @@ body[data-page="track"] .track-card {
   color: var(--accent);
   letter-spacing: 0.04em;
 }
+
+.menu-card-image {
+  width: 100%;
+  height: 140px;
+  border-radius: 12px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.menu-card-image {
+  background-position: center 60%;
+}

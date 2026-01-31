@@ -1405,6 +1405,27 @@ const initContactForm = () => {
   });
 };
 
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".quick-add");
+  if (!btn) return;
+
+  const items = JSON.parse(btn.dataset.items);
+  const cart = readCart();
+
+  items.forEach(item => {
+    const existing = cart[item.id];
+    cart[item.id] = {
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      qty: (existing?.qty || 0) + item.qty
+    };
+  });
+
+  saveCart(cart);
+  showToast("Quick combo added to cart");
+});
+
 
 
 // Init
