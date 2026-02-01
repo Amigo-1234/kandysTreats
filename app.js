@@ -1407,52 +1407,35 @@ const initContactForm = () => {
 };
 
 
-function startQuickPicksAutoScroll(row) {
+document.addEventListener("DOMContentLoaded", () => {
+  const row = document.querySelector(".quick-picks-row");
   if (!row) return;
 
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    return;
-  }
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-  if (row.scrollWidth <= row.clientWidth) return;
+  let rafId;
+  let paused = false;
+  const speed = 0.3; // phone-friendly speed
 
-  let isPaused = false;
-  const speed = 0.6;
-
-  row.classList.add("is-auto-scrolling");
-
-  function loop() {
-    if (!isPaused) {
+  function autoScroll() {
+    if (!paused) {
       row.scrollLeft += speed;
 
-      if (row.scrollLeft >= row.scrollWidth - row.clientWidth - 1) {
+      if (row.scrollLeft + row.clientWidth >= row.scrollWidth - 1) {
         row.scrollLeft = 0;
       }
     }
-    requestAnimationFrame(loop);
+    rafId = requestAnimationFrame(autoScroll);
   }
 
-  const pause = () => {
-    isPaused = true;
-    row.classList.remove("is-auto-scrolling");
-  };
+  // Pause on touch
+  row.addEventListener("touchstart", () => paused = true, { passive: true });
+  row.addEventListener("touchend", () => paused = false);
+  row.addEventListener("mouseenter", () => paused = true);
+  row.addEventListener("mouseleave", () => paused = false);
 
-  const resume = () => {
-    isPaused = false;
-    row.classList.add("is-auto-scrolling");
-  };
-
-  ["mouseenter", "mousedown", "wheel", "touchstart"].forEach(e =>
-    row.addEventListener(e, pause)
-  );
-
-  ["mouseleave", "mouseup", "touchend"].forEach(e =>
-    row.addEventListener(e, resume)
-  );
-
-  requestAnimationFrame(loop);
-}
-
+  autoScroll();
+});
 
 function initQuickPicks() {
   const wrap = document.getElementById("quick-picks");
