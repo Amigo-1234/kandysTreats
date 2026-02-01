@@ -453,6 +453,8 @@ const initCartPage = () => {
   const payNowBtn = document.getElementById("pay-now-btn");
 
 
+  
+
   if (!itemsContainer || !subtotalEl) return;
 
   const DELIVERY_FEE = 500;
@@ -675,7 +677,7 @@ totalEl.textContent = formatPrice(
   }
 
     if (placeBtn.disabled) return;
-    placeBtn.disabled = true;
+setTimeout(() => placeBtn.disabled = true, 0);
 
 
   const orderId = `KD-${Date.now().toString().slice(-6)}`;
@@ -793,20 +795,6 @@ async function handlePaymentSuccess(orderId, reference) {
 
 
 // Listen for order status changes to send notifications
-
-onSnapshot(
-  query(collection(window.db, "orders")),
-  snap => {
-    snap.docChanges().forEach(change => {
-      if (change.type !== "modified") return;
-
-      const data = change.doc.data();
-      if (data.status === "Out" && data.notificationToken) {
-        sendLocalNotification(data);
-      }
-    });
-  }
-);
 
 function sendLocalNotification(order) {
   new Notification("Your order is on the way 🚴‍♂️", {
