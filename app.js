@@ -31,6 +31,8 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
+import { getDocs } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
 // Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCWDTVJgW5dqcBbnZRb6m_Yz-fB7flO9nU",
@@ -1524,9 +1526,15 @@ function startQuickPicksAutoScroll(row) {
 }
 
 
-function initQuickPicks() {
+async function initQuickPicks() {
   const wrap = document.getElementById("quick-picks");
   if (!wrap) return;
+
+  // Skeletons first (instant feedback)
+  wrap.innerHTML = `
+    <article class="menu-card skeleton-card"></article>
+    <article class="menu-card skeleton-card"></article>
+  `;
 
   const q = query(
     collection(window.db, "quickPicks"),
@@ -1534,7 +1542,9 @@ function initQuickPicks() {
     orderBy("priority", "desc")
   );
 
-  onSnapshot(q, snap => {
+  try {
+    const snap = await getDocs(q);
+
     wrap.innerHTML = "";
 
     if (snap.empty) {
@@ -1543,15 +1553,19 @@ function initQuickPicks() {
     }
 
     snap.forEach(docSnap => {
-      const data = docSnap.data();
-      wrap.appendChild(renderQuickPickCard(docSnap.id, data));
+      wrap.appendChild(renderQuickPickCard(docSnap.id, docSnap.data()));
     });
 
-    // ✅ START AUTO SCROLL AFTER CARDS EXIST
-    startQuickPicksAutoScroll(wrap);
-  });
-}
+    // 🚀 Start auto scroll AFTER cards exist
+    requestAnimationFrame(() => {
+      startQuickPicksAutoScroll(wrap);
+    });
 
+  } catch (err) {
+    console.error(err);
+    wrap.innerHTML = `<p class="muted">Failed to load quick picks</p>`;
+  }
+}
 function renderQuickPickCard(id, data) {
   const card = document.createElement("article");
   card.className = "menu-card glass-card interactive-card";
