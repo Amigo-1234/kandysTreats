@@ -105,89 +105,7 @@
           </button>
         </form>
 
-        <section
-  class="glass-card track-card"
-  id="inline-track"
-  hidden
->
-  <h2>Track Your Order</h2>
 
-  <div class="track-top">
-    <div>
-      <div class="muted">Order</div>
-      <div class="track-order-id" id="t-id">—</div>
-    </div>
-    <div class="track-status-pill" id="t-status">—</div>
-  </div>
-
-  <!-- TIMELINE -->
-  <div class="timeline" id="track-steps">
-    <div class="timeline-item" data-status="New">
-      <span class="dot"></span>
-      <div>
-        <strong>Order received</strong>
-        <p>We've received your order</p>
-      </div>
-    </div>
-
-    <div class="timeline-item" data-status="Preparing">
-      <span class="dot"></span>
-      <div>
-        <strong>Preparing</strong>
-        <p>Your food is being prepared</p>
-      </div>
-    </div>
-
-    <div class="timeline-item" data-status="Out">
-      <span class="dot"></span>
-      <div>
-        <strong>Out for delivery</strong>
-        <p>Rider is on the way</p>
-      </div>
-    </div>
-
-    <div class="timeline-item" data-status="Completed">
-      <span class="dot"></span>
-      <div>
-        <strong>Delivered</strong>
-        <p>Order completed</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- META -->
-  <div class="track-meta grid">
-    <div class="meta-card">
-      <span class="meta-label">Customer</span>
-      <span class="meta-value" id="t-name">—</span>
-    </div>
-    <div class="meta-card">
-      <span class="meta-label">Phone</span>
-      <span class="meta-value" id="t-phone">—</span>
-    </div>
-    <div class="meta-card">
-      <span class="meta-label">Order Type</span>
-      <span class="meta-value" id="t-type">—</span>
-    </div>
-    <div class="meta-card">
-      <span class="meta-label">Placed</span>
-      <span class="meta-value" id="t-time">—</span>
-    </div>
-  </div>
-
-  <!-- ITEMS -->
-  <div class="track-items">
-    <h3>Items</h3>
-    <div id="t-items"></div>
-  </div>
-
-  <!-- SUMMARY -->
-  <div class="track-summary glass-card">
-    <div class="row"><span>Subtotal</span><span id="t-subtotal">₦0</span></div>
-    <div class="row"><span>Delivery</span><span id="t-delivery">₦0</span></div>
-    <div class="row bold"><span>Total</span><span id="t-total">₦0</span></div>
-  </div>
-</section>
 
         <section class="order-confirmation" id="order-confirmation" hidden>
           <h3>Order confirmed!</h3>
@@ -236,9 +154,6 @@
 
   <div class="toast-container" aria-live="polite" aria-atomic="true"></div>
   <script src="app.js" type="module"></script>
-  <button id="floating-track-btn" class="floating-track-btn" hidden>
-  🚚 Track Order
-</button>
 <script src="https://js.paystack.co/v1/inline.js"></script>
 </body>
 </html>

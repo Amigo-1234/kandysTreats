@@ -62,7 +62,7 @@ const ORDER_STATUSES = ["New", "Preparing", "Out", "Completed"];
 // Mock menu data
 // TODO: Firestore: fetch menu
 let MENU_ITEMS = []; // will be filled from Firestore
-let inlineUnsub = null; // for inline tracking unsubscribe
+//  // for inline tracking unsubscribe
 
 async function requestNotificationToken() {
   try {
@@ -652,21 +652,6 @@ totalEl.textContent = formatPrice(
 
   };
 
-  function initFloatingTrackButton() {
-  const btn = document.getElementById("floating-track-btn");
-  if (!btn) return;
-
-  const lastOrder = localStorage.getItem("kandys_last_order_code");
-  if (!lastOrder) return;
-
-  btn.hidden = false;
-
-  btn.addEventListener("click", () => {
-    window.location.href = "/track.html";
-  });
-}
-  
-initFloatingTrackButton();
 
   /* ================= SUBMIT ORDER ================= */
   form.addEventListener("submit", async (e) => {
@@ -798,63 +783,12 @@ async function handlePaymentSuccess(orderId, reference) {
     saveCart({});
     showToast("Payment successful 🎉");
 
-    document.getElementById("checkout-form").hidden = true;
-    const trackSection = document.getElementById("inline-track");
-    trackSection.hidden = false;
-
-    startInlineTracking(orderId);
 
   } catch (err) {
     console.error(err);
     showToast("Payment save failed — contact support");
   }
 }
-
-function startInlineTracking(orderId) {
-  if (inlineUnsub) inlineUnsub();
-  const ref = doc(window.db, "orders", orderId);
-
-  inlineUnsub = onSnapshot(ref, (snap) => {
-    if (!snap.exists()) return;
-
-    const order = snap.data();
-
-    document.getElementById("t-id").textContent = order.id;
-    document.getElementById("t-status").textContent = order.status || "New";
-    document.getElementById("t-name").textContent = order.customer?.name || "—";
-    document.getElementById("t-phone").textContent = order.customer?.phone || "—";
-    document.getElementById("t-type").textContent =
-      order.fulfilment === "pickup" ? "Pickup" : "Delivery";
-
-    const d = order.createdAt?.toDate
-      ? order.createdAt.toDate()
-      : new Date();
-    document.getElementById("t-time").textContent = d.toLocaleString("en-NG");
-
-    // Items
-    const itemsWrap = document.getElementById("t-items");
-    itemsWrap.innerHTML = "";
-    (order.items || []).forEach(i => {
-      const row = document.createElement("div");
-      row.className = "track-item-row";
-      row.innerHTML = `
-        <div><strong>${i.name}</strong><br>${i.qty} × ₦${i.price}</div>
-        <div>₦${i.price * i.qty}</div>
-      `;
-      itemsWrap.appendChild(row);
-    });
-
-    document.getElementById("t-subtotal").textContent = formatPrice(order.subtotal);
-    document.getElementById("t-delivery").textContent =
-      formatPrice((order.deliveryFee || 0) + (order.takeawayFee || 0));
-    document.getElementById("t-total").textContent = formatPrice(order.total);
-
-    renderTimeline(order.status || "New");
-  });
-  trackSection.scrollIntoView({ behavior: "smooth" });
-}
-
-
 
 
 

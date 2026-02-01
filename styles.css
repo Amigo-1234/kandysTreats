@@ -2341,3 +2341,16 @@ tbody tr:hover {
     display: none;
   }
 }
+@media (min-width: 768px) {
+  .bottom-nav {
+    display: none !important;
+  }
+}
+@media (min-width: 768px) {
+  .floating-track-btn {
+    display: none !important;
+  }
+}
+.checkout-form {
+  padding-bottom: 140px;
+}
