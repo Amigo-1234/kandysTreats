@@ -72,29 +72,51 @@
       </button>
     </section>
 
+
+
+
     <!-- TRANSACTIONS -->
-    <section class="section glass-card ">
+   <section class="section transactions-section">
+
+  <!-- STICKY BAR (OUTSIDE glass-card) -->
+  <div class="transactions-bar">
+    <div class="transactions-bar-inner glass-card">
       <h2>Transactions</h2>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Date</th>
-              <th>Customer</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Paid</th>
-            </tr>
-          </thead>
+      <div class="transactions-actions">
+        <div class="date-filters">
+          <button class="is-active">Today</button>
+          <button>Last 7 days</button>
+          <button>This month</button>
+        </div>
 
-          <tbody id="transactions-body">
-            <!-- Filled by JS -->
-          </tbody>
-        </table>
+        <button id="print-transactions" class="btn btn-outline btn-sm">
+          Print
+        </button>
       </div>
-    </section>
+    </div>
+  </div>
+
+  <!-- TABLE CARD -->
+  <div class="glass-card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Date</th>
+            <th>Customer</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Paid</th>
+          </tr>
+        </thead>
+        <tbody id="transactions-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
 
   </main>
 

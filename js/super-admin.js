@@ -117,9 +117,45 @@ document.querySelectorAll("#super-logout, #owner-logout")
       await signOut(auth);
     });
   });
+// ================= GLOBAL STATE =================
+let allTransactions = [];
 
-/* ================= FINANCE LISTENER ================= */
+// ================= HELPERS =================
+const formatDate = ts => {
+  if (!ts) return "-";
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString("en-GB");
+};
 
+const isWithinDays = (ts, days) => {
+  const date = ts.toDate ? ts.toDate() : new Date(ts);
+  const now = new Date();
+  return (now - date) <= days * 24 * 60 * 60 * 1000;
+};
+
+// ================= RENDER =================
+function renderTransactions(transactions) {
+  tableBody.innerHTML = "";
+
+  transactions.forEach(o => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${o.id}</td>
+      <td>${formatDate(o.createdAt)}</td>
+      <td>${o.customer?.name || "-"}</td>
+      <td>${formatPrice(o.total)}</td>
+      <td>${o.status || "—"}</td>
+      <td>
+        <span class="badge ${o.paid ? "paid" : "unpaid"}">
+          ${o.paid ? "Paid" : "Unpaid"}
+        </span>
+      </td>
+    `;
+    tableBody.appendChild(tr);
+  });
+}
+
+// ================= FIRESTORE LISTENER =================
 function startFinanceListener() {
   const q = query(
     collection(db, "orders"),
@@ -130,35 +166,99 @@ function startFinanceListener() {
     let totalRevenue = 0;
     let todayRevenue = 0;
 
-    tableBody.innerHTML = "";
+    allTransactions = [];
 
     snap.forEach(docSnap => {
       const o = docSnap.data();
       if (!o.paid) return;
 
       totalRevenue += o.total || 0;
-      if (isToday(o.createdAt)) {
+      if (isWithinDays(o.createdAt, 1)) {
         todayRevenue += o.total || 0;
       }
 
-     const tr = document.createElement("tr");
-tr.innerHTML = `
-  <td>${o.id}</td>
-  <td>${o.createdAt?.toDate().toLocaleDateString("en-NG") || "-"}</td>
-  <td>${o.customer?.name || "-"}</td>
-  <td>${formatPrice(o.total)}</td>
-  <td>${o.status || "—"}</td>
-  <td>
-    <span class="badge ${o.paid ? "paid" : "unpaid"}">
-      ${o.paid ? "Paid" : "Unpaid"}
-    </span>
-  </td>
-`;
-tableBody.appendChild(tr);
+      allTransactions.push({
+        id: o.id,
+        createdAt: o.createdAt,
+        customer: o.customer,
+        total: o.total,
+        status: o.status,
+        paid: o.paid
+      });
     });
 
     totalRevenueEl.textContent = formatPrice(totalRevenue);
     todayRevenueEl.textContent = formatPrice(todayRevenue);
-    ordersCountEl.textContent = snap.docs.length;
+    ordersCountEl.textContent = allTransactions.length;
+
+    renderTransactions(allTransactions);
   });
 }
+
+// ================= DATE FILTERS =================
+document.querySelectorAll(".date-filters button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document
+      .querySelectorAll(".date-filters button")
+      .forEach(b => b.classList.remove("is-active"));
+
+    btn.classList.add("is-active");
+
+    const range = btn.dataset.range;
+    let filtered = allTransactions;
+
+    if (range === "today") {
+      filtered = allTransactions.filter(t => isWithinDays(t.createdAt, 1));
+    }
+
+    if (range === "7") {
+      filtered = allTransactions.filter(t => isWithinDays(t.createdAt, 7));
+    }
+
+    if (range === "30") {
+      filtered = allTransactions.filter(t => isWithinDays(t.createdAt, 30));
+    }
+
+    renderTransactions(filtered);
+  });
+});
+
+// ================= CSV EXPORT =================
+document.getElementById("export-csv").onclick = () => {
+  const headers = [
+    "Order ID",
+    "Date",
+    "Customer",
+    "Amount (NGN)",
+    "Status",
+    "Paid"
+  ];
+
+  const rows = allTransactions.map(t => [
+    t.id,
+    formatDate(t.createdAt),
+    t.customer?.name || "",
+    t.total,
+    t.status || "",
+    t.paid ? "Yes" : "No"
+  ]);
+
+  const csv = [headers, ...rows]
+    .map(r => r.join(","))
+    .join("\n");
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `kandys-transactions-${Date.now()}.csv`;
+  a.click();
+
+  URL.revokeObjectURL(url);
+};
+
+// ================= PRINT =================
+document.getElementById("print-transactions").onclick = () => {
+  window.print();
+};
