@@ -2129,3 +2129,29 @@ body[data-page="track"] .track-card {
     flex: unset;
   }
 }
+
+/* SAFARI FIX – force horizontal scrolling */
+.quick-picks-row {
+  overflow-x: scroll;              /* not auto */
+  overflow-y: hidden;
+
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+
+  scroll-snap-type: x proximity;   /* NOT mandatory */
+}
+
+.quick-picks-row .menu-card {
+  min-width: 260px;
+  flex-shrink: 0;
+}
+
+.quick-picks-row .menu-card {
+  animation: quickFloat 6s ease-in-out infinite;
+}
+/* SAFARI ONLY – disable floating animation */
+@supports (-webkit-touch-callout: none) {
+  .quick-picks-row .menu-card {
+    animation: quickPickIn 0.45s cubic-bezier(.22,.61,.36,1) forwards;
+  }
+}

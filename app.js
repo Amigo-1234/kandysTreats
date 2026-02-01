@@ -1479,7 +1479,9 @@ function startQuickPicksAutoScroll(row) {
   }
 
   // Desktop grid → no auto scroll
-  if (window.innerWidth >= 900) return;
+  if (window.innerWidth >= 900 || /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)) {
+  return;
+}
 
   // No overflow → no scroll
   if (row.scrollWidth <= row.clientWidth) return;
