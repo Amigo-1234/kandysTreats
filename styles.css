@@ -367,10 +367,15 @@ p {
 }
 
 .menu-card-image {
-  position: relative;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #35112e, #1b1430);
-  overflow: hidden;
+  height: 180px; /* ⬅ bigger */
+  border-radius: 14px;
+  background-size: cover;
+  background-position: center;
+  transition: transform .4s ease;
+}
+
+.menu-card:hover .menu-card-image {
+  transform: scale(1.05);
 }
 
 .menu-card-image::after {
@@ -1895,4 +1900,178 @@ body[data-page="track"] .track-card {
 
 .menu-card-image {
   background-position: center 60%;
+}
+
+.builder-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.builder-toggle button {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  cursor: pointer;
+}
+
+.builder-toggle .is-active {
+  background: linear-gradient(135deg, #ff3c8e, #ff6a3c);
+}
+
+#quick-pick-form {
+  max-width: 520px;
+}
+
+/* ============================= */
+/* QUICK PICKS – LIVELY SECTION */
+/* ============================= */
+
+.qp-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+}
+
+.qp-admin-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.05);
+  margin-bottom: 8px;
+}
+
+.qp-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ============================= */
+/* QUICK PICKS – MOBILE DEFAULT */
+/* ============================= */
+
+.quick-picks-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(240px, 280px);
+  gap: 14px;
+
+  overflow-x: auto;
+  padding-bottom: 10px;
+
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Scrollbar */
+.quick-picks-row::-webkit-scrollbar {
+  height: 6px;
+}
+
+.quick-picks-row::-webkit-scrollbar-thumb {
+  background: rgba(255, 59, 167, 0.45);
+  border-radius: 999px;
+}
+
+/* ============================= */
+/* QUICK PICK CARD */
+/* ============================= */
+
+.quick-picks-row .menu-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  scroll-snap-align: start;
+
+  opacity: 0;
+  transform: translateX(20px);
+  animation: quickPickIn 0.45s ease forwards;
+
+  transition:
+    transform 0.35s cubic-bezier(0.19, 1, 0.22, 1),
+    box-shadow 0.35s ease;
+}
+
+/* stagger entrance */
+.quick-picks-row .menu-card:nth-child(1) { animation-delay: 0.05s; }
+.quick-picks-row .menu-card:nth-child(2) { animation-delay: 0.1s; }
+.quick-picks-row .menu-card:nth-child(3) { animation-delay: 0.15s; }
+.quick-picks-row .menu-card:nth-child(4) { animation-delay: 0.2s; }
+
+/* ============================= */
+/* IMAGE */
+/* ============================= */
+
+.quick-picks-row .menu-card-image {
+  height: 160px;
+  border-radius: 14px;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.45s ease;
+}
+
+/* ============================= */
+/* DESKTOP HOVER ONLY */
+/* ============================= */
+
+@media (hover: hover) {
+  .quick-picks-row .menu-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow:
+      0 0 0 1px rgba(255, 59, 167, 0.35),
+      0 0 25px rgba(255, 59, 167, 0.45);
+  }
+
+  .quick-picks-row .menu-card:hover .menu-card-image {
+    transform: scale(1.08);
+  }
+}
+
+/* ============================= */
+/* MOBILE IDLE FLOAT */
+/* ============================= */
+
+@media (max-width: 899px) {
+  .quick-picks-row .menu-card {
+    animation:
+      quickPickIn 0.45s ease forwards,
+      quickFloat 6s ease-in-out infinite;
+  }
+
+  .quick-picks-row .menu-card:nth-child(even) {
+    animation-delay: 0.12s, 1.5s;
+  }
+}
+
+/* ============================= */
+/* DESKTOP GRID FIX */
+/* ============================= */
+
+@media (min-width: 900px) {
+  .quick-picks-row {
+    grid-auto-flow: unset;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow-x: visible;
+  }
+}
+
+/* ============================= */
+/* ANIMATIONS */
+/* ============================= */
+
+@keyframes quickPickIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes quickFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }

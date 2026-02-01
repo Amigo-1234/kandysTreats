@@ -220,3 +220,205 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 });
+
+const qpMenuList = document.getElementById("qp-menu-list");
+
+onSnapshot(collection(db, "menus"), snap => {
+  qpMenuList.innerHTML = "";
+
+  snap.forEach(doc => {
+    const item = doc.data();
+
+    const row = document.createElement("div");
+    row.className = "qp-row";
+
+    row.innerHTML = `
+      <label>
+        <input type="checkbox" data-id="${doc.id}">
+        ${item.name} (₦${item.price})
+      </label>
+      <input type="number" min="1" value="1" class="qp-qty" />
+    `;
+
+    qpMenuList.appendChild(row);
+  });
+});
+const toggleBtns = document.querySelectorAll(".builder-toggle button");
+const quickForm = document.getElementById("quick-pick-form");
+const menuSection = document.querySelector(".menu-builder");
+
+toggleBtns.forEach(btn => {
+  btn.addEventListener("click", () => {
+    toggleBtns.forEach(b => b.classList.remove("is-active"));
+    btn.classList.add("is-active");
+
+    const mode = btn.dataset.mode;
+
+    if (mode === "quick") {
+      quickForm.hidden = false;
+      menuSection.style.display = "none";
+    } else {
+      quickForm.hidden = true;
+      menuSection.style.display = "block";
+    }
+  });
+});
+document
+  .getElementById("quick-pick-form")
+  .addEventListener("submit", async e => {
+    e.preventDefault();
+
+    const title = qpTitle.value.trim();
+    if (!title) return alert("Title required");
+
+    const items = [];
+
+    document.querySelectorAll(".qp-row").forEach(row => {
+      const check = row.querySelector("input[type=checkbox]");
+      if (!check.checked) return;
+
+      const qty = Number(row.querySelector(".qp-qty").value || 1);
+
+      let BUILDER_MENU_ITEMS = [];
+
+onSnapshot(collection(db, "menus"), snap => {
+  BUILDER_MENU_ITEMS = snap.docs.map(d => ({
+    id: d.id,
+    ...d.data()
+  }));
+
+  qpMenuList.innerHTML = "";
+
+  BUILDER_MENU_ITEMS.forEach(item => {
+    const row = document.createElement("div");
+    row.className = "qp-row";
+
+    row.innerHTML = `
+      <label>
+        <input type="checkbox" data-id="${item.id}">
+        ${item.name} (₦${item.price})
+      </label>
+      <input type="number" min="1" value="1" class="qp-qty" />
+    `;
+
+    qpMenuList.appendChild(row);
+  });
+});
+      if (!menuDoc) return;
+
+      items.push({
+        menuId: menuDoc.id,
+        name: menuDoc.name,
+        price: menuDoc.price,
+        qty
+      });
+    });
+
+    if (!items.length) {
+      alert("Select at least one food");
+      return;
+    }
+
+    await addDoc(collection(db, "quickPicks"), {
+      title,
+      description: qpDesc.value.trim(),
+      image: qpImage.value.trim(),
+      items,
+      active: true,
+      priority: Date.now()
+    });
+
+    showToast("Quick Pick saved 🎉");
+    e.target.reset();
+  });
+
+ const qpItems = document.getElementById("qp-items");
+
+if (qpItems) {
+  onSnapshot(
+    query(collection(db, "quickPicks"), orderBy("priority", "desc")),
+    snap => {
+      qpItems.innerHTML = "";
+
+      snap.forEach(docSnap => {
+        const qp = docSnap.data();
+
+        const row = document.createElement("div");
+        row.className = "qp-admin-row";
+
+        row.innerHTML = `
+          <div>
+            <strong>${qp.title}</strong>
+            <div class="muted">${qp.items.length} items</div>
+          </div>
+
+          <div class="qp-actions">
+            <button class="btn btn-sm ${qp.active ? "btn-primary" : "btn-outline"}">
+              ${qp.active ? "Active" : "Hidden"}
+            </button>
+            <button class="btn btn-ghost btn-sm">🗑️</button>
+          </div>
+        `;
+
+        // toggle active
+        row.querySelector(".btn-primary, .btn-outline").onclick = () => {
+          updateDoc(doc(db, "quickPicks", docSnap.id), {
+            active: !qp.active
+          });
+        };
+
+        // delete
+        row.querySelector(".btn-ghost").onclick = () => {
+          if (!confirm("Delete this quick pick?")) return;
+          deleteDoc(doc(db, "quickPicks", docSnap.id));
+        };
+
+        qpItems.appendChild(row);
+      });
+    }
+  );
+}
+
+function renderExistingQuickPick(id, data) {
+  const card = document.createElement("div");
+  card.className = "qp-admin-card";
+
+  card.innerHTML = `
+    <div class="qp-admin-main">
+      <div>
+        <strong>${data.title}</strong>
+        <p class="muted">${data.description || ""}</p>
+        <small>${data.items.length} items</small>
+      </div>
+
+      <div class="qp-admin-actions">
+        <button class="btn btn-sm ${
+          data.active ? "btn-outline" : "btn-primary"
+        }">
+          ${data.active ? "Disable" : "Enable"}
+        </button>
+        <button class="btn btn-ghost btn-sm">🗑</button>
+      </div>
+    </div>
+  `;
+
+  const [toggleBtn, deleteBtn] =
+    card.querySelectorAll("button");
+
+  // toggle active
+  toggleBtn.onclick = async () => {
+    await updateDoc(doc(db, "quickPicks", id), {
+      active: !data.active
+    });
+  };
+
+  // delete
+  deleteBtn.onclick = async () => {
+    if (!confirm(`Delete "${data.title}"?`)) return;
+    await deleteDoc(doc(db, "quickPicks", id));
+  };
+
+  return card;
+}
+
+initExistingQuickPicks();

@@ -11,6 +11,7 @@ import {
   collection,
   query,
   orderBy,
+  where,          // 👈 ADD THIS
   onSnapshot,
   updateDoc,
   getDoc,
@@ -1405,28 +1406,74 @@ const initContactForm = () => {
   });
 };
 
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest(".quick-add");
-  if (!btn) return;
 
-  const items = JSON.parse(btn.dataset.items);
-  const cart = readCart();
 
-  items.forEach(item => {
-    const existing = cart[item.id];
-    cart[item.id] = {
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      qty: (existing?.qty || 0) + item.qty
-    };
+function initQuickPicks() {
+  const wrap = document.getElementById("quick-picks");
+  if (!wrap) return;
+
+  const q = query(
+    collection(db, "quickPicks"),
+    where("active", "==", true),
+    orderBy("priority", "desc")
+  );
+
+  onSnapshot(q, snap => {
+    wrap.innerHTML = "";
+
+    if (snap.empty) {
+      wrap.innerHTML = `<p class="muted">No quick picks yet.</p>`;
+      return;
+    }
+
+    snap.forEach(docSnap => {
+      const data = docSnap.data();
+      wrap.appendChild(renderQuickPickCard(docSnap.id, data));
+    });
   });
+}
 
-  saveCart(cart);
-  showToast("Quick combo added to cart");
-});
+function renderQuickPickCard(id, data) {
+  const card = document.createElement("article");
+  card.className = "menu-card glass-card interactive-card";
 
+  card.innerHTML = `
+    <div class="menu-card-image"
+      style="background-image:url('${data.image || getRandomImage()}')">
+    </div>
 
+    <div class="menu-card-body">
+      <h3>${data.title}</h3>
+      <p>${data.description || ""}</p>
+
+      <div class="menu-card-meta">
+        <span class="chip">${data.items.length} items</span>
+      </div>
+
+      <button class="btn btn-primary quick-add">
+        Add to cart
+      </button>
+    </div>
+  `;
+
+  card.querySelector("button").onclick = () => {
+    const cart = readCart();
+
+    data.items.forEach(i => {
+      cart[i.menuId] = {
+        id: i.menuId,
+        name: i.name,
+        price: i.price,
+        qty: (cart[i.menuId]?.qty || 0) + i.qty
+      };
+    });
+
+    saveCart(cart);
+    showToast(`${data.title} added to cart`);
+  };
+
+  return card;
+}
 
 // Init
 document.addEventListener("DOMContentLoaded", () => {
@@ -1439,4 +1486,23 @@ document.addEventListener("DOMContentLoaded", () => {
   if (page === "track") initTrackPage();
   if (page === "home") initReviewsSlider();
   if (page === "contact") initContactForm();
+  if (page === "home") initQuickPicks();
+});
+
+onSnapshot(q, snap => {
+  wrap.innerHTML = "";
+
+  const track = document.createElement("div");
+  track.className = "quick-picks-track";
+
+  snap.forEach(docSnap => {
+    track.appendChild(renderQuickPickCard(docSnap.id, docSnap.data()));
+  });
+
+  // duplicate for seamless loop
+  snap.forEach(docSnap => {
+    track.appendChild(renderQuickPickCard(docSnap.id, docSnap.data()));
+  });
+
+  wrap.appendChild(track);
 });
