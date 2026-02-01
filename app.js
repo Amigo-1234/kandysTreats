@@ -1407,6 +1407,52 @@ const initContactForm = () => {
 };
 
 
+function startQuickPicksAutoScroll(row) {
+  if (!row) return;
+
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return;
+  }
+
+  if (row.scrollWidth <= row.clientWidth) return;
+
+  let isPaused = false;
+  const speed = 0.6;
+
+  row.classList.add("is-auto-scrolling");
+
+  function loop() {
+    if (!isPaused) {
+      row.scrollLeft += speed;
+
+      if (row.scrollLeft >= row.scrollWidth - row.clientWidth - 1) {
+        row.scrollLeft = 0;
+      }
+    }
+    requestAnimationFrame(loop);
+  }
+
+  const pause = () => {
+    isPaused = true;
+    row.classList.remove("is-auto-scrolling");
+  };
+
+  const resume = () => {
+    isPaused = false;
+    row.classList.add("is-auto-scrolling");
+  };
+
+  ["mouseenter", "mousedown", "wheel", "touchstart"].forEach(e =>
+    row.addEventListener(e, pause)
+  );
+
+  ["mouseleave", "mouseup", "touchend"].forEach(e =>
+    row.addEventListener(e, resume)
+  );
+
+  requestAnimationFrame(loop);
+}
+
 
 function initQuickPicks() {
   const wrap = document.getElementById("quick-picks");
@@ -1430,6 +1476,9 @@ function initQuickPicks() {
       const data = docSnap.data();
       wrap.appendChild(renderQuickPickCard(docSnap.id, data));
     });
+
+    // ✅ START AUTO SCROLL AFTER CARDS EXIST
+    startQuickPicksAutoScroll(wrap);
   });
 }
 
@@ -1475,6 +1524,8 @@ function renderQuickPickCard(id, data) {
   return card;
 }
 
+
+
 // Init
 document.addEventListener("DOMContentLoaded", () => {
   syncCartBadge();
@@ -1489,20 +1540,3 @@ document.addEventListener("DOMContentLoaded", () => {
   if (page === "home") initQuickPicks();
 });
 
-onSnapshot(q, snap => {
-  wrap.innerHTML = "";
-
-  const track = document.createElement("div");
-  track.className = "quick-picks-track";
-
-  snap.forEach(docSnap => {
-    track.appendChild(renderQuickPickCard(docSnap.id, docSnap.data()));
-  });
-
-  // duplicate for seamless loop
-  snap.forEach(docSnap => {
-    track.appendChild(renderQuickPickCard(docSnap.id, docSnap.data()));
-  });
-
-  wrap.appendChild(track);
-});

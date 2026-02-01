@@ -2075,3 +2075,24 @@ body[data-page="track"] .track-card {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
 }
+.quick-picks-row {
+  scroll-behavior: smooth;
+}
+
+.quick-picks-row {
+  display: flex;              /* IMPORTANT */
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+
+.quick-picks-row > .menu-card {
+  flex: 0 0 280px;             /* FORCE width */
+}
+
+.quick-picks-row {
+  scroll-snap-type: x mandatory;
+}
+.quick-picks-row.is-auto-scrolling {
+  scroll-snap-type: none;
+}
