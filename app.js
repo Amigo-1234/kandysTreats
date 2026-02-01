@@ -675,7 +675,7 @@ initFloatingTrackButton();
   const name = document.getElementById("customer-name")?.value.trim();
   const phone = document.getElementById("customer-phone")?.value.trim();
   const email = document.getElementById("customer-email")?.value.trim();
-  const notes = document.getElementById("order-notes")?.value.trim() || "";
+  const notes = document.getElementById("customer-notes")?.value.trim() || "";
 
   if (!name || !phone) {
     showToast("Please fill in name and phone number");
