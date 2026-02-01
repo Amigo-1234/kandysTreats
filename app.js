@@ -236,7 +236,7 @@ if (cachedMenu) {
 
 
   const menusQuery = query(
-  collection(db, "menus"),
+  collection(window.db, "menus"),
   orderBy("createdAt", "asc")
 );
 
@@ -435,6 +435,7 @@ img.dataset.src = item.image || getRandomImage();
   });
 };
 
+
 // Cart page (UPDATED: creates Firestore order)
 const initCartPage = () => {
   const itemsContainer = document.getElementById("cart-items");
@@ -446,10 +447,8 @@ const initCartPage = () => {
   const form = document.getElementById("checkout-form");
   const fulfilmentButtons = document.querySelectorAll(".toggle-option[data-fulfilment]");
   const addressField = document.getElementById("address-field");
-  const placeBtn = document.getElementById("place-order-btn");
-  const fulfilment =
-  document.querySelector(".toggle-option.is-active")?.dataset.fulfilment ||
-  "delivery";
+  const placeBtn = document.getElementById("pay-now-btn");
+  const payNowBtn = document.getElementById("pay-now-btn");
 
 
   if (!itemsContainer || !subtotalEl) return;
@@ -688,7 +687,9 @@ initFloatingTrackButton();
     return;
   }
 
-  placeBtn.disabled = true;
+    if (placeBtn.disabled) return;
+    placeBtn.disabled = true;
+
 
   const orderId = `KD-${Date.now().toString().slice(-6)}`;
   localStorage.setItem("kandys_last_order_code", orderId);
@@ -696,14 +697,21 @@ initFloatingTrackButton();
   const items = ids.map(id => cart[id]);
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
 
+  const fulfilment =
+  document.querySelector(".toggle-option.is-active")?.dataset.fulfilment ||
+  "delivery";
+
   const cartItems = ids.map(id => cart[id]);
 const takeawayFee =
   fulfilment === "delivery" ? calculateTakeawayFee(cartItems) : 0;
 
-  const deliveryFee = DELIVERY_FEE;
+  const deliveryFee =
+  fulfilment === "delivery" ? DELIVERY_FEE : 0;
   const total = subtotal + deliveryFee;
 
-  await setDoc(doc(db, "orders", orderId), {
+
+
+await setDoc(doc(window.db, "orders", orderId), {
   id: orderId,
   customer: { name, phone, email },
   fulfilment,
@@ -714,22 +722,21 @@ const takeawayFee =
   total: subtotal + deliveryFee + takeawayFee,
   notes,
   status: "New",
+  paid: false,
   createdAt: serverTimestamp(),
 });
 
-  saveCart({});
-  showToast("Order placed successfully 🎉");
-
-  // Hide checkout
-document.getElementById("checkout-form").hidden = true;
-
-// Show tracking
-const trackSection = document.getElementById("inline-track");
-trackSection.hidden = false;
-
-// Start live tracking
-startInlineTracking(orderId);
+// 🔥 OPEN PAYSTACK HERE
+payWithPaystack({
+  email,
+  name,
+  phone,
+  orderId,
+  amount: subtotal + deliveryFee + takeawayFee,
+  placeBtn,
 });
+
+})
 
 
 
@@ -741,9 +748,69 @@ startInlineTracking(orderId);
   render();
 };
 
+
+
+function payWithPaystack({ email, amount, name, phone, orderId, placeBtn }) {
+
+  if (!window.PaystackPop) {
+  placeBtn.disabled = false;
+  showToast("Payment service unavailable. Try again.");
+  return;
+}
+  const handler = PaystackPop.setup({
+    key: "pk_live_bd05647da5ae5885013df5fdbc07c7545d7adf70", // ✅ PUBLIC KEY ONLY
+    email: email || "ads.kandystreats@gmail.com",
+    amount: Math.round(amount * 100), // kobo
+    currency: "NGN",
+    ref: orderId,
+
+    metadata: {
+      custom_fields: [
+        { display_name: "Customer", variable_name: "name", value: name },
+        { display_name: "Phone", variable_name: "phone", value: phone },
+      ],
+    },
+
+    callback: function (response) {
+      handlePaymentSuccess(orderId, response.reference);
+    },
+
+    onClose: function () {
+      placeBtn.disabled = false;
+      showToast("Payment cancelled");
+    },
+  });
+
+  handler.openIframe();
+}
+
+async function handlePaymentSuccess(orderId, reference) {
+  try {
+    await updateDoc(doc(window.db, "orders", orderId), {
+      paid: true,
+      paymentReference: reference,
+      paymentMethod: "paystack",
+      paidAt: serverTimestamp(),
+    });
+
+    saveCart({});
+    showToast("Payment successful 🎉");
+
+    document.getElementById("checkout-form").hidden = true;
+    const trackSection = document.getElementById("inline-track");
+    trackSection.hidden = false;
+
+    startInlineTracking(orderId);
+
+  } catch (err) {
+    console.error(err);
+    showToast("Payment save failed — contact support");
+  }
+}
+
 function startInlineTracking(orderId) {
   if (inlineUnsub) inlineUnsub();
-  const ref = doc(db, "orders", orderId);
+  const ref = doc(window.db, "orders", orderId);
 
   inlineUnsub = onSnapshot(ref, (snap) => {
     if (!snap.exists()) return;
@@ -792,7 +859,7 @@ function startInlineTracking(orderId) {
 // Listen for order status changes to send notifications
 
 onSnapshot(
-  query(collection(db, "orders")),
+  query(collection(window.db, "orders")),
   snap => {
     snap.docChanges().forEach(change => {
       if (change.type !== "modified") return;
@@ -978,7 +1045,7 @@ function sendWhatsApp(order, status) {
 
       try {
         // 1️⃣ Update Firestore (ONCE)
-        await updateDoc(doc(db, "orders", id), {
+        await updateDoc(doc(window.db, "orders", id), {
           status: newStatus,
         });
 
@@ -1012,7 +1079,7 @@ function sendWhatsApp(order, status) {
 
 
 const startOrdersListener = () => {
-  const qy = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+  const qy = query(collection(window.db, "orders"), orderBy("createdAt", "desc"));
 
   unsubscribeOrders = onSnapshot(
     qy,
@@ -1093,7 +1160,7 @@ printBtn?.addEventListener("click", () => {
     const password = document.getElementById("admin-password")?.value;
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(window.auth, email, password);
       showToast("Signed in");
     } catch (err) {
       showToast(err.message || "Login failed");
@@ -1102,11 +1169,11 @@ printBtn?.addEventListener("click", () => {
 
   // Logout
   logoutBtn?.addEventListener("click", async () => {
-    await signOut(auth);
+    await signOut(window.auth);
   });
 
   // Auth state + admin role gate
-  onAuthStateChanged(auth, async (user) => {
+  onAuthStateChanged(window.auth, async (user) => {
   stopOrdersListener();
 
   if (!user) {
@@ -1115,23 +1182,28 @@ printBtn?.addEventListener("click", () => {
     return;
   }
 
-  const adminSnap = await getDoc(doc(db, "admins", user.uid));
-  if (!adminSnap.exists()) {
-    showToast("Not authorized as admin");
-    await signOut(auth);
-    return;
-  }
+  try {
+    const adminSnap = await getDoc(
+      doc(window.db, "admins", user.uid)
+    );
 
-  // ✅ AUTH CONFIRMED
-  loginSection.hidden = true;
-  panel.hidden = false;
+    if (!adminSnap.exists()) {
+      showToast("Not authorized as admin");
+      await signOut(window.auth);
+      return;
+    }
 
-  bindStatusButtons();
-  startOrdersListener();
+    // ✅ AUTH CONFIRMED
+    loginSection.hidden = true;
+    panel.hidden = false;
 
-  // 🔥 START FOOD MANAGEMENT ONLY NOW
-  if (window.initFoodManagement) {
-    window.initFoodManagement();
+    bindStatusButtons();
+    startOrdersListener();
+
+  } catch (err) {
+    console.error("Admin auth error:", err);
+    showToast("Admin verification failed");
+    await signOut(window.auth);
   }
 });
 
@@ -1235,6 +1307,31 @@ const initTrackPage = () => {
 
   if (!form || !input) return;
 
+  form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const code = input.value.trim().toUpperCase();
+  if (!code) return;
+
+  try {
+    const snap = await getDoc(doc(window.db, "orders", code));
+
+    if (!snap.exists()) {
+      errBox.hidden = false;
+      errBox.textContent = "Order not found";
+      return;
+    }
+
+    errBox.hidden = true;
+    result.hidden = false;
+
+    renderOrder(snap.data());
+  } catch (err) {
+    errBox.hidden = false;
+    errBox.textContent = "Failed to load order";
+  }
+});
+
   const ORDER_STATUSES = ["New", "Preparing", "Out", "Completed"];
   let unsubscribe = null;
 
@@ -1304,40 +1401,6 @@ const initTrackPage = () => {
 };
 
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const code = normalizeCode(input.value);
-    if (!code) return;
-
-    setState({ isLoading: true, error: "", showResult: false });
-
-    // Stop previous listener
-    if (unsubscribe) unsubscribe();
-
-    try {
-      const ref = doc(db, "orders", code);
-
-      unsubscribe = onSnapshot(
-        ref,
-        (snap) => {
-          if (!snap.exists()) {
-            setState({ isLoading: false, error: "Order not found." });
-            return;
-          }
-
-          renderOrder(snap.data());
-          setState({ isLoading: false, showResult: true });
-        },
-        () => {
-          setState({ isLoading: false, error: "Live update failed." });
-        }
-      );
-    } catch (err) {
-      console.error(err);
-      setState({ isLoading: false, error: "Failed to fetch order." });
-    }
-  });
 
   // Auto-track from URL or last order
   const url = new URL(location.href);
@@ -1459,7 +1522,7 @@ function initQuickPicks() {
   if (!wrap) return;
 
   const q = query(
-    collection(db, "quickPicks"),
+    collection(window.db, "quickPicks"),
     where("active", "==", true),
     orderBy("priority", "desc")
   );

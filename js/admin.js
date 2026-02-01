@@ -304,7 +304,11 @@ onSnapshot(collection(db, "menus"), snap => {
     qpMenuList.appendChild(row);
   });
 });
-      if (!menuDoc) return;
+     const menuDoc = BUILDER_MENU_ITEMS.find(
+  m => m.id === check.dataset.id
+);
+
+if (!menuDoc) return;
 
       items.push({
         menuId: menuDoc.id,

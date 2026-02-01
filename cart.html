@@ -5,6 +5,7 @@
   <title>Cart & Checkout | Kandys Treats Eatery</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="styles.css" rel="stylesheet" />
+  
 </head>
 <body class="page page-cart">
   <div class="page-shell">
@@ -96,9 +97,11 @@
             ></textarea>
           </div>
 
-          <button type="submit" class="btn btn-primary btn-block" id="place-order-btn">
-            <span class="btn-label-default">Place Order</span>
-            <span class="btn-label-loading">Placing order…</span>
+          <button
+            type="submit"
+            class="btn btn-primary btn-block"
+            id="pay-now-btn">
+            Place Order & Pay Now
           </button>
         </form>
 
@@ -236,6 +239,7 @@
   <button id="floating-track-btn" class="floating-track-btn" hidden>
   🚚 Track Order
 </button>
+<script src="https://js.paystack.co/v1/inline.js"></script>
 </body>
 </html>
 
