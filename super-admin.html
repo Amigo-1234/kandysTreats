@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kandys Treats — Super Admin</title>
+
+  <!-- MAIN APP STYLES -->
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="supe">
+</head>
+
+<body data-page="super-admin">
+
+  <!-- HEADER -->
+  <header class="app-header glass-card">
+    <div>
+      <h1>Super Admin</h1>
+      <p class="muted">Owner finance & transaction control</p>
+    </div>
+
+    <button id="super-logout" class="btn btn-ghost">
+      Logout
+    </button>
+  </header>
+
+  <!-- LOGIN -->
+  <section id="owner-login" class="section glass-card" >
+    <h2>Owner Login</h2>
+  <form id="owner-login-form">
+    <input name="email" type="email" />
+    <input name="password" type="password" />
+    <button type="submit">Sign in</button>
+  </form>
+</section>
+
+
+  <!-- PANEL -->
+  <main id="super-admin-panel" hidden>
+
+    <!-- STATS -->
+    <section class="section">
+      <div class="card-grid">
+
+        <div class="glass-card stat-card revenue">
+          <h3>Total Revenue</h3>
+          <div class="value" id="stat-total-revenue">₦0</div>
+        </div>
+
+        <div class="glass-card stat-card revenue">
+          <h3>Today</h3>
+          <div class="value" id="stat-today-revenue">₦0</div>
+        </div>
+
+        <div class="glass-card stat-card revenue">
+          <h3>Total Orders</h3>
+          <div class="value" id="stat-total-orders">0</div>
+        </div>
+
+        <div class="glass-card stat-card revenue">
+          <h3>Unpaid</h3>
+          <div class="value" id="stat-unpaid">0</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ACTION BAR -->
+    <section class="section glass-card">
+      <button id="export-csv" class="btn btn-outline">
+        Export CSV
+      </button>
+    </section>
+
+    <!-- TRANSACTIONS -->
+    <section class="section glass-card ">
+      <h2>Transactions</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Date</th>
+              <th>Customer</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Paid</th>
+            </tr>
+          </thead>
+
+          <tbody id="transactions-body">
+            <!-- Filled by JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- JS (isolated on purpose) -->
+  <script type="module" src="js/super-admin.js"></script>
+</body>
+</html>
