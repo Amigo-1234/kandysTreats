@@ -1949,23 +1949,28 @@ body[data-page="track"] .track-card {
   gap: 8px;
 }
 
-/* ============================= */
-/* QUICK PICKS – MOBILE DEFAULT */
-/* ============================= */
+/* ================================================= */
+/* QUICK PICKS – FINAL, CLEAN, SAFARI-SAFE VERSION */
+/* ================================================= */
 
+/* ---------- SLIDER CONTAINER ---------- */
 .quick-picks-row {
   display: flex;
   gap: 14px;
 
-  overflow-x: auto;
-  padding-bottom: 10px;
+  padding-bottom: 12px;
 
-  scroll-snap-type: x mandatory;
+  overflow-x: scroll;
+  overflow-y: hidden;
+
+  scroll-snap-type: x proximity;
   scroll-behavior: smooth;
+
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
 }
 
-/* Scrollbar */
+/* Scrollbar (WebKit only, harmless elsewhere) */
 .quick-picks-row::-webkit-scrollbar {
   height: 6px;
 }
@@ -1975,12 +1980,12 @@ body[data-page="track"] .track-card {
   border-radius: 999px;
 }
 
-/* ============================= */
-/* QUICK PICK CARD */
-/* ============================= */
-
+/* ---------- CARD ---------- */
 .quick-picks-row .menu-card {
-  flex: 0 0 280px;
+  flex: 0 0 clamp(240px, 78vw, 300px);
+  min-width: 260px;
+  flex-shrink: 0;
+
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -1988,40 +1993,54 @@ body[data-page="track"] .track-card {
   scroll-snap-align: start;
 
   opacity: 0;
-  transform: translateX(20px);
+  transform: translateX(18px);
   animation: quickPickIn 0.45s cubic-bezier(.22,.61,.36,1) forwards;
 
   transition:
     transform 0.35s cubic-bezier(0.19, 1, 0.22, 1),
     box-shadow 0.35s ease;
-
-  will-change: transform;
 }
 
-/* stagger entrance */
-.quick-picks-row .menu-card:nth-child(1) { animation-delay: 0.05s; }
-.quick-picks-row .menu-card:nth-child(2) { animation-delay: 0.1s; }
-.quick-picks-row .menu-card:nth-child(3) { animation-delay: 0.15s; }
-.quick-picks-row .menu-card:nth-child(4) { animation-delay: 0.2s; }
+/* Stagger entrance */
+.quick-picks-row .menu-card:nth-child(1) { animation-delay: .05s; }
+.quick-picks-row .menu-card:nth-child(2) { animation-delay: .10s; }
+.quick-picks-row .menu-card:nth-child(3) { animation-delay: .15s; }
+.quick-picks-row .menu-card:nth-child(4) { animation-delay: .20s; }
 
-/* ============================= */
-/* IMAGE */
-/* ============================= */
-
+/* ---------- IMAGE (IMPROVED QUALITY) ---------- */
 .quick-picks-row .menu-card-image {
-  height: 160px;
+  width: 100%;
+  height: 150px;
+  aspect-ratio: 16 / 10;
+
   border-radius: 14px;
+
   background-size: cover;
-  background-position: center;
+  background-position: center 55%;
+  background-repeat: no-repeat;
+
+  image-rendering: auto;
+
+  position: relative;
+  overflow: hidden;
 
   transition: transform 0.45s ease;
-  will-change: transform;
 }
 
-/* ============================= */
-/* DESKTOP HOVER ONLY */
-/* ============================= */
+/* Soft highlight overlay */
+.quick-picks-row .menu-card-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top,
+      rgba(255,255,255,.25),
+      transparent 55%);
+  opacity: .55;
+  pointer-events: none;
+}
 
+/* ---------- DESKTOP HOVER (ONLY WHERE IT MAKES SENSE) ---------- */
 @media (hover: hover) {
   .quick-picks-row .menu-card:hover {
     transform: translateY(-4px) scale(1.015);
@@ -2035,16 +2054,13 @@ body[data-page="track"] .track-card {
   }
 }
 
-/* ============================= */
-/* MOBILE IDLE FLOAT */
-/* ============================= */
-
+/* ---------- MOBILE FLOAT (NON-SAFARI) ---------- */
 @media (max-width: 899px) {
   .quick-picks-row .menu-card {
     animation:
       quickPickIn 0.45s cubic-bezier(.22,.61,.36,1) forwards,
       quickFloat 6s ease-in-out infinite;
-    animation-delay: 0s, 0.6s;
+    animation-delay: 0s, .6s;
   }
 
   .quick-picks-row .menu-card:nth-child(even) {
@@ -2052,10 +2068,14 @@ body[data-page="track"] .track-card {
   }
 }
 
-/* ============================= */
-/* DESKTOP GRID FIX */
-/* ============================= */
+/* ---------- SAFARI OVERRIDE (CRITICAL) ---------- */
+@supports (-webkit-touch-callout: none) {
+  .quick-picks-row .menu-card {
+    animation: quickPickIn 0.45s cubic-bezier(.22,.61,.36,1) forwards;
+  }
+}
 
+/* ---------- DESKTOP GRID MODE ---------- */
 @media (min-width: 900px) {
   .quick-picks-row {
     display: grid;
@@ -2065,21 +2085,16 @@ body[data-page="track"] .track-card {
 
   .quick-picks-row .menu-card {
     flex: unset;
+    min-width: unset;
   }
 }
 
-/* ============================= */
-/* SCROLL SNAP CONTROL */
-/* ============================= */
-
+/* ---------- AUTO-SCROLL PAUSE STATE ---------- */
 .quick-picks-row.is-auto-scrolling {
   scroll-snap-type: none;
 }
 
-/* ============================= */
-/* ANIMATIONS */
-/* ============================= */
-
+/* ---------- ANIMATIONS ---------- */
 @keyframes quickPickIn {
   to {
     opacity: 1;
@@ -2090,68 +2105,4 @@ body[data-page="track"] .track-card {
 @keyframes quickFloat {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
-}
-
-/* QUICK PICKS – IMAGE SIZE (FINAL) */
-.quick-picks-row .menu-card-image {
-  height: 150px;
-  aspect-ratio: 16 / 10;
-  border-radius: 14px;
-  background-size: cover;
-  background-position: center;
-}
-
-/* QUICK PICKS – SLIDER CORE */
-.quick-picks-row {
-  display: flex;
-  gap: 14px;
-  overflow-x: auto;
-  padding-bottom: 12px;
-
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-}
-
-.quick-picks-row .menu-card {
-  flex: 0 0 clamp(240px, 80vw, 300px);
-  scroll-snap-align: start;
-}
-
-@media (min-width: 900px) {
-  .quick-picks-row {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    overflow-x: visible;
-  }
-
-  .quick-picks-row .menu-card {
-    flex: unset;
-  }
-}
-
-/* SAFARI FIX – force horizontal scrolling */
-.quick-picks-row {
-  overflow-x: scroll;              /* not auto */
-  overflow-y: hidden;
-
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
-
-  scroll-snap-type: x proximity;   /* NOT mandatory */
-}
-
-.quick-picks-row .menu-card {
-  min-width: 260px;
-  flex-shrink: 0;
-}
-
-.quick-picks-row .menu-card {
-  animation: quickFloat 6s ease-in-out infinite;
-}
-/* SAFARI ONLY – disable floating animation */
-@supports (-webkit-touch-callout: none) {
-  .quick-picks-row .menu-card {
-    animation: quickPickIn 0.45s cubic-bezier(.22,.61,.36,1) forwards;
-  }
 }
