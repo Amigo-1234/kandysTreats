@@ -1473,47 +1473,52 @@ const initContactForm = () => {
 function startQuickPicksAutoScroll(row) {
   if (!row) return;
 
+  // Respect accessibility
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     return;
   }
 
+  // Desktop grid → no auto scroll
+  if (window.innerWidth >= 900) return;
+
+  // No overflow → no scroll
   if (row.scrollWidth <= row.clientWidth) return;
 
-  let isPaused = false;
-  const speed = 0.6;
+  let rafId;
+  let paused = false;
+  const speed = 0.35;
 
-  row.classList.add("is-auto-scrolling");
-
-  function loop() {
-    if (!isPaused) {
+  function step() {
+    if (!paused) {
       row.scrollLeft += speed;
 
       if (row.scrollLeft >= row.scrollWidth - row.clientWidth - 1) {
         row.scrollLeft = 0;
       }
     }
-    requestAnimationFrame(loop);
+    rafId = requestAnimationFrame(step);
   }
 
   const pause = () => {
-    isPaused = true;
+    paused = true;
     row.classList.remove("is-auto-scrolling");
   };
 
   const resume = () => {
-    isPaused = false;
+    paused = false;
     row.classList.add("is-auto-scrolling");
   };
 
-  ["mouseenter", "mousedown", "wheel", "touchstart"].forEach(e =>
-    row.addEventListener(e, pause)
+  ["mouseenter", "touchstart", "wheel", "mousedown"].forEach(evt =>
+    row.addEventListener(evt, pause, { passive: true })
   );
 
-  ["mouseleave", "mouseup", "touchend"].forEach(e =>
-    row.addEventListener(e, resume)
+  ["mouseleave", "touchend"].forEach(evt =>
+    row.addEventListener(evt, resume)
   );
 
-  requestAnimationFrame(loop);
+  row.classList.add("is-auto-scrolling");
+  step();
 }
 
 

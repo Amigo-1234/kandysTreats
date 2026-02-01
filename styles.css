@@ -2091,3 +2091,41 @@ body[data-page="track"] .track-card {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
 }
+
+/* QUICK PICKS – IMAGE SIZE (FINAL) */
+.quick-picks-row .menu-card-image {
+  height: 150px;
+  aspect-ratio: 16 / 10;
+  border-radius: 14px;
+  background-size: cover;
+  background-position: center;
+}
+
+/* QUICK PICKS – SLIDER CORE */
+.quick-picks-row {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.quick-picks-row .menu-card {
+  flex: 0 0 clamp(240px, 80vw, 300px);
+  scroll-snap-align: start;
+}
+
+@media (min-width: 900px) {
+  .quick-picks-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow-x: visible;
+  }
+
+  .quick-picks-row .menu-card {
+    flex: unset;
+  }
+}
