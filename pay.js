@@ -76,17 +76,16 @@ loadOrder();
 /* ================= PAYSTACK ================= */
 
 paystackBtn.addEventListener("click", () => {
-  if (typeof PaystackPop === "undefined") {
-    showError("Paystack not loaded. Refresh page.");
+  if (!orderData) {
+    showError("Order not ready. Please refresh.");
     return;
   }
 
-  const handler = PaystackPop.setup({
+  window.startPaystackPayment({
     key: "pk_live_bd05647da5ae5885013df5fdbc07c7545d7adf70",
     email: orderData.customer?.email || "ads.kandystreats@gmail.com",
     amount: Math.round(orderData.total * 100),
-    currency: "NGN",
-    ref: orderId,
+    orderId,
 
     metadata: {
       custom_fields: [
@@ -95,11 +94,11 @@ paystackBtn.addEventListener("click", () => {
       ]
     },
 
-    callback: async (response) => {
+    onSuccess: async (reference) => {
       await updateDoc(doc(db, "orders", orderId), {
         paid: true,
         paymentMethod: "paystack",
-        paymentReference: response.reference,
+        paymentReference: reference,
         paidAt: serverTimestamp(),
       });
 
@@ -110,9 +109,8 @@ paystackBtn.addEventListener("click", () => {
       showError("Payment cancelled.");
     }
   });
-
-  handler.openIframe();
 });
+
 
 /* ================= FLUTTERWAVE ================= */
 

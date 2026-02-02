@@ -41,14 +41,16 @@
     </section>
   </main>
 
-  <!-- Payment SDKs -->
-  <script
-  src="https://js.paystack.co/v1/inline.js"
-  defer>
-</script>
-  <script src="https://checkout.flutterwave.com/v3.js"></script>
+ <!-- Paystack MUST be first and NOT deferred -->
+<script src="https://js.paystack.co/v1/inline.js"></script>
 
-  <!-- App logic -->
-  <script type="module" src="pay.js"></script>
+<!-- Paystack handler (NON-module) -->
+<script src="paystack.js"></script>
+
+<!-- Flutterwave -->
+<script src="https://checkout.flutterwave.com/v3.js"></script>
+
+<!-- App logic (module is fine here) -->
+<script type="module" src="pay.js"></script>
 </body>
 </html>
