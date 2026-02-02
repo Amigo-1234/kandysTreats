@@ -65,7 +65,7 @@ async function loadOrder() {
 
   orderIdEl.textContent = orderId;
   amountEl.textContent =
-    `₦${Number(orderData.total).toLocaleString("en-NG")}`;
+  Number(orderData.total).toLocaleString("en-NG");
 
   paystackBtn.disabled = false;
   flutterwaveBtn.disabled = false;

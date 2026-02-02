@@ -2320,3 +2320,94 @@ tbody tr:hover {
     padding-right: 40px;
   }
 }
+
+/* ================= PAY PAGE ================= */
+
+.page-pay {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.pay-wrapper {
+  width: 100%;
+  max-width: 420px;
+}
+
+.pay-card {
+  padding: 20px 18px 22px;
+  border-radius: 18px;
+  text-align: center;
+}
+
+/* Title */
+.pay-title {
+  font-size: 1.35rem;
+  margin-bottom: 6px;
+}
+
+/* Order info */
+.pay-order-id {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  margin-bottom: 6px;
+}
+
+/* Amount */
+.pay-amount-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 18px;
+}
+
+.pay-currency {
+  font-size: 1.2rem;
+  opacity: 0.7;
+}
+
+.pay-amount {
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+/* Buttons */
+.pay-buttons {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.pay-btn {
+  padding: 14px;
+  font-size: 1rem;
+  border-radius: 14px;
+}
+
+/* Secure note */
+.pay-note {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+/* Error message (soft, not aggressive) */
+.pay-error {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #ff9a9a;
+}
+
+/* Desktop polish */
+@media (min-width: 768px) {
+  .pay-card {
+    padding: 24px 22px 26px;
+  }
+
+  .pay-amount {
+    font-size: 2.4rem;
+  }
+}
