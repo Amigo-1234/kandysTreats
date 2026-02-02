@@ -700,23 +700,24 @@ const takeawayFee =
 
 
 
-await setDoc(doc(window.db, "orders", orderId), {
+await setDoc(doc(db, "orders", orderId), {
   id: orderId,
   customer: { name, phone, email },
-  fulfilment,
   items,
   subtotal,
-  takeawayFee,
   deliveryFee,
-  total: subtotal + deliveryFee + takeawayFee,
-  notes,
-  status: "New",
+  takeawayFee,
+  total,
+  fulfilment,
+
+  status: "Pending",        // NOT "New"
   paid: false,
+  paymentStatus: "pending", // 👈 IMPORTANT
+
   createdAt: serverTimestamp(),
 });
 
 // clear cart
-saveCart({});
 
 // 👉 redirect to payment page
 window.location.href = `/pay.html?order=${orderId}`;
@@ -958,8 +959,11 @@ function sendWhatsApp(order, status) {
 
 
 const startOrdersListener = () => {
-  const qy = query(collection(window.db, "orders"), orderBy("createdAt", "desc"));
-
+  const qy = query(
+  collection(window.db, "orders"),
+  where("paid", "==", true),
+  orderBy("createdAt", "desc")
+);
   unsubscribeOrders = onSnapshot(
     qy,
     (snap) => {

@@ -425,4 +425,5 @@ function renderExistingQuickPick(id, data) {
   return card;
 }
 
+
 initExistingQuickPicks();

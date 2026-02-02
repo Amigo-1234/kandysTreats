@@ -121,7 +121,7 @@ flutterwaveBtn.onclick = () => {
   }
 
   FlutterwaveCheckout({
-    public_key: "FLWPUBK_LIVE_REPLACE_THIS",
+    public_key: "FLWPUBK-3094f9362789db81b6b2afb5e7c1a080-X",
     tx_ref: orderId,
     amount: orderData.total,
     currency: "NGN",
@@ -175,3 +175,7 @@ window.__markPaid = async (orderId) => {
     console.error("❌ Failed to mark paid", err);
   }
 };
+
+document.getElementById("back-to-cart")?.addEventListener("click", () => {
+  window.location.href = "/cart.html";
+});
