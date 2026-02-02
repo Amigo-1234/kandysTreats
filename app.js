@@ -715,6 +715,12 @@ await setDoc(doc(window.db, "orders", orderId), {
   createdAt: serverTimestamp(),
 });
 
+// clear cart
+saveCart({});
+
+// 👉 redirect to payment page
+window.location.href = `/pay.html?order=${orderId}`;
+
 // 🔥 OPEN PAYSTACK HERE
 payWithPaystack({
   email,
@@ -739,58 +745,7 @@ payWithPaystack({
 
 
 
-function payWithPaystack({ email, amount, name, phone, orderId, placeBtn }) {
 
-  if (!window.PaystackPop) {
-  placeBtn.disabled = false;
-  showToast("Payment service unavailable. Try again.");
-  return;
-}
-  const handler = PaystackPop.setup({
-    key: "pk_live_bd05647da5ae5885013df5fdbc07c7545d7adf70", // ✅ PUBLIC KEY ONLY
-    email: email || "ads.kandystreats@gmail.com",
-    amount: Math.round(amount * 100), // kobo
-    currency: "NGN",
-    ref: orderId,
-
-    metadata: {
-      custom_fields: [
-        { display_name: "Customer", variable_name: "name", value: name },
-        { display_name: "Phone", variable_name: "phone", value: phone },
-      ],
-    },
-
-    callback: function (response) {
-      handlePaymentSuccess(orderId, response.reference);
-    },
-
-    onClose: function () {
-      placeBtn.disabled = false;
-      showToast("Payment cancelled");
-    },
-  });
-
-  handler.openIframe();
-}
-
-async function handlePaymentSuccess(orderId, reference) {
-  try {
-    await updateDoc(doc(window.db, "orders", orderId), {
-      paid: true,
-      paymentReference: reference,
-      paymentMethod: "paystack",
-      paidAt: serverTimestamp(),
-    });
-
-    saveCart({});
-    showToast("Payment successful 🎉");
-
-
-  } catch (err) {
-    console.error(err);
-    showToast("Payment save failed — contact support");
-  }
-}
 
 
 

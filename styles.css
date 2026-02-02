@@ -2320,37 +2320,3 @@ tbody tr:hover {
     padding-right: 40px;
   }
 }
-
-.floating-track-btn {
-  z-index: 5;
-}
-
-#pay-now-btn {
-  position: relative;
-  z-index: 20;
-}
-
-@media (min-width: 768px) {
-  .floating-track-btn {
-    display: none !important;
-  }
-}
-
-@media (min-width: 768px) {
-  .bottom-nav {
-    display: none;
-  }
-}
-@media (min-width: 768px) {
-  .bottom-nav {
-    display: none !important;
-  }
-}
-@media (min-width: 768px) {
-  .floating-track-btn {
-    display: none !important;
-  }
-}
-.checkout-form {
-  padding-bottom: 140px;
-}

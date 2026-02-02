@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" data-page="pay">
+<head>
+  <meta charset="UTF-8" />
+  <title>Complete Payment | Kandys Treats</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="page page-pay">
+
+  <main class="pay-wrapper">
+    <section class="pay-card glass-card">
+
+      <h1 class="pay-title">Complete Payment</h1>
+
+      <div class="pay-order-box">
+        <p class="pay-order-id">
+          Order ID: <strong id="pay-order-id">—</strong>
+        </p>
+        <p class="pay-amount" id="pay-amount">₦0</p>
+      </div>
+
+      <div class="pay-buttons">
+        <button id="pay-paystack" class="btn btn-primary pay-btn">
+          Pay with Paystack
+        </button>
+
+        <button id="pay-flutterwave" class="btn btn-outline pay-btn">
+          Pay with Flutterwave
+        </button>
+      </div>
+
+      <p class="pay-note">
+        🔒 Secure payment · No card details stored
+      </p>
+
+      <p id="pay-error" class="pay-error" hidden></p>
+
+    </section>
+  </main>
+
+  <!-- Payment SDKs -->
+  <script
+  src="https://js.paystack.co/v1/inline.js"
+  defer>
+</script>
+  <script src="https://checkout.flutterwave.com/v3.js"></script>
+
+  <!-- App logic -->
+  <script type="module" src="pay.js"></script>
+</body>
+</html>
