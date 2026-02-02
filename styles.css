@@ -2411,3 +2411,21 @@ tbody tr:hover {
     font-size: 2.4rem;
   }
 }
+
+.pay-back {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  opacity: 0.65;
+  text-decoration: none;
+  border: 1px solid purple;
+  padding: 10px;
+  border-radius: 12px;
+  background-color: purple;
+  color: #fff;
+}
+
+.pay-back:hover {
+  opacity: 1;
+  text-decoration: underline;
+}

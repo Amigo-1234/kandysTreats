@@ -150,3 +150,28 @@ flutterwaveBtn.onclick = () => {
     }
   });
 };
+// ================= DEV TEST HELPERS =================
+// ⚠️ Dev only – remove before production if you want
+
+window.__markPaid = async (orderId) => {
+  if (!orderId) {
+    console.error("Order ID required");
+    return;
+  }
+
+  try {
+    await updateDoc(doc(db, "orders", orderId), {
+      paid: true,
+      paymentMethod: "manual-test",
+      paymentReference: "DEV_CONSOLE",
+      paidAt: serverTimestamp(),
+    });
+
+    console.log("✅ Marked as paid:", orderId);
+
+    // simulate real redirect
+    window.location.href = `/track.html?code=${orderId}`;
+  } catch (err) {
+    console.error("❌ Failed to mark paid", err);
+  }
+};
