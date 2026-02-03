@@ -720,6 +720,7 @@ await setDoc(doc(db, "orders", orderId), {
 // clear cart
 
 // 👉 redirect to payment page
+
 window.location.href = `/pay.html?order=${orderId}`;
 
 // 🔥 OPEN PAYSTACK HERE
