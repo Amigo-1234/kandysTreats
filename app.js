@@ -1403,7 +1403,7 @@ unsubscribe = onSnapshot(
 };
 
 
-  const renderOrder = (order) => {
+const renderOrder = (order) => {
   tId.textContent = order.id;
   tStatus.textContent = order.status || "New";
   tName.textContent = order.customer?.name || "—";
@@ -1415,74 +1415,66 @@ unsubscribe = onSnapshot(
     : new Date(order.createdAt);
   tTime.textContent = d.toLocaleString("en-NG");
 
+  // -------- ITEMS --------
   tItems.innerHTML = "";
 
-// ✅ NEW MULTI-ORDER (current system)
-if (order.subOrders && order.subOrders.length) {
-  order.subOrders.forEach((sub, i) => {
-    const section = document.createElement("div");
-    section.className = "admin-suborder";
+  if (order.subOrders && order.subOrders.length) {
+    order.subOrders.forEach((sub, i) => {
+      const section = document.createElement("div");
+      section.className = "track-suborder";
 
-    section.innerHTML = `
-      <div class="suborder-title">Order ${i + 1}</div>
-      <ul class="suborder-list">
-        ${sub.items.map(item =>
-          `<li>${item.qty} × ${item.name}</li>`
-        ).join("")}
-      </ul>
-    `;
+      section.innerHTML = `
+        <div class="suborder-title">Order ${i + 1}</div>
+        <ul class="suborder-list">
+          ${sub.items.map(item =>
+            `<li>${item.qty} × ${item.name}</li>`
+          ).join("")}
+        </ul>
+      `;
 
-    itemsWrap.appendChild(section); // ✅ CORRECT TARGET
-  });
-
-  return;
-}
-// 🧯 FALLBACK: old single-order data
-if (order.items && order.items.length) {
-  const ul = document.createElement("ul");
-  order.items.forEach(item => {
-    const li = document.createElement("li");
-    li.textContent = `${item.qty} × ${item.name}`;
-    ul.appendChild(li);
-  });
-  itemsWrap.appendChild(ul);
-  return;
-}
-
-itemsWrap.textContent = "No items found";
-
-// ❌ truly empty
-tItems.innerHTML = "<p>No items found</p>";
-
-
-  // --- CALCULATE TOTALS SAFELY ---
-let subtotal = 0;
-
-if (order.subOrders && order.subOrders.length) {
-  order.subOrders.forEach(sub => {
-    sub.items.forEach(item => {
-      subtotal += (item.price || 0) * (item.qty || 0);
+      tItems.appendChild(section);
     });
-  });
-}
+  } else if (order.items && order.items.length) {
+    const ul = document.createElement("ul");
+    order.items.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = `${item.qty} × ${item.name}`;
+      ul.appendChild(li);
+    });
+    tItems.appendChild(ul);
+  } else {
+    tItems.innerHTML = "<p>No items found</p>";
+  }
 
-const delivery =
-  (order.deliveryFee || 0) + (order.takeawayFee || 0);
+  // -------- TOTALS --------
+  let subtotal = 0;
 
-const total = subtotal + delivery;
+  if (order.subOrders && order.subOrders.length) {
+    order.subOrders.forEach(sub => {
+      sub.items.forEach(item => {
+        subtotal += Number(item.price || 0) * Number(item.qty || 0);
+      });
+    });
+  } else if (order.items) {
+    order.items.forEach(item => {
+      subtotal += Number(item.price || 0) * Number(item.qty || 0);
+    });
+  }
 
-// --- DISPLAY ---
-tSubtotal.textContent = formatPrice(subtotal);
-tDelivery.textContent = formatPrice(delivery);
-tTotal.textContent = formatPrice(total);
+  const delivery =
+    Number(order.deliveryFee || 0) +
+    Number(order.takeawayFee || 0);
 
-  // ✅ THIS LINE MAKES THE GREEN DOT MOVE
+  const total = subtotal + delivery;
+
+  tSubtotal.textContent = formatPrice(subtotal);
+  tDelivery.textContent = formatPrice(delivery);
+  tTotal.textContent = formatPrice(total);
+
+  // -------- TIMELINE --------
   renderTimeline(order.status || "New");
-
   applyTimelineStatus(order.status || "New");
-
 };
-
 
 
   // Auto-track from URL or last order
