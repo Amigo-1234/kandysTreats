@@ -57,6 +57,7 @@ const CART_KEY = "kandys_cart";
 const ORDERS_KEY = "kandys_orders";
 const MENU_CACHE_KEY = "kandys_menu_cache_v1";
 const ORDER_STATUSES = ["New", "Preparing", "Out", "Completed"];
+const DRAFT_ORDERS_KEY = "kandys_draft_orders";
  // no longer used by admin, but left for now
 
 // Mock menu data
@@ -453,6 +454,18 @@ const initCartPage = () => {
   const payNowBtn = document.getElementById("pay-now-btn");
 
 
+  const reviewBtn = document.getElementById("view-orders-btn");
+
+reviewBtn?.addEventListener("click", () => {
+  const drafts = readDraftOrders();
+
+  if (!drafts.length) {
+    showToast("No saved orders yet");
+    return;
+  }
+
+  window.location.href = "orders-preview.html";
+});
   
 
   if (!itemsContainer || !subtotalEl) return;
@@ -654,86 +667,62 @@ totalEl.textContent = formatPrice(
 
   };
 
-
-  /* ================= SUBMIT ORDER ================= */
-  form.addEventListener("submit", async (e) => {
+  form.addEventListener("submit", (e) => {
   e.preventDefault();
-
-  const name = document.getElementById("customer-name")?.value.trim();
-  const phone = document.getElementById("customer-phone")?.value.trim();
-  const email = document.getElementById("customer-email")?.value.trim();
-  const notes = document.getElementById("customer-notes")?.value.trim() || "";
-
-  if (!name || !phone) {
-    showToast("Please fill in name and phone number");
-    return;
-  }
 
   const cart = readCart();
   const ids = Object.keys(cart);
+
   if (!ids.length) {
     showToast("Your cart is empty");
     return;
   }
 
-    if (placeBtn.disabled) return;
-setTimeout(() => placeBtn.disabled = true, 0);
+  const name = document.getElementById("customer-name").value.trim();
+  const phone = document.getElementById("customer-phone").value.trim();
+  const email = document.getElementById("customer-email").value.trim();
 
-
-  const orderId = `KD-${Date.now().toString().slice(-6)}`;
-  localStorage.setItem("kandys_last_order_code", orderId);
+  if (!name || !phone) {
+    showToast("Please fill in name and phone");
+    return;
+  }
 
   const items = ids.map(id => cart[id]);
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
 
   const fulfilment =
-  document.querySelector(".toggle-option.is-active")?.dataset.fulfilment ||
-  "delivery";
+    document.querySelector(".toggle-option.is-active")?.dataset.fulfilment ||
+    "delivery";
 
-  const cartItems = ids.map(id => cart[id]);
-const takeawayFee =
-  fulfilment === "delivery" ? calculateTakeawayFee(cartItems) : 0;
+  const takeawayFee =
+    fulfilment === "delivery" ? calculateTakeawayFee(items) : 0;
 
   const deliveryFee =
-  fulfilment === "delivery" ? DELIVERY_FEE : 0;
-  const total = subtotal + deliveryFee;
+    fulfilment === "delivery" ? DELIVERY_FEE : 0;
 
+  const draftOrder = {
+    id: `draft-${Date.now()}`,
+    customer: { name, phone, email },
+    items,
+    fulfilment,
+    subtotal,
+    takeawayFee,
+    deliveryFee,
+    total: subtotal + takeawayFee + deliveryFee,
+    createdAt: Date.now()
+  };
 
+  const drafts = readDraftOrders();
+  drafts.push(draftOrder);
+  saveDraftOrders(drafts);
 
-await setDoc(doc(db, "orders", orderId), {
-  id: orderId,
-  customer: { name, phone, email },
-  items,
-  subtotal,
-  deliveryFee,
-  takeawayFee,
-  total,
-  fulfilment,
+  // ✅ clear cart ONLY AFTER draft is saved
+  saveCart({});
+  render();
 
-  status: "Pending",        // NOT "New"
-  paid: false,
-  paymentStatus: "pending", // 👈 IMPORTANT
-
-  createdAt: serverTimestamp(),
+  showToast("Order saved. You can add another order.");
 });
 
-// clear cart
-
-// 👉 redirect to payment page
-
-window.location.href = `/pay.html?order=${orderId}`;
-
-// 🔥 OPEN PAYSTACK HERE
-payWithPaystack({
-  email,
-  name,
-  phone,
-  orderId,
-  amount: subtotal + deliveryFee + takeawayFee,
-  placeBtn,
-});
-
-})
 
 
 
@@ -747,6 +736,111 @@ payWithPaystack({
 
 
 
+
+const readDraftOrders = () => {
+  try {
+    return JSON.parse(localStorage.getItem(DRAFT_ORDERS_KEY)) || [];
+  } catch {
+    return [];
+  }
+};
+
+const saveDraftOrders = (orders) => {
+  localStorage.setItem(DRAFT_ORDERS_KEY, JSON.stringify(orders));
+};
+
+
+// =====================
+// PREVIEW PAGE (DRAFT ORDERS)
+// =====================
+
+const initPreviewPage = () => {
+  const wrap = document.getElementById("draft-orders");
+  const empty = document.getElementById("no-drafts");
+  const totalEl = document.getElementById("preview-total");
+  const payBtn = document.getElementById("proceed-payment");
+
+  if (!wrap || !totalEl || !payBtn) return;
+
+  const drafts = readDraftOrders();
+
+  if (!drafts.length) {
+    empty.hidden = false;
+    payBtn.disabled = true;
+    return;
+  }
+
+  empty.hidden = true;
+  wrap.innerHTML = "";
+
+  let grandTotal = 0;
+
+  drafts.forEach((order, index) => {
+    grandTotal += order.total;
+
+    const card = document.createElement("div");
+    card.className = "draft-order";
+
+    card.innerHTML = `
+      <h3>Order ${index + 1}</h3>
+      <p><strong>${order.customer.name}</strong> — ${order.customer.phone}</p>
+
+      <ul>
+        ${order.items.map(i =>
+          `<li>${i.qty} × ${i.name}</li>`
+        ).join("")}
+      </ul>
+
+      <strong>${formatPrice(order.total)}</strong>
+
+      <button class="remove-draft" data-id="${order.id}">
+        Remove
+      </button>
+    `;
+
+    wrap.appendChild(card);
+  });
+
+  totalEl.textContent = formatPrice(grandTotal);
+
+  wrap.addEventListener("click", (e) => {
+    const btn = e.target.closest(".remove-draft");
+    if (!btn) return;
+
+    const id = btn.dataset.id;
+    const next = drafts.filter(d => d.id !== id);
+    saveDraftOrders(next);
+    location.reload();
+  });
+
+  payBtn.onclick = async () => {
+  const drafts = readDraftOrders();
+  if (!drafts.length) return;
+
+  const orderId = `KD-${Date.now()}`;
+
+  const total = drafts.reduce((s, o) => s + o.total, 0);
+
+  const order = {
+    id: orderId,
+    items: drafts.flatMap(d => d.items),
+    customer: drafts[0].customer, // first customer
+    fulfilment: drafts[0].fulfilment,
+    subtotal: drafts.reduce((s, o) => s + o.subtotal, 0),
+    takeawayFee: drafts.reduce((s, o) => s + o.takeawayFee, 0),
+    deliveryFee: drafts.reduce((s, o) => s + o.deliveryFee, 0),
+    total,
+    paid: false,
+    status: "New",
+    createdAt: serverTimestamp(),
+  };
+
+  await setDoc(doc(window.db, "orders", orderId), order);
+
+  // 🚨 DO NOT CLEAR DRAFTS YET
+  window.location.href = `/pay.html?order=${orderId}`;
+};
+};
 
 
 
@@ -1504,5 +1598,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (page === "home") initReviewsSlider();
   if (page === "contact") initContactForm();
   if (page === "home") initQuickPicks();
+  if (page === "preview") initPreviewPage();
 });
 

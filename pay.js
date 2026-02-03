@@ -177,5 +177,5 @@ window.__markPaid = async (orderId) => {
 };
 
 document.getElementById("back-to-cart")?.addEventListener("click", () => {
-  window.location.href = "/cart.html";
+  window.location.href = "/orders-preview.html";
 });

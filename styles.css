@@ -2429,3 +2429,102 @@ tbody tr:hover {
   opacity: 1;
   text-decoration: underline;
 }
+/* =====================
+   PREVIEW PAGE
+===================== */
+
+.page-preview {
+  background: #0e0e11;
+  color: #fff;
+}
+
+.preview-shell {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+
+.preview-header {
+  margin-bottom: 20px;
+}
+
+.preview-header h1 {
+  font-size: 1.6rem;
+  margin-bottom: 4px;
+}
+
+.preview-header p {
+  opacity: 0.7;
+  font-size: 0.9rem;
+}
+
+.draft-orders {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.draft-order {
+  background: rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.draft-order h3 {
+  font-size: 1rem;
+  margin-bottom: 6px;
+}
+
+.draft-order p {
+  font-size: 0.85rem;
+  opacity: 0.75;
+  margin-bottom: 10px;
+}
+
+.draft-order ul {
+  padding-left: 18px;
+  margin-bottom: 12px;
+}
+
+.draft-order li {
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.draft-order strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.remove-draft {
+  background: none;
+  border: none;
+  color: #ff9b9b;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.preview-summary {
+  margin-top: 28px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  font-size: 1.05rem;
+}
+
+.btn-block {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.empty-state {
+  text-align: center;
+  opacity: 0.6;
+  margin-top: 40px;
+}
