@@ -2528,3 +2528,22 @@ tbody tr:hover {
   opacity: 0.6;
   margin-top: 40px;
 }
+
+.suborder-header {
+  margin-top: 12px;
+  font-weight: 600;
+  opacity: 0.85;
+  border-bottom: 1px dashed rgba(255,255,255,0.2);
+  padding-bottom: 4px;
+}
+
+.suborder-header {
+  margin-top: 14px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.suborder-list {
+  margin-left: 18px;
+  margin-bottom: 10px;
+}

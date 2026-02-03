@@ -823,7 +823,14 @@ const initPreviewPage = () => {
 
   const order = {
     id: orderId,
-    items: drafts.flatMap(d => d.items),
+    subOrders: drafts.map((d, index) => ({
+    index: index + 1,
+    items: d.items,
+    subtotal: d.subtotal,
+    takeawayFee: d.takeawayFee,
+    deliveryFee: d.deliveryFee,
+    total: d.total,
+  })),
     customer: drafts[0].customer, // first customer
     fulfilment: drafts[0].fulfilment,
     subtotal: drafts.reduce((s, o) => s + o.subtotal, 0),
@@ -956,15 +963,54 @@ const renderTable = () => {
   el = detailContent.querySelector("[data-detail-notes]");
   if (el) el.textContent = order.notes || "None";
 
-  const itemsList = detailContent.querySelector("[data-detail-items]");
-  if (itemsList) {
-    itemsList.innerHTML = "";
-    (order.items || []).forEach((i) => {
-      const li = document.createElement("li");
-      li.textContent = `${i.qty} × ${i.name}`;
-      itemsList.appendChild(li);
-    });
-  }
+  el = detailContent.querySelector("[data-detail-time]");
+if (el && order.createdAt) {
+  const d = order.createdAt.toDate
+    ? order.createdAt.toDate()
+    : new Date(order.createdAt);
+  el.textContent = d.toLocaleString("en-NG");
+}
+
+const itemsWrap = detailContent.querySelector("[data-detail-items]");
+itemsWrap.innerHTML = "";
+
+// ✅ MULTI-ORDER (ADMIN)
+if (order.subOrders && order.subOrders.length) {
+  order.subOrders.forEach((sub, i) => {
+    const section = document.createElement("div");
+    section.className = "admin-suborder";
+
+    section.innerHTML = `
+      <div class="suborder-title">Order ${i + 1}</div>
+      <ul class="suborder-list">
+        ${sub.items.map(item =>
+          `<li>${item.qty} × ${item.name}</li>`
+        ).join("")}
+      </ul>
+    `;
+
+    tItems.appendChild(section);
+  });
+
+  return;
+}
+// Fallback (old single-order data)
+if (order.items && order.items.length) {
+  const ul = document.createElement("ul");
+  order.items.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = `${item.qty} × ${item.name}`;
+    ul.appendChild(li);
+  });
+  itemsWrap.appendChild(ul);
+  return;
+}
+
+// Empty state
+// Empty state (ONLY if nothing rendered)
+if (!order.subOrders?.length && !order.items?.length) {
+  itemsWrap.textContent = "No items found";
+}
 
   detailPanel
     ?.querySelectorAll(".chip-status")
@@ -976,13 +1022,19 @@ const renderTable = () => {
     });
 };
 function buildWhatsAppMessage(order, status) {
+  const allItems = order.subOrders
+    ? order.subOrders.flatMap(sub => sub.items)
+    : [];
+
   return `
 Hello ${order.customer.name},
 
 Your order (${order.id}) is now *${status}*.
 
 Items:
-${order.items.map(i => `• ${i.qty} × ${i.name}`).join("\n")}
+${allItems.length
+  ? allItems.map(i => `• ${i.qty} × ${i.name}`).join("\n")
+  : "No items"}
 
 Thank you for ordering from Kandys Treats ❤️
 `.trim();
@@ -1283,7 +1335,10 @@ const initTrackPage = () => {
   const tTotal = document.getElementById("t-total");
   const stepsWrap = document.getElementById("track-steps");
 
+
   if (!form || !input) return;
+
+  let unsubscribe = null;
 
   form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -1292,18 +1347,28 @@ const initTrackPage = () => {
   if (!code) return;
 
   try {
-    const snap = await getDoc(doc(window.db, "orders", code));
+    // stop previous listener if any
+if (unsubscribe) unsubscribe();
+
+setState({ isLoading: true });
+
+unsubscribe = onSnapshot(
+  doc(window.db, "orders", code),
+  (snap) => {
+    setState({ isLoading: false });
 
     if (!snap.exists()) {
-      errBox.hidden = false;
-      errBox.textContent = "Order not found";
+      setState({ error: "Order not found" });
       return;
     }
 
-    errBox.hidden = true;
-    result.hidden = false;
-
+    setState({ showResult: true });
     renderOrder(snap.data());
+  },
+  () => {
+    setState({ error: "Failed to listen to order" });
+  }
+);
   } catch (err) {
     errBox.hidden = false;
     errBox.textContent = "Failed to load order";
@@ -1311,7 +1376,7 @@ const initTrackPage = () => {
 });
 
   const ORDER_STATUSES = ["New", "Preparing", "Out", "Completed"];
-  let unsubscribe = null;
+
 
   const normalizeCode = (v) => String(v || "").trim().toUpperCase();
 
@@ -1351,25 +1416,65 @@ const initTrackPage = () => {
   tTime.textContent = d.toLocaleString("en-NG");
 
   tItems.innerHTML = "";
-  (order.items || []).forEach((i) => {
-    const row = document.createElement("div");
-    row.className = "track-item-row";
-    row.innerHTML = `
-      <div>
-        <strong>${i.name}</strong><br>
-        ${i.qty} × ${formatPrice(i.price)}
-      </div>
-      <div>${formatPrice(i.price * i.qty)}</div>
+
+// ✅ NEW MULTI-ORDER (current system)
+if (order.subOrders && order.subOrders.length) {
+  order.subOrders.forEach((sub, i) => {
+    const section = document.createElement("div");
+    section.className = "admin-suborder";
+
+    section.innerHTML = `
+      <div class="suborder-title">Order ${i + 1}</div>
+      <ul class="suborder-list">
+        ${sub.items.map(item =>
+          `<li>${item.qty} × ${item.name}</li>`
+        ).join("")}
+      </ul>
     `;
-    tItems.appendChild(row);
+
+    itemsWrap.appendChild(section); // ✅ CORRECT TARGET
   });
 
-  tSubtotal.textContent = formatPrice(order.subtotal || 0);
-  tDelivery.textContent = formatPrice(
-  (order.deliveryFee || 0) + (order.takeawayFee || 0)
-);
+  return;
+}
+// 🧯 FALLBACK: old single-order data
+if (order.items && order.items.length) {
+  const ul = document.createElement("ul");
+  order.items.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = `${item.qty} × ${item.name}`;
+    ul.appendChild(li);
+  });
+  itemsWrap.appendChild(ul);
+  return;
+}
 
-  tTotal.textContent = formatPrice(order.total || 0);
+itemsWrap.textContent = "No items found";
+
+// ❌ truly empty
+tItems.innerHTML = "<p>No items found</p>";
+
+
+  // --- CALCULATE TOTALS SAFELY ---
+let subtotal = 0;
+
+if (order.subOrders && order.subOrders.length) {
+  order.subOrders.forEach(sub => {
+    sub.items.forEach(item => {
+      subtotal += (item.price || 0) * (item.qty || 0);
+    });
+  });
+}
+
+const delivery =
+  (order.deliveryFee || 0) + (order.takeawayFee || 0);
+
+const total = subtotal + delivery;
+
+// --- DISPLAY ---
+tSubtotal.textContent = formatPrice(subtotal);
+tDelivery.textContent = formatPrice(delivery);
+tTotal.textContent = formatPrice(total);
 
   // ✅ THIS LINE MAKES THE GREEN DOT MOVE
   renderTimeline(order.status || "New");
