@@ -51,6 +51,9 @@ const messaging = getMessaging(app);
 
 window.db = db; // for debugging
 window.auth = auth; // for debugging
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js");
+}
 
 // Local keys (cart stays localStorage for speed)
 const CART_KEY = "kandys_cart";
