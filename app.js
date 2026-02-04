@@ -995,10 +995,15 @@ if (order.subOrders && order.subOrders.length) {
     section.innerHTML = `
       <div class="suborder-title">Order ${i + 1}</div>
       <ul class="suborder-list">
-        ${sub.items.map(item =>
-          `<li>${item.qty} × ${item.name}</li>`
-        ).join("")}
-      </ul>
+  ${sub.items.map(item =>
+    `
+    <li class="order-item">
+      <span class="qty">${item.qty}×</span>
+      <span class="name">${item.name}</span>
+    </li>
+    `
+  ).join("")}
+</ul>
     `;
 
     itemsWrap.appendChild(section);
