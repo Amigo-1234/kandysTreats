@@ -120,6 +120,17 @@ const syncCartBadge = (cart = readCart()) => {
   });
 };
 
+const syncReviewBadge = () => {
+  const drafts = readDraftOrders();
+  const badge = document.getElementById("review-count");
+  if (!badge) return;
+
+  const count = drafts.length;
+  badge.textContent = count;
+
+  badge.classList.toggle("is-visible", count > 0);
+};
+
 const showToast = (message) => {
   const container = document.querySelector(".toast-container");
   if (!container) return;
@@ -721,6 +732,7 @@ totalEl.textContent = formatPrice(
   render();
 
   showToast("Order saved. You can add another order.");
+  syncReviewBadge();
 });
 
 
@@ -975,6 +987,7 @@ const itemsWrap = detailContent.querySelector("[data-detail-items]");
 itemsWrap.innerHTML = "";
 
 // ✅ MULTI-ORDER (ADMIN)
+// ✅ MULTI-ORDER (ADMIN)
 if (order.subOrders && order.subOrders.length) {
   order.subOrders.forEach((sub, i) => {
     const section = document.createElement("div");
@@ -989,7 +1002,7 @@ if (order.subOrders && order.subOrders.length) {
       </ul>
     `;
 
-    tItems.appendChild(section);
+    itemsWrap.appendChild(section); // ✅ FIXED
   });
 
   return;
@@ -1474,6 +1487,12 @@ const renderOrder = (order) => {
   // -------- TIMELINE --------
   renderTimeline(order.status || "New");
   applyTimelineStatus(order.status || "New");
+
+    const waBtn = document.getElementById("wa-support");
+if (waBtn) {
+  const msg = `Hello, I need help with my order ${order.id}`;
+  waBtn.href = `https://wa.me/+2348134641796?text=${encodeURIComponent(msg)}`;
+}
 };
 
 
@@ -1686,6 +1705,7 @@ function renderQuickPickCard(id, data) {
 // Init
 document.addEventListener("DOMContentLoaded", () => {
   syncCartBadge();
+  syncReviewBadge();
   const page = document.documentElement.dataset.page;
 
   if (page === "menu") initMenuPage();
