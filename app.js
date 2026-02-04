@@ -1785,28 +1785,75 @@ document.addEventListener("DOMContentLoaded", () => {
   if (page === "preview") initPreviewPage();
 });
 
-let deferredPrompt;
 
+// ===============================
+// PWA INSTALL POPUP (CALM VERSION)
+// ===============================
+
+let deferredPrompt = null;
+
+// Capture install event but DO NOT show anything yet
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
-
-  showInstallBanner();
 });
 
-function showInstallBanner() {
-  const banner = document.createElement("div");
-  banner.className = "install-banner";
-  banner.innerHTML = `
-    <span>Install Kandys Treats for a better experience</span>
-    <button id="install-btn">Install</button>
-  `;
-  document.body.appendChild(banner);
+// Show popup (only when we decide to)
+function showInstallPopup() {
+  if (!deferredPrompt) return;
 
-  document.getElementById("install-btn").onclick = async () => {
-    banner.remove();
+  // Prevent duplicate popup
+  if (document.querySelector(".install-overlay")) return;
+
+  const overlay = document.createElement("div");
+  overlay.className = "install-overlay";
+
+  overlay.innerHTML = `
+    <div class="install-popup glass-card">
+      <h3>Install Kandys Treats</h3>
+      <p>
+        Get faster access, offline support, and a smoother ordering experience.
+      </p>
+      <div class="popup-actions">
+        <button class="btn btn-outline" id="install-later">
+          Not now
+        </button>
+        <button class="btn btn-primary" id="install-now">
+          Install
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  // Close popup
+  document.getElementById("install-later").onclick = () => {
+    overlay.remove();
+  };
+
+  // Trigger install
+  document.getElementById("install-now").onclick = async () => {
+    overlay.remove();
     deferredPrompt.prompt();
     await deferredPrompt.userChoice;
     deferredPrompt = null;
   };
 }
+
+// Decide WHEN to show it
+document.addEventListener("DOMContentLoaded", () => {
+  const page = document.documentElement.dataset.page;
+
+  // Only show on non-sensitive pages
+  const allowedPages = ["home", "menu"];
+
+  if (!allowedPages.includes(page)) return;
+  if (localStorage.getItem("install_popup_seen")) return;
+
+  setTimeout(() => {
+    showInstallPopup();
+    localStorage.setItem("install_popup_seen", "1");
+  }, 12000); // calm delay
+});
+
