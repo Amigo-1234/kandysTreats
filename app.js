@@ -714,11 +714,10 @@ totalEl.textContent = formatPrice(
     document.querySelector(".toggle-option.is-active")?.dataset.fulfilment ||
     "delivery";
 
-  const takeawayFee =
-    fulfilment === "delivery" ? calculateTakeawayFee(items) : 0;
+  const takeawayFee = calculateTakeawayFee(cartItems);
 
   const deliveryFee =
-    fulfilment === "delivery" ? DELIVERY_FEE : 0;
+  fulfilment === "delivery" && ids.length ? DELIVERY_FEE : 0;
 
   const draftOrder = {
     id: `draft-${Date.now()}`,
@@ -1505,41 +1504,52 @@ const renderOrder = (order) => {
   }
 
   // -------- TOTALS --------
-  let subtotal = 0;
+// -------- TOTALS (DISPLAY ONLY) --------
 
-  if (order.subOrders && order.subOrders.length) {
-    order.subOrders.forEach(sub => {
-      sub.items.forEach(item => {
-        subtotal += Number(item.price || 0) * Number(item.qty || 0);
-      });
-    });
-  } else if (order.items) {
-    order.items.forEach(item => {
-      subtotal += Number(item.price || 0) * Number(item.qty || 0);
-    });
-  }
+// Subtotal
+tSubtotal.textContent = formatPrice(order.subtotal || 0);
 
-  const delivery =
-    Number(order.deliveryFee || 0) +
-    Number(order.takeawayFee || 0);
+// Dispatch & Takeaway rows
+const dispatchRow = document.getElementById("dispatch-row");
+const takeawayRow = document.getElementById("takeaway-row");
 
-  const total = subtotal + delivery;
+const dispatchEl = document.getElementById("t-dispatch");
+const takeawayEl = document.getElementById("t-takeaway");
 
-  tSubtotal.textContent = formatPrice(subtotal);
-  tDelivery.textContent = formatPrice(delivery);
-  tTotal.textContent = formatPrice(total);
+// Reset rows
+dispatchRow.hidden = true;
+takeawayRow.hidden = true;
 
-  const existingVat = document.querySelector(".track-vat");
+// Dispatch fee (₦500)
+if (order.deliveryFee && order.deliveryFee > 0) {
+  dispatchRow.hidden = false;
+  dispatchEl.textContent = formatPrice(order.deliveryFee);
+}
+
+// Takeaway pack (₦200 / ₦300)
+if (order.takeawayFee && order.takeawayFee > 0) {
+  takeawayRow.hidden = false;
+  takeawayEl.textContent = formatPrice(order.takeawayFee);
+}
+
+// ===== VAT =====
+const existingVat = document.querySelector(".track-vat");
 if (existingVat) existingVat.remove();
 
-const vatRow = document.createElement("div");
-vatRow.className = "track-row track-vat";
-vatRow.innerHTML = `
-  <span>V.A.T (2%)</span>
-  <strong>${formatPrice(vat)}</strong>
-`;
+if (order.vat && order.vat > 0) {
+  const vatRow = document.createElement("div");
+  vatRow.className = "row track-vat";
+  vatRow.innerHTML = `
+    <span>V.A.T (2%)</span>
+    <span>${formatPrice(order.vat)}</span>
+  `;
 
-tDelivery.parentNode.insertBefore(vatRow, tTotal.parentNode);
+  // Insert VAT just before total
+  tTotal.closest(".row").before(vatRow);
+}
+
+// Final Total (already includes everything)
+tTotal.textContent = formatPrice(order.total || 0);
 
   // -------- TIMELINE --------
   renderTimeline(order.status || "New");

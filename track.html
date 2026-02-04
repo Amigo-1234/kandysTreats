@@ -184,10 +184,28 @@
 
           <!-- SUMMARY -->
           <div class="track-summary glass-card">
-            <div class="row"><span>Subtotal</span><span id="t-subtotal">₦0</span></div>
-            <div class="row"><span>Delivery</span><span id="t-delivery">₦0</span></div>
-            <div class="row bold"><span>Total</span><span id="t-total">₦0</span></div>
-          </div>
+  <div class="row">
+    <span>Subtotal</span>
+    <span id="t-subtotal">₦0</span>
+  </div>
+
+  <div class="row" id="dispatch-row" hidden>
+    <span>Dispatch</span>
+    <span id="t-dispatch">₦0</span>
+  </div>
+
+  <div class="row" id="takeaway-row" hidden>
+    <span>Takeaway Pack</span>
+    <span id="t-takeaway">₦0</span>
+  </div>
+
+  <!-- VAT will be injected here -->
+
+  <div class="row bold">
+    <span>Total</span>
+    <span id="t-total">₦0</span>
+  </div>
+</div>
 
         </div>
       </section>
