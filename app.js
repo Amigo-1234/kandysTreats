@@ -115,6 +115,12 @@ const saveOrders = (orders) => {
   localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
 };
 
+const PAYSTACK_FEE_RATE = 0.02;
+
+function calculatePaystackFee(amount) {
+  return Math.round(Number(amount) * PAYSTACK_FEE_RATE);
+}
+
 const syncCartBadge = (cart = readCart()) => {
   const totalQty = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
   document.querySelectorAll(".js-cart-count").forEach((el) => {
@@ -834,11 +840,18 @@ const initPreviewPage = () => {
 
   const orderId = `KD-${Date.now()}`;
 
-  const total = drafts.reduce((s, o) => s + o.total, 0);
+  const baseSubtotal = drafts.reduce((s, o) => s + o.subtotal, 0);
+const baseTakeaway = drafts.reduce((s, o) => s + o.takeawayFee, 0);
+const baseDelivery = drafts.reduce((s, o) => s + o.deliveryFee, 0);
 
-  const order = {
-    id: orderId,
-    subOrders: drafts.map((d, index) => ({
+const baseTotal = baseSubtotal + baseTakeaway + baseDelivery;
+
+const vat = calculatePaystackFee(baseTotal); // 2%
+const totalToPay = baseTotal + vat;           // CUSTOMER PAYS THIS
+const order = {
+  id: orderId,
+
+  subOrders: drafts.map((d, index) => ({
     index: index + 1,
     items: d.items,
     subtotal: d.subtotal,
@@ -846,16 +859,22 @@ const initPreviewPage = () => {
     deliveryFee: d.deliveryFee,
     total: d.total,
   })),
-    customer: drafts[0].customer, // first customer
-    fulfilment: drafts[0].fulfilment,
-    subtotal: drafts.reduce((s, o) => s + o.subtotal, 0),
-    takeawayFee: drafts.reduce((s, o) => s + o.takeawayFee, 0),
-    deliveryFee: drafts.reduce((s, o) => s + o.deliveryFee, 0),
-    total,
-    paid: false,
-    status: "New",
-    createdAt: serverTimestamp(),
-  };
+
+  customer: drafts[0].customer,
+  fulfilment: drafts[0].fulfilment,
+
+  subtotal: baseSubtotal,
+  takeawayFee: baseTakeaway,
+  deliveryFee: baseDelivery,
+
+  vat,                    // 2% VAT (customer paid this)
+  total: totalToPay,      // FINAL amount customer pays
+  netAmount: baseTotal,   // business revenue (before Paystack charges)
+
+  paid: false,
+  status: "New",
+  createdAt: serverTimestamp(),
+};
 
   await setDoc(doc(window.db, "orders", orderId), order);
 
@@ -931,7 +950,10 @@ const renderTable = () => {
     tr.innerHTML = `
       <td>${order.id}</td>
       <td>${order.customer?.name || "-"}</td>
-      <td>${formatPrice(order.total || 0)}</td>
+      <td>
+      ${formatPrice(order.total || 0)}
+      <small class="muted">VAT: ${formatPrice(order.paystackFee || 0)}</small>
+      </td>
       <td>${order.fulfilment === "delivery" ? "Delivery" : "Pickup"}</td>
       <td><span class="status-pill status-${toStatusClass(status)}">${status}</span></td>
     `;
@@ -987,6 +1009,19 @@ if (el && order.createdAt) {
 }
 
 const itemsWrap = detailContent.querySelector("[data-detail-items]");
+
+const vatEl = detailContent.querySelector("#detail-vat");
+const netEl = detailContent.querySelector("#detail-net");
+
+if (vatEl) {
+  vatEl.textContent = formatPrice(order.paystackFee || 0);
+}
+
+if (netEl) {
+  netEl.textContent = formatPrice(
+    order.netAmount || (order.total - (order.paystackFee || 0))
+  );
+}
 // -------- ITEMS --------
 itemsWrap.innerHTML = "";
 
@@ -1281,8 +1316,8 @@ const computeStats = () => {
   const countComp = orders.filter(o => (o.status || "New") === "Completed").length;
 
   const revenueToday = orders
-    .filter(o => isToday(o.createdAt))
-    .reduce((sum, o) => sum + Number(o.total || 0), 0);
+  .filter(o => isToday(o.createdAt))
+  .reduce((sum, o) => sum + Number(o.netAmount || 0), 0);
 
   if (statTotal) statTotal.textContent = total;
   if (statNew) statNew.textContent = countNew;
@@ -1493,6 +1528,18 @@ const renderOrder = (order) => {
   tSubtotal.textContent = formatPrice(subtotal);
   tDelivery.textContent = formatPrice(delivery);
   tTotal.textContent = formatPrice(total);
+
+  const existingVat = document.querySelector(".track-vat");
+if (existingVat) existingVat.remove();
+
+const vatRow = document.createElement("div");
+vatRow.className = "track-row track-vat";
+vatRow.innerHTML = `
+  <span>V.A.T (2%)</span>
+  <strong>${formatPrice(vat)}</strong>
+`;
+
+tDelivery.parentNode.insertBefore(vatRow, tTotal.parentNode);
 
   // -------- TIMELINE --------
   renderTimeline(order.status || "New");
