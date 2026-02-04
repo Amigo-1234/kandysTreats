@@ -1728,3 +1728,28 @@ document.addEventListener("DOMContentLoaded", () => {
   if (page === "preview") initPreviewPage();
 });
 
+let deferredPrompt;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+
+  showInstallBanner();
+});
+
+function showInstallBanner() {
+  const banner = document.createElement("div");
+  banner.className = "install-banner";
+  banner.innerHTML = `
+    <span>Install Kandys Treats for a better experience</span>
+    <button id="install-btn">Install</button>
+  `;
+  document.body.appendChild(banner);
+
+  document.getElementById("install-btn").onclick = async () => {
+    banner.remove();
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  };
+}
