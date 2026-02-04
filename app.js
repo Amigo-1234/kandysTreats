@@ -984,10 +984,9 @@ if (el && order.createdAt) {
 }
 
 const itemsWrap = detailContent.querySelector("[data-detail-items]");
+// -------- ITEMS --------
 itemsWrap.innerHTML = "";
 
-// ✅ MULTI-ORDER (ADMIN)
-// ✅ MULTI-ORDER (ADMIN)
 if (order.subOrders && order.subOrders.length) {
   order.subOrders.forEach((sub, i) => {
     const section = document.createElement("div");
@@ -1002,13 +1001,10 @@ if (order.subOrders && order.subOrders.length) {
       </ul>
     `;
 
-    itemsWrap.appendChild(section); // ✅ FIXED
+    itemsWrap.appendChild(section);
   });
-
-  return;
 }
-// Fallback (old single-order data)
-if (order.items && order.items.length) {
+else if (order.items && order.items.length) {
   const ul = document.createElement("ul");
   order.items.forEach(item => {
     const li = document.createElement("li");
@@ -1016,23 +1012,22 @@ if (order.items && order.items.length) {
     ul.appendChild(li);
   });
   itemsWrap.appendChild(ul);
-  return;
 }
-
-// Empty state
-// Empty state (ONLY if nothing rendered)
-if (!order.subOrders?.length && !order.items?.length) {
+else {
   itemsWrap.textContent = "No items found";
 }
 
-  detailPanel
-    ?.querySelectorAll(".chip-status")
-    .forEach((btn) => {
-      btn.classList.toggle(
-        "chip-glow",
-        btn.dataset.status === order.status
-      );
-    });
+// -------- STATUS UI (MUST ALWAYS RUN) --------
+detailPanel.querySelectorAll(".chip-status").forEach((btn) => {
+  const isActive = btn.dataset.status === order.status;
+  btn.classList.toggle("is-current", isActive);
+});
+
+const statusText = detailContent.querySelector("#current-status-text");
+if (statusText) {
+  statusText.textContent = order.status;
+}
+
 };
 function buildWhatsAppMessage(order, status) {
   const allItems = order.subOrders
@@ -1079,9 +1074,13 @@ function sendWhatsApp(order, status) {
 
       // Prevent duplicate action
       if (order.status === newStatus) {
-        showToast(`Order already marked as ${newStatus}`);
-        return;
-      }
+  btn.classList.remove("already-set"); // reset
+  void btn.offsetWidth;                // force reflow
+  btn.classList.add("already-set");
+
+  showToast(`Order already marked as ${newStatus}`);
+  return;
+}
 
       try {
         // 1️⃣ Update Firestore (ONCE)

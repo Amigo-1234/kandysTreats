@@ -2592,3 +2592,42 @@ tbody tr:hover {
   flex: 1;
   justify-content: center;
 }
+
+/* ACTIVE STATUS (current order status) */
+.chip-status.is-current {
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.15),
+              0 0 12px rgba(255,255,255,0.25);
+  opacity: 1;
+  cursor: default;
+}
+
+/* Already clicked effect */
+.chip-status.already-set {
+  animation: statusPulse 0.6s ease;
+}
+
+@keyframes statusPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 105, 180, 0.0);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(255, 105, 180, 0.35);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 105, 180, 0.0);
+  }
+}
+
+.chip-status {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 5;
+}
+
+.chip-status.is-current {
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.25),
+    0 0 14px rgba(255, 255, 255, 0.35);
+  transform: scale(1.03);
+  font-weight: 600;
+}
