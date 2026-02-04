@@ -470,6 +470,34 @@ const initCartPage = () => {
   const form = document.getElementById("checkout-form");
   const fulfilmentButtons = document.querySelectorAll(".toggle-option[data-fulfilment]");
   const addressField = document.getElementById("address-field");
+
+  // ===============================
+// DELIVERY / PICKUP TOGGLE LOGIC
+// ===============================
+
+const addressInput = document.getElementById("customer-address");
+
+fulfilmentButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    // Toggle active button
+    fulfilmentButtons.forEach(b => b.classList.remove("is-active"));
+    btn.classList.add("is-active");
+
+    const mode = btn.dataset.fulfilment;
+
+    if (mode === "pickup") {
+      addressField.style.display = "none";
+      addressInput.removeAttribute("required"); // 🔑 IMPORTANT
+      addressInput.value = "";                  // clean state
+    } else {
+      addressField.style.display = "block";
+      addressInput.setAttribute("required", "required");
+    }
+
+    render();
+  });
+});
+
   const placeBtn = document.getElementById("pay-now-btn");
   const payNowBtn = document.getElementById("pay-now-btn");
 
@@ -639,8 +667,7 @@ reviewBtn?.addEventListener("click", () => {
   "delivery";
 
 const cartItems = ids.map(id => cart[id]);
-const takeawayFee =
-  fulfilment === "delivery" ? calculateTakeawayFee(cartItems) : 0;
+const takeawayFee = calculateTakeawayFee(cartItems);
 
 
 
@@ -701,6 +728,7 @@ totalEl.textContent = formatPrice(
   const name = document.getElementById("customer-name").value.trim();
   const phone = document.getElementById("customer-phone").value.trim();
   const email = document.getElementById("customer-email").value.trim();
+  const address = document.getElementById("customer-address")?.value.trim() || "";
 
   if (!name || !phone) {
     showToast("Please fill in name and phone");
@@ -714,22 +742,28 @@ totalEl.textContent = formatPrice(
     document.querySelector(".toggle-option.is-active")?.dataset.fulfilment ||
     "delivery";
 
-  const takeawayFee = calculateTakeawayFee(cartItems);
+  const cartItems = items;
+const takeawayFee = calculateTakeawayFee(cartItems);
 
   const deliveryFee =
   fulfilment === "delivery" && ids.length ? DELIVERY_FEE : 0;
 
   const draftOrder = {
-    id: `draft-${Date.now()}`,
-    customer: { name, phone, email },
-    items,
-    fulfilment,
-    subtotal,
-    takeawayFee,
-    deliveryFee,
-    total: subtotal + takeawayFee + deliveryFee,
-    createdAt: Date.now()
-  };
+  id: `draft-${Date.now()}`,
+  customer: {
+    name,
+    phone,
+    email,
+    address: fulfilment === "delivery" ? address : ""
+  },
+  items,
+  fulfilment,
+  subtotal,
+  takeawayFee,
+  deliveryFee,
+  total: subtotal + takeawayFee + deliveryFee,
+  createdAt: Date.now()
+};
 
   const drafts = readDraftOrders();
   drafts.push(draftOrder);
@@ -986,6 +1020,14 @@ const renderTable = () => {
 
   el = detailContent.querySelector("[data-detail-phone]");
   if (el) el.textContent = order.customer?.phone || "-";
+
+  el = detailContent.querySelector("[data-detail-address]");
+if (el) {
+  el.textContent =
+    order.fulfilment === "delivery"
+      ? (order.customer?.address || "—")
+      : "Pickup (no address)";
+}
 
   el = detailContent.querySelector("[data-detail-type]");
   if (el) {
