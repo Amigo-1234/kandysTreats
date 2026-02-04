@@ -2687,3 +2687,54 @@ tbody tr:hover {
   margin: 18px 0;
   border-top: 1px dashed rgba(255,255,255,0.2);
 }
+
+/* Track page sub-orders */
+.track-suborder {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px dashed rgba(255,255,255,0.15);
+}
+
+/* ORDER title */
+.track-suborder .suborder-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  margin-bottom: 8px;
+}
+
+/* Items */
+.track-suborder .suborder-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Item row */
+.track-suborder .order-item {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px dotted rgba(255,255,255,0.1);
+}
+
+.track-suborder .order-item:last-child {
+  border-bottom: none;
+}
+
+/* Quantity */
+.track-suborder .order-item .qty {
+  min-width: 26px;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+/* Name */
+.track-suborder .order-item .name {
+  flex: 1;
+  line-height: 1.35;
+}
