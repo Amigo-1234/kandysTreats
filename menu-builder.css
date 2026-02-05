@@ -150,3 +150,32 @@
   transform: scale(1.05);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
 }
+
+/* ================= FIX TABLE SCROLL ================= */
+
+/* Allow horizontal scrolling for wide tables */
+.menu-items {
+  overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure table does not shrink */
+.menu-table {
+  min-width: 900px; /* forces scroll instead of squish */
+  width: 100%;
+}
+
+/* Keep headers visible */
+.menu-table thead th {
+  position: sticky;
+  top: 0;
+  background: rgba(15, 23, 42, 0.95);
+  z-index: 2;
+}
+
+/* Action column should never wrap */
+.menu-table td:last-child,
+.menu-table th:last-child {
+  white-space: nowrap;
+}

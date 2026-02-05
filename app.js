@@ -1637,29 +1637,7 @@ function renderTimeline(status) {
 
 
 // Reviews slider on home page
-const initReviewsSlider = () => {
-  const reviews = Array.from(document.querySelectorAll(".review-slide"));
-  const prevBtn = document.querySelector("[data-review-prev]");
-  const nextBtn = document.querySelector("[data-review-next]");
-  if (!reviews.length || !prevBtn || !nextBtn) return;
 
-  let index = 0;
-  const setActive = (i) => {
-    reviews.forEach((r, idx) => r.classList.toggle("active", idx === i));
-    index = i;
-  };
-
-  prevBtn.addEventListener("click", () => {
-    setActive((index - 1 + reviews.length) % reviews.length);
-  });
-  nextBtn.addEventListener("click", () => {
-    setActive((index + 1) % reviews.length);
-  });
-
-  setInterval(() => {
-    setActive((index + 1) % reviews.length);
-  }, 6000);
-};
 
 // Contact form
 const initContactForm = () => {
@@ -1821,7 +1799,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (page === "cart") initCartPage();
   if (page === "admin") initAdminPage();
   if (page === "track") initTrackPage();
-  if (page === "home") initReviewsSlider();
   if (page === "contact") initContactForm();
   if (page === "home") initQuickPicks();
   if (page === "preview") initPreviewPage();
@@ -1915,4 +1892,35 @@ function initHeroSlider() {
 document.addEventListener("DOMContentLoaded", () => {
   const page = document.documentElement.dataset.page;
   if (page === "home") initHeroSlider();
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const reviews = document.querySelectorAll('.review');
+  const nextBtn = document.querySelector('[data-review-next]');
+  const prevBtn = document.querySelector('[data-review-prev]');
+
+  if (!reviews.length) return;
+
+  let currentReview = 0;
+
+  function showReview(index) {
+    reviews.forEach((r, i) => {
+      r.classList.toggle('active', i === index);
+    });
+  }
+
+  nextBtn?.addEventListener('click', () => {
+    currentReview = (currentReview + 1) % reviews.length;
+    showReview(currentReview);
+  });
+
+  prevBtn?.addEventListener('click', () => {
+    currentReview = (currentReview - 1 + reviews.length) % reviews.length;
+    showReview(currentReview);
+  });
+
+  setInterval(() => {
+    currentReview = (currentReview + 1) % reviews.length;
+    showReview(currentReview);
+  }, 6000);
 });
