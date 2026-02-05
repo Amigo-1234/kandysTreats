@@ -1899,3 +1899,20 @@ document.addEventListener("DOMContentLoaded", () => {
   }, 12000); // calm delay
 });
 
+function initHeroSlider() {
+  const slides = document.querySelectorAll(".hero-slide");
+  if (!slides.length) return;
+
+  let index = 0;
+
+  setInterval(() => {
+    slides[index].classList.remove("is-active");
+    index = (index + 1) % slides.length;
+    slides[index].classList.add("is-active");
+  }, 5000); // calm 5s rotation
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const page = document.documentElement.dataset.page;
+  if (page === "home") initHeroSlider();
+});
