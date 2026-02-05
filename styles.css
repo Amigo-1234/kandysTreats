@@ -2836,3 +2836,20 @@ tbody tr:hover {
 .review-controls button {
   pointer-events: auto;
 }
+
+.reviews-footer {
+  text-align: center;
+  margin-top: 12px;
+}
+
+.review-link {
+  font-size: 0.9rem;
+  color: #e84c88;
+  text-decoration: none;
+  opacity: 0.9;
+}
+
+.review-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
