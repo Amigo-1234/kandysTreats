@@ -2853,3 +2853,61 @@ tbody tr:hover {
   opacity: 1;
   text-decoration: underline;
 }
+
+/* CALL BUTTON ANIMATION */
+.btn-call-animate {
+  position: relative;
+  overflow: hidden;
+  animation: pulseGlow 2.2s infinite ease-in-out;
+}
+
+/* Soft neon pulse */
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 0 rgba(232, 76, 136, 0);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(232, 76, 136, 0.65);
+    transform: scale(1.03);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(232, 76, 136, 0);
+    transform: scale(1);
+  }
+}
+
+/* Shine sweep */
+.btn-call-animate::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 120%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.35),
+    transparent
+  );
+  animation: shineSweep 3.5s infinite;
+}
+
+@keyframes shineSweep {
+  0% {
+    left: -120%;
+  }
+  60% {
+    left: 120%;
+  }
+  100% {
+    left: 120%;
+  }
+}
+
+/* Extra pop on hover */
+.btn-call-animate:hover {
+  transform: scale(1.06);
+  box-shadow: 0 0 26px rgba(232, 76, 136, 0.85);
+}
