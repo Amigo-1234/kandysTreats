@@ -1131,19 +1131,37 @@ textarea:focus-visible {
 }
 
 /* Bottom nav */
+/* Bottom nav – floating sticky */
 .bottom-nav {
   position: fixed;
-  inset-inline: 0;
-  bottom: 0;
+
+  bottom: calc(10px + env(safe-area-inset-bottom));
+  left: 12px;
+  right: 12px;
+
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 8px 10px;
-  border-radius: 18px 18px 0 0;
-  background: radial-gradient(circle at top, rgba(255, 59, 167, 0.16), rgba(10, 10, 18, 0.96));
+
+  padding: 10px 6px;
+
+  border-radius: 18px;
+
+  background: radial-gradient(
+    circle at top,
+    rgba(255, 59, 167, 0.18),
+    rgba(10, 10, 18, 0.92)
+  );
+
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+
+  border: 1px solid rgba(255, 255, 255, 0.14);
+
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 59, 167, 0.25);
+
   z-index: 30;
 }
 
@@ -1153,7 +1171,9 @@ textarea:focus-visible {
   color: var(--text-muted);
   font-size: 0.75rem;
   text-decoration: none;
-  padding: 4px 0;
+
+  padding: 8px 0; /* ⬅ was 4px */
+
   position: relative;
   transition:
     color var(--transition-fast) var(--easing-soft),
@@ -1162,6 +1182,9 @@ textarea:focus-visible {
 
 .bottom-nav-item.is-active {
   color: var(--accent);
+}
+.bottom-nav-item:active {
+  transform: scale(0.94);
 }
 
 .bottom-nav-item.is-active::after {
