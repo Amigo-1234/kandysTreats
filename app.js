@@ -84,6 +84,20 @@ async function requestNotificationToken() {
   }
 }
 
+const showLoader = () => {
+  const loader = document.getElementById("app-loader");
+  if (loader) loader.classList.remove("is-hidden");
+};
+
+const hideLoader = () => {
+  const loader = document.getElementById("app-loader");
+  if (!loader) return;
+
+  // small delay = smoother UX
+  setTimeout(() => {
+    loader.classList.add("is-hidden");
+  }, 300);
+};
 
 // Utilities
 const formatPrice = (value) => `₦${Number(value || 0).toLocaleString("en-NG")}`;
@@ -183,6 +197,9 @@ function normalizePhone(phone) {
 
 // Menu rendering
 const initMenuPage = () => {
+
+  showLoader();
+
   const grid = document.getElementById("menu-grid");
   const tabsContainer = document.getElementById("menu-tabs");
   const searchInput = document.getElementById("menu-search");
@@ -196,6 +213,8 @@ const initMenuPage = () => {
   const cats = MENU_ITEMS.map(i => i.category).filter(Boolean);
   return ["All", ...new Set(cats)];
 };
+
+
 
 const showMenuSkeletons = (count = 6) => {
   grid.innerHTML = "";
@@ -290,6 +309,8 @@ onSnapshot(menusQuery, (snapshot) => {
 
   renderTabs();
   renderGrid();
+
+  hideLoader();
 });
 
 
@@ -456,6 +477,8 @@ img.dataset.src = item.image || getRandomImage();
     queryText = "";
     renderGrid();
   });
+
+
 };
 
 
@@ -1706,6 +1729,7 @@ function startQuickPicksAutoScroll(row) {
 
 
 async function initQuickPicks() {
+  showLoader();
   const wrap = document.getElementById("quick-picks");
   if (!wrap) return;
 
@@ -1744,6 +1768,7 @@ async function initQuickPicks() {
     console.error(err);
     wrap.innerHTML = `<p class="muted">Failed to load quick picks</p>`;
   }
+  hideLoader();
 }
 function renderQuickPickCard(id, data) {
   const card = document.createElement("article");
@@ -1924,3 +1949,4 @@ document.addEventListener("DOMContentLoaded", () => {
     showReview(currentReview);
   }, 6000);
 });
+
