@@ -951,6 +951,24 @@ function sendLocalNotification(order) {
   });
 }
 
+let orderAudio;
+
+function playNewOrderSound(soundOn) {
+  if (!soundOn) return;
+
+  try {
+    if (!orderAudio) {
+      orderAudio = new Audio("/sounds/order-alert.mp3");
+      orderAudio.volume = 0.9;
+    }
+
+    orderAudio.currentTime = 0;
+    orderAudio.play().catch(() => {});
+  } catch (e) {
+    console.warn("Order sound failed", e);
+  }
+}
+
 // Admin page (UPDATED: Firebase Auth + Firestore real-time)
 const initAdminPage = () => {
   const searchInput = document.getElementById("order-search");
@@ -979,6 +997,19 @@ let lastSeenIds = new Set(); // for "new order" detection
   const detailPanel = document.getElementById("order-detail-panel");
   const emptyDetail = document.getElementById("order-detail-empty");
   const detailContent = document.getElementById("order-detail-content");
+
+  document.addEventListener(
+  "click",
+  () => {
+    if (orderAudio) {
+      orderAudio.play().then(() => {
+        orderAudio.pause();
+        orderAudio.currentTime = 0;
+      }).catch(() => {});
+    }
+  },
+  { once: true }
+);
 
   // ⛔ STOP if this is not the admin page
   if (!panel) return;
@@ -1249,7 +1280,7 @@ const startOrdersListener = () => {
       }
       lastSeenIds = newIds;
       if (hasNew) {
-        playNewOrderSound();
+        playNewOrderSound(soundOn);
         showToast("New order received!");
       }
 
@@ -1411,25 +1442,9 @@ const getFilteredOrders = () => {
   return list;
 };
 
-const playNewOrderSound = () => {
-  if (!soundOn) return;
-  // tiny beep (no file needed)
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.type = "sine";
-    o.frequency.value = 880;
-    g.gain.value = 0.05;
-    o.connect(g);
-    g.connect(ctx.destination);
-    o.start();
-    setTimeout(() => {
-      o.stop();
-      ctx.close();
-    }, 140);
-  } catch {}
-};
+
+
+
 
 };
 // Track page (read order by code)

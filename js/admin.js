@@ -20,6 +20,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const menusRef = collection(window.db, "menus");
   const menusQuery = query(menusRef, orderBy("createdAt", "asc"));
+  const orderSound = new Audio("/sounds/order-alert.mp3");
+orderSound.volume = 0.9;
 
   let activeSection = null;
   let menuItems = [];

@@ -3009,3 +3009,13 @@ tbody tr:hover {
     transform: rotate(360deg);
   }
 }
+
+.btn-contact {
+  border-color: rgba(232, 76, 136, 0.5);
+  color: #e84c88;
+}
+
+.btn-contact:hover {
+  background: rgba(232, 76, 136, 0.1);
+  border-color: #e84c88;
+}

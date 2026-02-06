@@ -67,20 +67,52 @@
   </div>
 
   <nav class="bottom-nav glass-card">
-    <a href="home.html" class="bottom-nav-item">
-      <span>Home</span>
-    </a>
-    <a href="menu.html" class="bottom-nav-item">
-      <span>Menu</span>
-    </a>
-    <a href="cart.html" class="bottom-nav-item">
-      <span>Cart</span>
-      <span class="bottom-nav-badge js-cart-count">0</span>
-    </a>
-    <a href="contact.html" class="bottom-nav-item is-active">
-      <span>Contact</span>
-    </a>
-  </nav>
+  <a href="home.html" class="bottom-nav-item" data-page="home">
+    <svg class="nav-icon" viewBox="0 0 24 24">
+      <path d="M3 10.5L12 3l9 7.5V21h-6v-6H9v6H3z"/>
+    </svg>
+    <span class="nav-label">Home</span>
+  </a>
+
+  <a href="menu.html" class="bottom-nav-item" data-page="menu">
+    <svg class="nav-icon" viewBox="0 0 24 24">
+      <path d="M4 6h16M4 12h16M4 18h16"/>
+    </svg>
+    <span class="nav-label">Menu</span>
+  </a>
+
+  <a href="cart.html" class="bottom-nav-item" data-page="cart">
+    <svg class="nav-icon" viewBox="0 0 24 24">
+      <path d="M6 6h15l-2 9H7z"/>
+      <circle cx="9" cy="20" r="1.5"/>
+      <circle cx="18" cy="20" r="1.5"/>
+    </svg>
+    <span class="nav-label">Cart</span>
+    <span class="bottom-nav-badge js-cart-count">0</span>
+  </a>
+
+  <a href="contact.html" class="bottom-nav-item is-active" data-page="contact">
+  <svg class="nav-icon" viewBox="0 0 24 24">
+    <path
+      d="M22 16.92v3a2 2 0 0 1-2.18 2
+      A19.86 19.86 0 0 1 3 5.18
+      A2 2 0 0 1 5 3h3a2 2 0 0 1 2 1.72
+      c.2 1.38.6 2.7 1.18 3.92
+      a2 2 0 0 1-.45 2.11L9.91 12.91
+      a16 16 0 0 0 6.18 6.18
+      l2.16-2.16a2 2 0 0 1 2.11-.45
+      c1.22.58 2.54.98 3.92 1.18
+      a2 2 0 0 1 1.72 2z"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+  <span class="nav-label">Contact</span>
+</a>
+</nav>
 
   <div class="toast-container" aria-live="polite" aria-atomic="true"></div>
   <script src="app.js" type="module"></script>
