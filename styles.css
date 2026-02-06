@@ -1215,6 +1215,42 @@ textarea:focus-visible {
   box-shadow: 0 0 12px rgba(255, 59, 167, 0.8);
 }
 
+/* Bottom nav icons */
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.nav-icon {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  fill: none;
+  transition:
+    transform 0.25s ease,
+    filter 0.25s ease,
+    color 0.25s ease;
+}
+
+.nav-label {
+  font-size: 0.72rem;
+}
+
+/* Active state */
+.bottom-nav-item.is-active .nav-icon {
+  color: var(--accent);
+  transform: translateY(-2px) scale(1.08);
+  filter: drop-shadow(0 0 8px rgba(255, 59, 167, 0.7));
+}
+
+/* Tap feedback */
+.bottom-nav-item:active .nav-icon {
+  transform: scale(0.92);
+}
+
 /* Toasts */
 .toast-container {
   position: fixed;

@@ -1950,3 +1950,16 @@ document.addEventListener("DOMContentLoaded", () => {
   }, 6000);
 });
 
+(function setActiveBottomNav() {
+  const page = document.documentElement.dataset.page;
+  if (!page) return;
+
+  document
+    .querySelectorAll(".bottom-nav-item")
+    .forEach((item) => {
+      item.classList.toggle(
+        "is-active",
+        item.dataset.page === page
+      );
+    });
+})();
