@@ -3184,55 +3184,65 @@ tbody tr:hover {
 }
 
 /* ============================= */
-/* TOP SAFE-AREA SCROLLER */
+/* TOP VERTICAL MESSAGE SCROLLER */
 /* ============================= */
 
+:root {
+  --top-bar-height: 38px;
+}
+
+/* Fixed top bar */
 .top-scroller {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: env(safe-area-inset-top, 40px);
-  background: linear-gradient(
-    135deg,
-    #120014,
-    #1a001e,
-    #120014
-  );
+  height: max(env(safe-area-inset-top), var(--top-bar-height));
+  background: linear-gradient(135deg, #120014, #1a001e);
   z-index: 9999;
   overflow: hidden;
+
   display: flex;
   align-items: center;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 14px rgba(255, 59, 167, 0.25);
 }
 
-/* Prevent content from hiding under it */
+/* Push page content down */
 body {
-  padding-top: env(safe-area-inset-top, 40px);
+  padding-top: max(env(safe-area-inset-top), var(--top-bar-height));
 }
 
+/* Scrolling container */
 .scroller-track {
   display: flex;
   flex-direction: column;
-  animation: scrollUp 18s linear infinite;
+  animation: scrollUp 20s linear infinite;
 }
 
+/* Individual messages */
 .scroller-item {
-  height: env(safe-area-inset-top, 40px);
+  height: max(env(safe-area-inset-top), var(--top-bar-height));
   display: flex;
   align-items: center;
   justify-content: center;
+
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   color: #ff4fa3;
+  text-align: center;
   white-space: nowrap;
 }
 
-/* Vertical scrolling animation */
+/* Vertical loop animation */
 @keyframes scrollUp {
-  0%   { transform: translateY(0); }
-  100% { transform: translateY(-100%); }
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
 }
 
+/* Pause on touch (mobile-friendly) */
 .top-scroller:active .scroller-track {
   animation-play-state: paused;
 }
