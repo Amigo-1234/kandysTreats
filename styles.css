@@ -3182,13 +3182,17 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
 }
-
 /* ============================= */
-/* TOP VERTICAL MESSAGE SCROLLER */
+/* IMPORTANT INFO TOP TICKER     */
 /* ============================= */
 
 :root {
-  --top-bar-height: 38px;
+  --top-bar-height: 42px;
+}
+
+/* Full-bleed support */
+html, body {
+  background: #120014;
 }
 
 /* Fixed top bar */
@@ -3197,59 +3201,68 @@ tbody tr:hover {
   top: 0;
   left: 0;
   width: 100%;
-
-  height: calc(env(safe-area-inset-top) + 38px);
-
-  background: linear-gradient(135deg, #120014, #1a001e);
+  height: calc(env(safe-area-inset-top) + var(--top-bar-height));
   z-index: 9999;
+
+  background: linear-gradient(135deg, #1a001e, #2a0030);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 6px 18px rgba(255, 59, 167, 0.35);
+
+  display: flex;
+  align-items: center;
+}
+
+/* Push page content */
+body {
+  padding-top: calc(env(safe-area-inset-top) + var(--top-bar-height));
+}
+
+/* Visible window */
+.scroller-window {
+  width: 100%;
+  height: var(--top-bar-height);
   overflow: hidden;
 
   display: flex;
-  align-items: flex-end;
-
-  padding-bottom: 8px;
-
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 4px 14px rgba(255, 59, 167, 0.25);
-}
-
-body {
-  padding-top: calc(env(safe-area-inset-top) + 38px);
-}
-css 
-html, body {
-  background: #120014;
-}
-
-/* Scrolling container */
-.scroller-track {
-  display: flex;
-  flex-direction: column;
-  animation: scrollUp 20s linear infinite;
-}
-
-/* Individual messages */
-.scroller-item {
-  height: max(env(safe-area-inset-top), var(--top-bar-height));
-  display: flex;
   align-items: center;
-  justify-content: center;
+}
 
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  color: #ff4fa3;
-  text-align: center;
+/* Moving text */
+.scroller-track {
+  display: inline-flex;
+  align-items: center;
+  gap: 4rem;
+
   white-space: nowrap;
+  will-change: transform;
+
+  animation: tickerMove 90s linear infinite;
 }
 
-/* Vertical loop animation */
-@keyframes scrollUp {
-  from { transform: translateY(0); }
-  to   { transform: translateY(-50%); }
+/* Message style (visibility upgrade) */
+.scroller-track span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #ffd1e8;
+
+  text-shadow:
+    0 0 8px rgba(255, 79, 163, 0.6),
+    0 0 14px rgba(255, 79, 163, 0.4);
 }
 
-/* Pause on touch (mobile-friendly) */
+/* Smooth continuous movement */
+@keyframes tickerMove {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/* Pause on touch */
 .top-scroller:active .scroller-track {
   animation-play-state: paused;
 }
