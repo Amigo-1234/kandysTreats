@@ -3128,3 +3128,57 @@ tbody tr:hover {
   box-shadow: 0 0 18px rgba(255, 59, 167, 0.7);
   background: rgba(255, 59, 167, 0.18);
 }
+
+/* ============================= */
+/* SITEMAP */
+/* ============================= */
+
+.sitemap-section {
+  margin-top: 24px;
+  padding: 18px;
+}
+
+.sitemap-title {
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.sitemap-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+}
+
+.sitemap-list a {
+  text-decoration: none;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: block;
+  text-align: center;
+  transition:
+    background 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+.sitemap-list a:hover {
+  background: rgba(255, 59, 167, 0.18);
+  box-shadow: 0 0 16px rgba(255, 59, 167, 0.6);
+  transform: translateY(-2px);
+}
+
+/* Mobile polish */
+@media (max-width: 420px) {
+  .sitemap-list {
+    grid-template-columns: 1fr;
+  }
+}
