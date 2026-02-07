@@ -3266,3 +3266,58 @@ body {
 .top-scroller:active .scroller-track {
   animation-play-state: paused;
 }
+
+/* ============================= */
+/* TOP ANNOUNCEMENT BAR (ADMIN)  */
+/* ============================= */
+
+.top-announcement {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(env(safe-area-inset-top) + 44px);
+  padding-top: env(safe-area-inset-top);
+
+  background: linear-gradient(135deg, #120014, #1a001e);
+  z-index: 9999;
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 4px 14px rgba(255, 79, 163, 0.35);
+}
+
+/* Push page content down */
+body {
+  padding-top: calc(env(safe-area-inset-top) + 44px);
+}
+
+.announcement-track {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+#announcement-text {
+  display: inline-block;
+  padding-left: 100%;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #ff6fb5;
+
+  animation: announcement-marquee 35s linear infinite;
+}
+
+/* Slow, readable movement */
+@keyframes announcement-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}

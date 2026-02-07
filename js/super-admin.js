@@ -8,6 +8,7 @@ import {
   orderBy,
   onSnapshot,
   getDoc,
+  setDoc,
   doc
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
@@ -132,6 +133,21 @@ const isWithinDays = (ts, days) => {
   const now = new Date();
   return (now - date) <= days * 24 * 60 * 60 * 1000;
 };
+
+
+const msgInput = document.getElementById("announcement-input");
+const activeToggle = document.getElementById("announcement-active");
+const saveBtn = document.getElementById("save-announcement");
+
+saveBtn?.addEventListener("click", async () => {
+  await setDoc(doc(db, "siteConfig", "announcement"), {
+    message: msgInput.value.trim(),
+    active: activeToggle.checked,
+    speed: 30, // slower = calmer
+  });
+
+  alert("Announcement updated");
+});
 
 // ================= RENDER =================
 function renderTransactions(transactions) {

@@ -195,6 +195,43 @@ function normalizePhone(phone) {
 }
 
 
+function initAnnouncementBar() {
+  const bar = document.getElementById("announcement-bar");
+  const textEl = document.getElementById("announcement-text");
+
+  if (!bar || !textEl) return;
+
+  const ref = doc(window.db, "siteConfig", "announcement");
+
+  onSnapshot(ref, snap => {
+    if (!snap.exists()) {
+      bar.hidden = true;
+      return;
+    }
+
+    const { active, message, speed = 20 } = snap.data();
+
+    if (!active || !message) {
+      bar.hidden = true;
+      return;
+    }
+
+    textEl.textContent = message;
+    bar.hidden = false;
+
+    // reset animation cleanly
+    textEl.style.animation = "none";
+    void textEl.offsetWidth;
+
+    textEl.style.animation = `
+      announcement-marquee ${speed}s linear infinite
+    `;
+  });
+}
+
+document.addEventListener("DOMContentLoaded", initAnnouncementBar);
+
+
 // Menu rendering
 const initMenuPage = () => {
 
