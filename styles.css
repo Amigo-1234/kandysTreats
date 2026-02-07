@@ -3197,22 +3197,29 @@ tbody tr:hover {
   top: 0;
   left: 0;
   width: 100%;
-  height: max(env(safe-area-inset-top), var(--top-bar-height));
+
+  height: calc(env(safe-area-inset-top) + 38px);
+
   background: linear-gradient(135deg, #120014, #1a001e);
   z-index: 9999;
   overflow: hidden;
 
   display: flex;
-  align-items: center;
+  align-items: flex-end;
 
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  padding-bottom: 8px;
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 4px 14px rgba(255, 59, 167, 0.25);
 }
 
-/* Push page content down */
 body {
-  padding-top: max(env(safe-area-inset-top), var(--top-bar-height));
+  padding-top: calc(env(safe-area-inset-top) + 38px);
+}
+css 
+html, body {
+  background: #120014;
 }
 
 /* Scrolling container */
