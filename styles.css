@@ -3321,3 +3321,34 @@ body {
     transform: translateX(-100%);
   }
 }
+
+.announcement-list {
+  margin-top: 20px;
+  list-style: none;
+  padding: 0;
+}
+
+.announcement-item {
+  background: rgba(255,255,255,0.04);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.announcement-item span {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+.announcement-actions button {
+  margin-left: 6px;
+}
+
+.announcement-item.is-hidden {
+  opacity: 0.45;
+  text-decoration: line-through;
+}

@@ -1,16 +1,18 @@
 // super-admin.js
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
-  getFirestore,
   collection,
-  query,
-  orderBy,
+  addDoc,
+  deleteDoc,
+  doc,
+  updateDoc,
   onSnapshot,
-  getDoc,
-  setDoc,
-  doc
+  serverTimestamp,
+  query,
+  where,
+  orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
 
 import {
   getAuth,
@@ -18,6 +20,13 @@ import {
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+  getFirestore,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
 
 /* ================= FIREBASE INIT ================= */
 
@@ -135,19 +144,71 @@ const isWithinDays = (ts, days) => {
 };
 
 
-const msgInput = document.getElementById("announcement-input");
-const activeToggle = document.getElementById("announcement-active");
-const saveBtn = document.getElementById("save-announcement");
+const list = document.getElementById("announcement-list");
+const input = document.getElementById("new-announcement");
+const addBtn = document.getElementById("add-announcement");
 
-saveBtn?.addEventListener("click", async () => {
-  await setDoc(doc(db, "siteConfig", "announcement"), {
-    message: msgInput.value.trim(),
-    active: activeToggle.checked,
-    speed: 30, // slower = calmer
+const ref = collection(db, "announcements");
+const q = query(ref, orderBy("createdAt", "desc"));
+
+addBtn.addEventListener("click", async () => {
+  if (!input.value.trim()) return;
+
+  await addDoc(ref, {
+    text: input.value.trim(),
+    active: true,
+    createdAt: serverTimestamp()
   });
 
-  alert("Announcement updated");
+  input.value = "";
 });
+
+onSnapshot(q, snap => {
+  list.innerHTML = "";
+
+  snap.forEach(docSnap => {
+    const data = docSnap.data();
+    const li = document.createElement("li");
+    li.className = `announcement-item ${data.active ? "is-active" : "is-hidden"}`;
+
+    li.innerHTML = `
+      <span>${data.text}</span>
+      <div class="announcement-actions">
+        <button data-edit>✏️</button>
+        <button data-toggle>${data.active ? "Hide" : "Show"}</button>
+        <button data-delete>🗑️</button>
+      </div>
+    `;
+
+    if (snap.empty) {
+      list.innerHTML = "<li class='muted'>No announcements yet</li>";
+      return;
+    }
+
+    // Toggle
+    li.querySelector("[data-toggle]").onclick = () =>
+      updateDoc(doc(db, "announcements", docSnap.id), {
+        active: !data.active
+      });
+
+    // Delete
+    li.querySelector("[data-delete]").onclick = () =>
+      deleteDoc(doc(db, "announcements", docSnap.id));
+
+    // Edit
+    li.querySelector("[data-edit]").onclick = () => {
+      const updated = prompt("Edit announcement:", data.text);
+      if (updated)
+        updateDoc(doc(db, "announcements", docSnap.id), {
+          text: updated
+        });
+    };
+
+    list.appendChild(li);
+  });
+});
+
+
 
 // ================= RENDER =================
 function renderTransactions(transactions) {

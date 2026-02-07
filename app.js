@@ -195,42 +195,35 @@ function normalizePhone(phone) {
 }
 
 
-function initAnnouncementBar() {
-  const bar = document.getElementById("announcement-bar");
-  const textEl = document.getElementById("announcement-text");
+const bar = document.getElementById("announcement-bar");
+const textEl = document.getElementById("announcement-text");
 
-  if (!bar || !textEl) return;
+if (bar && textEl) {
+  const q = query(
+    collection(db, "announcements"),
+    where("active", "==", true),
+    orderBy("createdAt", "desc")
+  );
 
-  const ref = doc(window.db, "siteConfig", "announcement");
-
-  onSnapshot(ref, snap => {
-    if (!snap.exists()) {
+  onSnapshot(q, snap => {
+    if (snap.empty) {
       bar.hidden = true;
       return;
     }
 
-    const { active, message, speed = 20 } = snap.data();
+    const messages = snap.docs
+      .map(d => d.data().text)
+      .filter(Boolean);
 
-    if (!active || !message) {
+    if (!messages.length) {
       bar.hidden = true;
       return;
     }
 
-    textEl.textContent = message;
+    textEl.textContent = messages.join("  •  ");
     bar.hidden = false;
-
-    // reset animation cleanly
-    textEl.style.animation = "none";
-    void textEl.offsetWidth;
-
-    textEl.style.animation = `
-      announcement-marquee ${speed}s linear infinite
-    `;
   });
 }
-
-document.addEventListener("DOMContentLoaded", initAnnouncementBar);
-
 
 // Menu rendering
 const initMenuPage = () => {

@@ -69,20 +69,20 @@
     </section>
 
     <section class="section glass-card">
-  <h2>Site Announcement</h2>
+  <h2>Site Announcements</h2>
 
-  <textarea id="announcement-input"
-    placeholder="Type announcement here..."
-    rows="3"></textarea>
+  <div class="announcement-form">
+    <textarea
+      id="new-announcement"
+      placeholder="Type announcement here..."
+      rows="3"></textarea>
 
-  <label>
-    <input type="checkbox" id="announcement-active" />
-    Show announcement
-  </label>
+    <button id="add-announcement" class="btn btn-primary">
+      Add Announcement
+    </button>
+  </div>
 
-  <button id="save-announcement" class="btn btn-primary">
-    Save
-  </button>
+  <ul id="announcement-list" class="announcement-list"></ul>
 </section>
 
     <!-- ACTION BAR -->
