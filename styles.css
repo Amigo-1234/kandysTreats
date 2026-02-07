@@ -3182,3 +3182,57 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
 }
+
+/* ============================= */
+/* TOP SAFE-AREA SCROLLER */
+/* ============================= */
+
+.top-scroller {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: env(safe-area-inset-top, 40px);
+  background: linear-gradient(
+    135deg,
+    #120014,
+    #1a001e,
+    #120014
+  );
+  z-index: 9999;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+/* Prevent content from hiding under it */
+body {
+  padding-top: env(safe-area-inset-top, 40px);
+}
+
+.scroller-track {
+  display: flex;
+  flex-direction: column;
+  animation: scrollUp 18s linear infinite;
+}
+
+.scroller-item {
+  height: env(safe-area-inset-top, 40px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: #ff4fa3;
+  white-space: nowrap;
+}
+
+/* Vertical scrolling animation */
+@keyframes scrollUp {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-100%); }
+}
+
+.top-scroller:active .scroller-track {
+  animation-play-state: paused;
+}
