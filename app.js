@@ -1065,6 +1065,7 @@ function playNewOrderSound(soundOn) {
   }
 }
 
+
 // Admin page (UPDATED: Firebase Auth + Firestore real-time)
 const initAdminPage = () => {
   const searchInput = document.getElementById("order-search");
@@ -1079,12 +1080,14 @@ const statCompleted = document.getElementById("stat-completed");
 const statRevenue = document.getElementById("stat-revenue");
 
 
+
+
 let activeFilter = "All";
 let searchQuery = "";
 let soundOn = true;
 
 let lastSeenIds = new Set(); // for "new order" detection
-
+  let authReady = false;
   const loginSection = document.getElementById("admin-login");
   const panel = document.getElementById("admin-panel");
   const loginForm = document.getElementById("admin-login-form");
@@ -1093,6 +1096,10 @@ let lastSeenIds = new Set(); // for "new order" detection
   const detailPanel = document.getElementById("order-detail-panel");
   const emptyDetail = document.getElementById("order-detail-empty");
   const detailContent = document.getElementById("order-detail-content");
+
+  // 🔒 LOCK UI until auth resolves (NOW SAFE)
+loginSection.hidden = true;
+panel.hidden = true;
 
   document.addEventListener(
   "click",
@@ -1121,6 +1128,7 @@ const renderTable = () => {
 
   if (!ordersToShow.length) {
     const tr = document.createElement("tr");
+tr.dataset.id = order.id;
     tr.innerHTML = `<td colspan="5" style="opacity:.7;padding:14px;">No orders match this view.</td>`;
     tbody.appendChild(tr);
     return;
@@ -1151,6 +1159,26 @@ const renderTable = () => {
     tbody.appendChild(tr);
     setTimeout(() => tr.classList.add("visible"), 30 * index);
   });
+
+  // 🔁 restore selected row after re-render
+if (STATE.selectedOrderId) {
+  const row = tbody.querySelector(
+    `tr[data-id="${STATE.selectedOrderId}"]`
+  );
+
+  if (row) {
+    row.classList.add("active");
+
+    const order = STATE.orders.find(
+      o => o.id === STATE.selectedOrderId
+    );
+
+    if (order) {
+      renderDetail(order);
+    }
+  }
+}
+
 };
 
 
@@ -1449,40 +1477,43 @@ printBtn?.addEventListener("click", () => {
   });
 
   // Auth state + admin role gate
-  onAuthStateChanged(window.auth, async (user) => {
-  stopOrdersListener();
-
+onAuthStateChanged(window.auth, async (user) => {
+  // 🔐 Auth resolved — now we decide UI
   if (!user) {
-    panel.hidden = true;
     loginSection.hidden = false;
+    panel.hidden = true;
     return;
   }
 
   try {
-    const adminSnap = await getDoc(
-      doc(window.db, "admins", user.uid)
-    );
+    const ref = doc(window.db, "users", user.uid);
+const snap = await getDoc(ref);
 
-    if (!adminSnap.exists()) {
-      showToast("Not authorized as admin");
-      await signOut(window.auth);
-      return;
-    }
+if (!snap.exists()) {
+  showToast("No role assigned");
+  await signOut(window.auth);
+  return;
+}
 
-    // ✅ AUTH CONFIRMED
+const { role } = snap.data();
+
+if (role !== "staff" && role !== "superAdmin") {
+  showToast("Access denied");
+  await signOut(window.auth);
+  return;
+}
+
+    // ✅ AUTH + ROLE CONFIRMED
     loginSection.hidden = true;
     panel.hidden = false;
 
-    bindStatusButtons();
     startOrdersListener();
-
   } catch (err) {
     console.error("Admin auth error:", err);
-    showToast("Admin verification failed");
+    showToast("Permission check failed");
     await signOut(window.auth);
   }
 });
-
 
   const toStatusClass = (s) =>
   String(s || "New").toLowerCase().replace(/\s+/g, "-");

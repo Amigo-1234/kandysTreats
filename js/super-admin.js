@@ -9,7 +9,6 @@ import {
   onSnapshot,
   serverTimestamp,
   query,
-  where,
   orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
@@ -100,7 +99,13 @@ onAuthStateChanged(auth, async user => {
   let snap;
 
 try {
-  snap = await getDoc(doc(db, "superAdmins", user.uid));
+   snap = await getDoc(doc(db, "users", user.uid));
+
+if (!snap.exists() || snap.data().role !== "superAdmin") {
+  alert("Not authorized");
+  await signOut(auth);
+  return;
+};
 } catch (err) {
   alert("Permission error. Check Firestore rules.");
   await signOut(auth);
