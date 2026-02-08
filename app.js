@@ -11,7 +11,7 @@ import {
   collection,
   query,
   orderBy,
-  where,          // 👈 ADD THIS
+  where,        // 👈 ADD THIS
   onSnapshot,
   updateDoc,
   getDoc,
@@ -196,18 +196,19 @@ function normalizePhone(phone) {
 
 
 const bar = document.getElementById("announcement-bar");
-const textEl = document.getElementById("announcement-text");
+const items = document.querySelectorAll(".announcement-content");
 
-if (bar && textEl) {
+if (bar && items.length) {
   const q = query(
     collection(db, "announcements"),
     where("active", "==", true),
     orderBy("createdAt", "desc")
   );
 
-  onSnapshot(q, snap => {
+  onSnapshot(q, (snap) => {
     if (snap.empty) {
       bar.hidden = true;
+      document.body.classList.remove("has-announcement");
       return;
     }
 
@@ -217,13 +218,22 @@ if (bar && textEl) {
 
     if (!messages.length) {
       bar.hidden = true;
+      document.body.classList.remove("has-announcement");
       return;
     }
 
-    textEl.textContent = messages.join("  •  ");
+    // 🔁 DUPLICATE text for infinite scroll
+    const content = messages.join("  •  ");
+
+    items.forEach(el => {
+      el.textContent = `${content}   •   ${content}`;
+    });
+
     bar.hidden = false;
+    document.body.classList.add("has-announcement");
   });
 }
+
 
 // Menu rendering
 const initMenuPage = () => {
