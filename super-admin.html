@@ -103,23 +103,30 @@
    <section class="section transactions-section">
 
   <!-- STICKY BAR (OUTSIDE glass-card) -->
-  <div class="transactions-bar">
+  <div class="transactions-bar"style="margin-bottom: 30px;">
     <div class="transactions-bar-inner glass-card">
       <h2>Transactions</h2>
 
       <div class="transactions-actions">
-        <div class="date-filters">
-          <button class="is-active">Today</button>
-          <button>Last 7 days</button>
-          <button>This month</button>
-        </div>
 
-        <button id="print-transactions" class="btn btn-outline btn-sm">
-          Print
-        </button>
-      </div>
-    </div>
+  <div class="date-filters">
+    <button class="is-active" data-range="today">Today</button>
+    <button data-range="7">Last 7 days</button>
+    <button data-range="30">This month</button>
   </div>
+
+  <input
+    id="transaction-search"
+    class="transaction-search"
+    placeholder="Search Order ID…"
+    type="search"
+  />
+
+  <button id="print-transactions" class="btn btn-outline btn-sm">
+    Print
+  </button>
+
+</div>
 
   <!-- TABLE CARD -->
   <div class="glass-card">

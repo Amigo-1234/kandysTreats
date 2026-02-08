@@ -255,9 +255,9 @@ function startFinanceListener() {
       if (!o.paid) return;
 
       totalRevenue += o.total || 0;
-      if (isWithinDays(o.createdAt, 1)) {
-        todayRevenue += o.total || 0;
-      }
+      if (isToday(o.createdAt)) {
+  todayRevenue += o.total || 0;
+}
 
       allTransactions.push({
         id: o.id,
@@ -339,6 +339,20 @@ document.getElementById("export-csv").onclick = () => {
 
   URL.revokeObjectURL(url);
 };
+
+/* ================= SEARCH ================= */
+
+const searchInput = document.getElementById("transaction-search");
+
+searchInput?.addEventListener("input", () => {
+  const q = searchInput.value.trim().toLowerCase();
+
+  const filtered = allTransactions.filter(t =>
+    String(t.id || "").toLowerCase().includes(q)
+  );
+
+  renderTransactions(filtered);
+});
 
 // ================= PRINT =================
 document.getElementById("print-transactions").onclick = () => {

@@ -3547,3 +3547,47 @@ body {
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.55);
 }
+
+/* ===============================
+   TRANSACTIONS TOOLBAR
+   =============================== */
+
+.transactions-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.date-filters {
+  display: flex;
+  gap: 6px;
+}
+
+.date-filters button {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.date-filters button.is-active {
+  background: linear-gradient(135deg, #e84c88, #ff7ab3);
+}
+
+.transaction-search {
+  min-width: 220px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.35);
+  color: #fff;
+  outline: none;
+}
+
+.transaction-search::placeholder {
+  color: rgba(255,255,255,0.5);
+}
