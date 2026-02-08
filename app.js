@@ -672,7 +672,11 @@ reviewBtn?.addEventListener("click", () => {
       name.includes("amala") ||
       name.includes("swallow") ||
       name.includes("semo") ||
-      name.includes("eba")
+      name.includes("eba") ||
+      name.includes("spaghetti") ||
+      name.includes("pepper soup") ||
+      name.includes("pounded yam") ||
+      name.includes("ewa agoyin")
     ) {
       hasFood = true;
     }
