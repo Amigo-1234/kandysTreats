@@ -223,10 +223,10 @@ if (bar && items.length) {
     }
 
     // 🔁 DUPLICATE text for infinite scroll
-    const content = messages.join("  •  ");
+    const content = messages.join("  |  ");
 
     items.forEach(el => {
-      el.textContent = `${content}   •   ${content}`;
+      el.textContent = `${content}   |   ${content}`;
     });
 
     bar.hidden = false;

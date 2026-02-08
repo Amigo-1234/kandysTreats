@@ -105,49 +105,61 @@ body.has-announcement {
   padding-top: calc(env(safe-area-inset-top) + 46px);
 }
 
+/* TRACK */
 .announcement-track {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   white-space: nowrap;
 
+  padding-left: 100%;
   will-change: transform;
-  animation: announcement-scroll 32s linear infinite;
+
+  /* slowed down but still alive */
+  animation: announcement-scroll 75s linear infinite;
 }
 
-/* THE TEXT */
+/* TEXT */
 #announcement-text,
-.announcement-content {
+.announcement-track {
   font-size: 0.8rem;
   font-weight: 900;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
 
   color: #ffd6ea;
+
   text-shadow:
-    0 0 8px rgba(232, 76, 136, 0.6),
-    0 0 16px rgba(232, 76, 136, 0.4);
+    0 0 6px rgba(232, 76, 136, 0.6),
+    0 0 14px rgba(232, 76, 136, 0.35);
+
+  padding: 0 3rem;
+  position: relative;
 }
 
-/* Prefix */
-#announcement-text::before {
-  content: "⚡ UPDATE — ";
+/* | MESSAGE | STYLE */
+#announcement-text::before,
+#announcement-text::after {
+  content: "|";
+  margin: 0 1.5rem;
   color: #ff5fa2;
+  opacity: 0.85;
 }
 
 /* TRUE CONTINUOUS SCROLL */
 @keyframes announcement-scroll {
   from {
-    transform: translateX(100%);
+    transform: translateX(0);
   }
   to {
-    transform: translateX(-100%);
+    transform: translateX(-200%);
   }
 }
 
-/* Accessibility */
+/* Accessibility (motion-safe users still see text) */
 @media (prefers-reduced-motion: reduce) {
   .announcement-track {
     animation: none;
+    padding-left: 0;
     transform: translateX(0);
   }
 }
