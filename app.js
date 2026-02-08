@@ -264,7 +264,7 @@ let tickerOffset = Number(sessionStorage.getItem(TICKER_KEY)) || 0;
 let rafId = null;
 
 function startTicker(track) {
-  const speed = 0.25; // 👈 slower = calmer
+  const speed = window.innerWidth > 768 ? 0.4 : 0.32; // 👈 slower = calmer
 
   function step() {
     tickerOffset -= speed;

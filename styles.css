@@ -124,11 +124,19 @@ body.has-announcement {
   min-width: max-content;
 }
 
-.announcement-track {
-  
+
+.announcement-viewport {
+  width: min(100%, 960px);   /* 👈 fixed max width */
+  margin: 0 auto;           /* center it */
+  overflow: hidden;
 }
 
 
+.announcement-content {
+  display: inline-block;
+  min-width: 600px;      /* 👈 fixed message block */
+  text-align: center;
+}
 
 /* TEXT */
 #announcement-text,
