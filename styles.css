@@ -3503,3 +3503,47 @@ body {
   position: sticky;
   top: 120px;
 }
+
+.about-card {
+  position: relative;
+}
+
+.about-eyebrow {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-secondary);
+  opacity: 0.85;
+}
+
+.about-card h3 {
+  margin-bottom: 10px;
+  font-size: 1.15rem;
+}
+
+.about-text {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+.about-text strong {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.about-highlight {
+  color: var(--accent);
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(255, 59, 167, 0.4);
+}
+
+.about-signature {
+  margin-top: 12px;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
