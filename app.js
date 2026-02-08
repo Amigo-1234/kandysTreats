@@ -195,9 +195,39 @@ function normalizePhone(phone) {
 }
 
 
+// ===============================
+// ANNOUNCEMENT BAR + MARQUEE
+// ===============================
+
+// ---- KEYS ----
+const ANNOUNCEMENT_CACHE_KEY = "kandys_announcements_v1";
+const TICKER_KEY = "kandys_announcement_offset";
+
+// ---- DOM ----
 const bar = document.getElementById("announcement-bar");
 const items = document.querySelectorAll(".announcement-content");
+const track = document.querySelector(".announcement-track");
 
+// ==================================================
+// 1️⃣ INSTANT RENDER (CACHE-FIRST, 0ms)
+// ==================================================
+if (bar && items.length) {
+  const cached = localStorage.getItem(ANNOUNCEMENT_CACHE_KEY);
+
+  if (cached) {
+    items.forEach(el => {
+      el.textContent = cached;
+    });
+  }
+
+  // Always show immediately — never wait for Firebase
+  bar.hidden = false;
+  document.body.classList.add("has-announcement");
+}
+
+// ==================================================
+// 2️⃣ FIREBASE (BACKGROUND SYNC ONLY)
+// ==================================================
 if (bar && items.length) {
   const q = query(
     collection(db, "announcements"),
@@ -206,34 +236,60 @@ if (bar && items.length) {
   );
 
   onSnapshot(q, (snap) => {
-    if (snap.empty) {
-      bar.hidden = true;
-      document.body.classList.remove("has-announcement");
-      return;
-    }
+    if (snap.empty) return;
 
     const messages = snap.docs
       .map(d => d.data().text)
       .filter(Boolean);
 
-    if (!messages.length) {
-      bar.hidden = true;
-      document.body.classList.remove("has-announcement");
-      return;
-    }
+    if (!messages.length) return;
 
-    // 🔁 DUPLICATE text for infinite scroll
-    const content = messages.join("  |  ");
+    const base = messages.join("  |  ");
+    const finalText = `${base}   |   ${base}`;
 
+    // Cache for instant load on next page
+    localStorage.setItem(ANNOUNCEMENT_CACHE_KEY, finalText);
+
+    // Update UI silently
     items.forEach(el => {
-      el.textContent = `${content}   |   ${content}`;
+      el.textContent = finalText;
     });
-
-    bar.hidden = false;
-    document.body.classList.add("has-announcement");
   });
 }
 
+// ==================================================
+// 3️⃣ JS-DRIVEN MARQUEE (NO RESET EVER)
+// ==================================================
+let tickerOffset = Number(sessionStorage.getItem(TICKER_KEY)) || 0;
+let rafId = null;
+
+function startTicker(track) {
+  const speed = 0.25; // 👈 slower = calmer
+
+  function step() {
+    tickerOffset -= speed;
+
+    // Seamless loop
+    if (Math.abs(tickerOffset) >= track.scrollWidth / 2) {
+      tickerOffset = 0;
+    }
+
+    track.style.transform = `translateX(${tickerOffset}px)`;
+    rafId = requestAnimationFrame(step);
+  }
+
+  step();
+}
+
+function stopTicker() {
+  if (rafId) cancelAnimationFrame(rafId);
+  sessionStorage.setItem(TICKER_KEY, tickerOffset);
+}
+
+if (track) {
+  startTicker(track);
+  window.addEventListener("pagehide", stopTicker);
+}
 
 // Menu rendering
 const initMenuPage = () => {
@@ -1736,6 +1792,8 @@ function startQuickPicksAutoScroll(row) {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     return;
   }
+
+  
 
   // Desktop grid → no auto scroll
   if (window.innerWidth >= 900 || /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)) {
