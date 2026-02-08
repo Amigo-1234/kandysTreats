@@ -68,21 +68,25 @@
       </div>
     </section>
 
-    <section class="section glass-card">
+   <section class="section glass-card">
   <h2>Site Announcements</h2>
 
-  <div class="announcement-form">
-    <textarea
-      id="new-announcement"
-      placeholder="Type announcement here..."
-      rows="3"></textarea>
+  <div class="announcement-layout">
+    <!-- LEFT -->
+    <div class="announcement-form">
+      <textarea
+        id="new-announcement"
+        placeholder="Type announcement here..."
+        rows="4"></textarea>
 
-    <button id="add-announcement" class="btn btn-primary">
-      Add Announcement
-    </button>
+      <button id="add-announcement" class="btn btn-primary">
+        Add Announcement
+      </button>
+    </div>
+
+    <!-- RIGHT -->
+    <ul id="announcement-list" class="announcement-list"></ul>
   </div>
-
-  <ul id="announcement-list" class="announcement-list"></ul>
 </section>
 
     <!-- ACTION BAR -->

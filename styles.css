@@ -3365,3 +3365,128 @@ body {
 .top-scroller:active .scroller-track {
   animation-play-state: paused;
 }
+
+
+/* ============================= */
+/* SUPER ADMIN — ANNOUNCEMENTS */
+/* ============================= */
+
+[data-page="super-admin"] .announcement-form {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+[data-page="super-admin"] .announcement-form textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 80px;
+
+  padding: 14px;
+  border-radius: 12px;
+
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+[data-page="super-admin"] .announcement-form textarea::placeholder {
+  color: rgba(255,255,255,0.45);
+}
+
+[data-page="super-admin"] .announcement-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+[data-page="super-admin"] .announcement-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+
+  padding: 14px 16px;
+  border-radius: 14px;
+
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+[data-page="super-admin"] .announcement-item span {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+[data-page="super-admin"] .announcement-item.is-hidden {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+[data-page="super-admin"] .announcement-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  padding: 6px 8px;
+  border-radius: 8px;
+
+  color: #fff;
+  font-size: 0.85rem;
+}
+
+[data-page="super-admin"] .announcement-actions button:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+
+/* ============================= */
+/* SUPER ADMIN – ANNOUNCEMENTS */
+/* PC-FIRST LAYOUT */
+/* ============================= */
+
+[data-page="super-admin"] .announcement-layout {
+  display: grid;
+  grid-template-columns: 420px 1fr; /* left form | right list */
+  gap: 28px;
+  align-items: flex-start;
+}
+
+/* Left form stays left */
+[data-page="super-admin"] .announcement-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Button aligns left (not full width) */
+[data-page="super-admin"] #add-announcement {
+  align-self: flex-start;
+  padding-inline: 22px;
+}
+
+/* Announcements list fills right side */
+[data-page="super-admin"] .announcement-list {
+  display: grid;
+  gap: 12px;
+}
+
+/* 🔻 Responsive fallback (mobile/tablet) */
+@media (max-width: 900px) {
+  [data-page="super-admin"] .announcement-layout {
+    grid-template-columns: 1fr;
+  }
+
+  [data-page="super-admin"] #add-announcement {
+    width: 100%;
+  }
+}
+
+[data-page="super-admin"] .announcement-form {
+  position: sticky;
+  top: 120px;
+}
