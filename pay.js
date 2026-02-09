@@ -95,16 +95,15 @@ paystackBtn.addEventListener("click", () => {
     },
 
     onSuccess: async (reference) => {
-      await updateDoc(doc(db, "orders", orderId), {
-        paid: true,
-        paymentMethod: "paystack",
-        paymentReference: reference,
-        paidAt: serverTimestamp(),
-      });
+  await updateDoc(doc(db, "orders", orderId), {
+    paymentMethod: "paystack",
+    paymentReference: reference,
+    paymentStatus: "pending",   // 👈 NEW
+    paidAt: serverTimestamp(), // optional (attempt time)
+  });
 
-      window.location.href = `/track.html?code=${orderId}`;
-    },
-
+  window.location.href = `/track.html?code=${orderId}`;
+},
     onClose: () => {
       showError("Payment cancelled.");
     }
@@ -133,17 +132,17 @@ flutterwaveBtn.onclick = () => {
     },
 
     callback: async (res) => {
-      if (res.status === "successful") {
-        await updateDoc(doc(db, "orders", orderId), {
-          paid: true,
-          paymentMethod: "flutterwave",
-          paymentReference: res.transaction_id,
-          paidAt: serverTimestamp(),
-        });
+  if (res.status === "successful") {
+    await updateDoc(doc(db, "orders", orderId), {
+      paymentMethod: "flutterwave",
+      paymentReference: res.transaction_id,
+      paymentStatus: "pending", // 👈 NEW
+      paidAt: serverTimestamp(),
+    });
 
-        window.location.href = `/track.html?code=${orderId}`;
-      }
-    },
+    window.location.href = `/track.html?code=${orderId}`;
+  }
+},
 
     onclose: () => {
       showError("Payment cancelled.");

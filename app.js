@@ -1010,26 +1010,24 @@ const order = {
   subOrders: drafts.map((d, index) => ({
     index: index + 1,
     items: d.items,
-    subtotal: d.subtotal,
     takeawayFee: d.takeawayFee,
-    deliveryFee: d.deliveryFee,
-    total: d.total,
+    deliveryFee: d.deliveryFee
   })),
 
   customer: drafts[0].customer,
   fulfilment: drafts[0].fulfilment,
 
-  subtotal: baseSubtotal,
-  takeawayFee: baseTakeaway,
-  deliveryFee: baseDelivery,
+  // ✅ SAFE ENOUGH FOR NOW
+  subtotal: baseTotal,
+  vat: vat,
+  total: totalToPay,
+  netAmount: baseTotal,
 
-  vat,                    // 2% VAT (customer paid this)
-  total: totalToPay,      // FINAL amount customer pays
-  netAmount: baseTotal,   // business revenue (before Paystack charges)
-
+  paymentRef: null,
   paid: false,
   status: "New",
-  createdAt: serverTimestamp(),
+
+  createdAt: serverTimestamp()
 };
 
   await setDoc(doc(window.db, "orders", orderId), order);
@@ -2110,4 +2108,23 @@ document.addEventListener("DOMContentLoaded", () => {
         item.dataset.page === page
       );
     });
+})();
+
+(() => {
+  const el = document.getElementById("today-hours");
+  if (!el) return;
+
+  const day = new Date().getDay(); // 0 = Sunday
+
+  const hoursByDay = {
+    0: "3:00 PM – 10:30 PM",  // Sunday
+    1: "9:00 AM – 10:30 PM",  // Monday
+    2: "9:00 AM – 10:30 PM",
+    3: "9:00 AM – 10:30 PM",
+    4: "9:00 AM – 10:30 PM",
+    5: "9:00 AM – 10:30 PM",
+    6: "9:00 AM – 10:30 PM"   // Saturday
+  };
+
+  el.textContent = hoursByDay[day] || "Closed";
 })();
