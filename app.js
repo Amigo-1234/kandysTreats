@@ -1292,6 +1292,8 @@ if (statusText) {
   statusText.textContent = order.status;
 }
 
+bindStatusButtons();
+
 };
 function buildWhatsAppMessage(order, status) {
   const allItems = order.subOrders
