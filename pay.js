@@ -96,10 +96,11 @@ paystackBtn.addEventListener("click", () => {
 
     onSuccess: async (reference) => {
   await updateDoc(doc(db, "orders", orderId), {
+    paid: true,
     paymentMethod: "paystack",
     paymentReference: reference,
-    paymentStatus: "pending",   // 👈 NEW
-    paidAt: serverTimestamp(), // optional (attempt time)
+    paymentStatus: "verified",
+    paidAt: serverTimestamp(),
   });
 
   window.location.href = `/track.html?code=${orderId}`;
@@ -134,11 +135,12 @@ flutterwaveBtn.onclick = () => {
     callback: async (res) => {
   if (res.status === "successful") {
     await updateDoc(doc(db, "orders", orderId), {
-      paymentMethod: "flutterwave",
-      paymentReference: res.transaction_id,
-      paymentStatus: "pending", // 👈 NEW
-      paidAt: serverTimestamp(),
-    });
+  paid: true,
+  paymentMethod: "flutterwave",
+  paymentReference: res.transaction_id,
+  paymentStatus: "verified",
+  paidAt: serverTimestamp(),
+});
 
     window.location.href = `/track.html?code=${orderId}`;
   }
