@@ -1123,18 +1123,22 @@ panel.hidden = true;
 
   const STATE = { selectedOrderId: null, orders: [] };
   let unsubscribeOrders = null;
+  let isUpdatingStatus = false;
 
 const renderTable = () => {
   const ordersToShow = getFilteredOrders();
   tbody.innerHTML = "";
 
   if (!ordersToShow.length) {
-    const tr = document.createElement("tr");
-tr.dataset.id = order.id;
-    tr.innerHTML = `<td colspan="5" style="opacity:.7;padding:14px;">No orders match this view.</td>`;
-    tbody.appendChild(tr);
-    return;
-  }
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td colspan="5" style="opacity:.7;padding:14px;">
+      No orders match this view.
+    </td>
+  `;
+  tbody.appendChild(tr);
+  return;
+}
 
   ordersToShow.forEach((order, index) => {
     const tr = document.createElement("tr");
@@ -1292,9 +1296,66 @@ if (statusText) {
   statusText.textContent = order.status;
 }
 
-bindStatusButtons();
-
 };
+
+detailPanel.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".chip-status");
+  if (!btn) return;
+
+  const id = STATE.selectedOrderId;
+  if (!id || isUpdatingStatus) return;
+
+  const newStatus = btn.dataset.status;
+  const order = STATE.orders.find(o => o.id === id);
+  if (!order) return;
+
+  if (order.status === newStatus) {
+    showToast(`Order already marked as ${newStatus}`);
+    return;
+  }
+
+  isUpdatingStatus = true; // 🔒 LOCK
+
+  try {
+    await updateDoc(doc(window.db, "orders", id), {
+  status: newStatus,
+  lastStatusUpdateAt: serverTimestamp()
+});
+
+    // EMAIL — send ONCE
+    if (order.customer?.email && window.emailjs) {
+      await emailjs.send(
+        "service_b42kpvg",
+        "template_wgethvr",
+        {
+          customer_name: order.customer.name,
+          order_id: order.id,
+          status: newStatus,
+          customer_email: order.customer.email,
+        }
+      ).catch(() => {});
+    }
+
+    if (order.status === newStatus) {
+  isUpdatingStatus = false;
+  return;
+}
+
+    // WHATSAPP — send ONCE
+    sendWhatsApp(order, newStatus);
+
+    showToast(`Order ${id} marked as ${newStatus}`);
+  } catch (err) {
+    console.error(err);
+    showToast("Failed to update order status");
+  } finally {
+    // 🔓 UNLOCK after Firestore settles
+    setTimeout(() => {
+      isUpdatingStatus = false;
+    }, 500);
+  }
+});
+
 function buildWhatsAppMessage(order, status) {
   const allItems = order.subOrders
     ? order.subOrders.flatMap(sub => sub.items)
@@ -1328,59 +1389,7 @@ function sendWhatsApp(order, status) {
 }
 
 
- const bindStatusButtons = () => {
-  detailPanel.querySelectorAll(".chip-status").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const id = STATE.selectedOrderId;
-      if (!id) return;
 
-      const newStatus = btn.dataset.status;
-      const order = STATE.orders.find(o => o.id === id);
-      if (!order) return;
-
-      // Prevent duplicate action
-      if (order.status === newStatus) {
-  btn.classList.remove("already-set"); // reset
-  void btn.offsetWidth;                // force reflow
-  btn.classList.add("already-set");
-
-  showToast(`Order already marked as ${newStatus}`);
-  return;
-}
-
-      try {
-        // 1️⃣ Update Firestore (ONCE)
-        await updateDoc(doc(window.db, "orders", id), {
-          status: newStatus,
-        });
-
-        // 2️⃣ Try EmailJS (best effort)
-        if (order.customer?.email && window.emailjs) {
-          emailjs.send(
-            "service_b42kpvg",
-            "template_wgethvr",
-            {
-              customer_name: order.customer.name,
-              order_id: order.id,
-              status: newStatus,
-              customer_email: order.customer.email,
-            }
-          ).catch(err => {
-            console.warn("EmailJS failed (ignored):", err);
-          });
-        }
-
-        // 3️⃣ WhatsApp = always works
-        sendWhatsApp(order, newStatus);
-
-        showToast(`Order ${id} marked as ${newStatus}`);
-      } catch (err) {
-        console.error(err);
-        showToast("Failed to update order status");
-      }
-    });
-  });
-};
 
 
 const startOrdersListener = () => {
