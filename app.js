@@ -1316,27 +1316,38 @@ detailPanel.addEventListener("click", async (e) => {
   const btn = e.target.closest(".chip-status");
   if (!btn) return;
 
+  // ✅ OPEN TAB IMMEDIATELY (USER CLICK = NOT BLOCKED)
+  const waTab = window.open("", "_blank");
+
   const id = STATE.selectedOrderId;
-  if (!id || isUpdatingStatus) return;
-
-  const newStatus = btn.dataset.status;
-  const order = STATE.orders.find(o => o.id === id);
-  if (!order) return;
-
-  if (order.status === newStatus) {
-    showToast(`Order already marked as ${newStatus}`);
+  if (!id || isUpdatingStatus) {
+    waTab?.close();
     return;
   }
 
-  isUpdatingStatus = true; // 🔒 LOCK
+  const newStatus = btn.dataset.status;
+  const order = STATE.orders.find(o => o.id === id);
+  if (!order) {
+    waTab?.close();
+    return;
+  }
+
+  if (order.status === newStatus) {
+    waTab?.close();
+    showToast(`Order already ${newStatus}`);
+    return;
+  }
+
+  isUpdatingStatus = true;
 
   try {
+    // 🔄 Update Firestore
     await updateDoc(doc(window.db, "orders", id), {
-  status: newStatus,
-  lastStatusUpdateAt: serverTimestamp()
-});
+      status: newStatus,
+      lastStatusUpdateAt: serverTimestamp()
+    });
 
-    // EMAIL — send ONCE
+    // 📧 Optional email
     if (order.customer?.email && window.emailjs) {
       await emailjs.send(
         "service_b42kpvg",
@@ -1350,20 +1361,19 @@ detailPanel.addEventListener("click", async (e) => {
       ).catch(() => {});
     }
 
-    if (order.status === newStatus) {
-  isUpdatingStatus = false;
-  return;
-}
+    // 📲 WhatsApp (NEW TAB – SAFE)
+    const phone = normalizePhone(order.customer.phone);
+    const msg = buildWhatsAppMessage(order, newStatus);
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
 
-    // WHATSAPP — send ONCE
-    sendWhatsApp(order, newStatus);
+    waTab.location.href = url;
 
     showToast(`Order ${id} marked as ${newStatus}`);
   } catch (err) {
     console.error(err);
-    showToast("Failed to update order status");
+    waTab?.close();
+    showToast("Failed to update order");
   } finally {
-    // 🔓 UNLOCK after Firestore settles
     setTimeout(() => {
       isUpdatingStatus = false;
     }, 500);
