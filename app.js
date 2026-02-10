@@ -191,7 +191,21 @@ const getRandomImage = () =>
 
 function normalizePhone(phone) {
   if (!phone) return "";
-  return phone.replace(/\D/g, ""); // removes +, spaces, etc
+
+  let p = phone.replace(/\D/g, "");
+
+  // Nigerian local number → add country code
+  if (p.startsWith("0")) {
+    p = "234" + p.slice(1);
+  }
+
+  // Already Nigerian international
+  if (p.startsWith("234")) {
+    return p;
+  }
+
+  // Fallback (already international)
+  return p;
 }
 
 
@@ -1385,7 +1399,8 @@ function sendWhatsApp(order, status) {
   const message = buildWhatsAppMessage(order, status);
   const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 
-  window.open(url, "_blank");
+  // ✅ NOT blocked by popup blockers
+  window.location.href = url;
 }
 
 
