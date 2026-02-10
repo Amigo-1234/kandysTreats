@@ -1044,11 +1044,13 @@ const order = {
   customer: drafts[0].customer,
   fulfilment: drafts[0].fulfilment,
 
-  // ✅ SAFE ENOUGH FOR NOW
-  subtotal: baseTotal,
+  subtotal: baseSubtotal,        // FOOD ONLY
+  deliveryFee: baseDelivery,     // ₦500
+  takeawayFee: baseTakeaway,     // ₦200
+
   vat: vat,
   total: totalToPay,
-  netAmount: baseTotal,
+  netAmount: baseSubtotal + baseDelivery + baseTakeaway,
 
   paymentRef: null,
   paid: false,

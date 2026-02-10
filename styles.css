@@ -3591,3 +3591,16 @@ body {
 .transaction-search::placeholder {
   color: rgba(255,255,255,0.5);
 }
+
+.track-summary .row {
+  display: grid;
+  grid-template-columns: 1fr auto; /* label | price */
+  gap: 12px;
+  align-items: center;
+}
+
+.track-summary .row span:last-child {
+  min-width: 90px;          /* 🔑 forces alignment */
+  text-align: right;
+  font-variant-numeric: tabular-nums; /* perfect number alignment */
+}
