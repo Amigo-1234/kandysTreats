@@ -208,6 +208,19 @@ function normalizePhone(phone) {
   return p;
 }
 
+function formatOrderDate(ts) {
+  if (!ts) return "—";
+
+  const date = ts.toDate(); // Firestore Timestamp → JS Date
+
+  return date.toLocaleString("en-NG", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 // ===============================
 // ANNOUNCEMENT BAR + MARQUEE
@@ -1156,18 +1169,36 @@ const renderTable = () => {
 
   ordersToShow.forEach((order, index) => {
     const tr = document.createElement("tr");
+tr.dataset.id = order.id; // ✅ ADD THIS
     const status = order.status || "New";
 
     tr.innerHTML = `
-      <td>${order.id}</td>
-      <td>${order.customer?.name || "-"}</td>
-      <td>
-      ${formatPrice(order.total || 0)}
-      <small class="muted">VAT: ${formatPrice(order.paystackFee || 0)}</small>
-      </td>
-      <td>${order.fulfilment === "delivery" ? "Delivery" : "Pickup"}</td>
-      <td><span class="status-pill status-${toStatusClass(status)}">${status}</span></td>
-    `;
+  <td>${order.id}</td>
+
+  <!-- DATE -->
+  <td class="muted">
+    ${formatOrderDate(order.createdAt)}
+  </td>
+
+  <!-- CUSTOMER -->
+  <td>${order.customer?.name || "-"}</td>
+
+  <!-- TOTAL -->
+  <td>
+    ${formatPrice(order.total || 0)}
+    <small class="muted">VAT: ${formatPrice(order.vat || 0)}</small>
+  </td>
+
+  <!-- TYPE -->
+  <td>${order.fulfilment === "delivery" ? "Delivery" : "Pickup"}</td>
+
+  <!-- STATUS -->
+  <td>
+    <span class="status-pill status-${toStatusClass(status)}">
+      ${status}
+    </span>
+  </td>
+`;
 
     tr.addEventListener("click", () => {
       STATE.selectedOrderId = order.id;
