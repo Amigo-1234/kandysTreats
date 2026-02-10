@@ -71,7 +71,33 @@ async function loadOrder() {
   flutterwaveBtn.disabled = false;
 }
 
+async function recoverPaymentIfNeeded() {
+  if (!orderData) return;
+
+  // If already paid, nothing to do
+  if (orderData.paid) {
+    window.location.href = `/track.html?code=${orderId}`;
+    return;
+  }
+
+  // If payment reference exists, recover
+  if (orderData.paymentReference) {
+    try {
+      await updateDoc(doc(db, "orders", orderId), {
+        paid: true,
+        paymentStatus: "verified",
+        recoveredAt: serverTimestamp(),
+      });
+
+      window.location.href = `/track.html?code=${orderId}`;
+    } catch (err) {
+      console.error("Payment recovery failed", err);
+    }
+  }
+}
+
 loadOrder();
+recoverPaymentIfNeeded();
 
 /* ================= PAYSTACK ================= */
 
