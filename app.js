@@ -1384,7 +1384,7 @@ detailPanel.addEventListener("click", async (e) => {
     if (order.customer?.email && window.emailjs) {
       await emailjs.send(
         "service_37w08c5",
-        "template_dlo4vr3",
+        "template_ux47usd",
         {
           customer_name: order.customer.name,
           order_id: order.id,
