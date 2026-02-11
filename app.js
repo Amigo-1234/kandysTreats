@@ -880,6 +880,8 @@ totalEl.textContent = formatPrice(
   const email = document.getElementById("customer-email").value.trim();
   const address = document.getElementById("customer-address")?.value.trim() || "";
 
+  const notes = document.getElementById("customer-notes")?.value.trim() || "";
+
   if (!name || !phone) {
     showToast("Please fill in name and phone");
     return;
@@ -1036,16 +1038,17 @@ const order = {
   id: orderId,
 
   subOrders: drafts.map((d, index) => ({
-    index: index + 1,
-    items: d.items,
-    takeawayFee: d.takeawayFee,
-    deliveryFee: d.deliveryFee
-  })),
+  index: index + 1,
+  items: d.items,
+  takeawayFee: d.takeawayFee,
+  deliveryFee: d.deliveryFee,
+  notes: d.notes || ""
+})),
 
   customer: drafts[0].customer,
   fulfilment: drafts[0].fulfilment,
 
-  notes: drafts[0].notes || "",
+  notes: drafts.map(d => d.notes).filter(Boolean).join(" | "),
 
   subtotal: baseSubtotal,        // FOOD ONLY
   deliveryFee: baseDelivery,     // ₦500
@@ -1306,18 +1309,23 @@ if (order.subOrders && order.subOrders.length) {
     section.className = "admin-suborder";
 
     section.innerHTML = `
-      <div class="suborder-title">Order ${i + 1}</div>
-      <ul class="suborder-list">
-  ${sub.items.map(item =>
-    `
-    <li class="order-item">
-      <span class="qty">${item.qty}×</span>
-      <span class="name">${item.name}</span>
-    </li>
-    `
-  ).join("")}
-</ul>
-    `;
+  <div class="suborder-title">Order ${i + 1}</div>
+
+  ${sub.notes ? `
+    <div class="suborder-notes">
+      <strong>Note:</strong> ${sub.notes}
+    </div>
+  ` : ""}
+
+  <ul class="suborder-list">
+    ${sub.items.map(item => `
+      <li class="order-item">
+        <span class="qty">${item.qty}×</span>
+        <span class="name">${item.name}</span>
+      </li>
+    `).join("")}
+  </ul>
+`;
 
     itemsWrap.appendChild(section);
   });
@@ -1678,7 +1686,7 @@ const initTrackPage = () => {
   form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const notes = document.getElementById("customer-notes")?.value.trim() || "";
+  
 
   const code = input.value.trim().toUpperCase();
   if (!code) return;
