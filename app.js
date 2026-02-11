@@ -906,6 +906,7 @@ const takeawayFee = calculateTakeawayFee(cartItems);
     email,
     address: fulfilment === "delivery" ? address : ""
   },
+  notes,
   items,
   fulfilment,
   subtotal,
@@ -1043,6 +1044,8 @@ const order = {
 
   customer: drafts[0].customer,
   fulfilment: drafts[0].fulfilment,
+
+  notes: drafts[0].notes || "",
 
   subtotal: baseSubtotal,        // FOOD ONLY
   deliveryFee: baseDelivery,     // ₦500
@@ -1674,6 +1677,8 @@ const initTrackPage = () => {
 
   form.addEventListener("submit", async (e) => {
   e.preventDefault();
+
+  const notes = document.getElementById("customer-notes")?.value.trim() || "";
 
   const code = input.value.trim().toUpperCase();
   if (!code) return;
