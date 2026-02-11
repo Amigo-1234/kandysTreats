@@ -72,27 +72,28 @@ async function loadOrder() {
 }
 
 async function recoverPaymentIfNeeded() {
-  if (!orderData) return;
+  const saved = localStorage.getItem("pending_payment");
+  if (!saved) return;
 
-  // If already paid, nothing to do
-  if (orderData.paid) {
+  const { orderId: savedOrderId, reference, method } = JSON.parse(saved);
+
+  if (savedOrderId !== orderId) return;
+
+  try {
+    await updateDoc(doc(db, "orders", orderId), {
+      paid: true,
+      paymentMethod: method || "unknown",
+      paymentReference: reference,
+      paymentStatus: "verified",
+      recoveredAt: serverTimestamp(),
+    });
+
+    localStorage.removeItem("pending_payment");
+
     window.location.href = `/track.html?code=${orderId}`;
-    return;
-  }
 
-  // If payment reference exists, recover
-  if (orderData.paymentReference) {
-    try {
-      await updateDoc(doc(db, "orders", orderId), {
-        paid: true,
-        paymentStatus: "verified",
-        recoveredAt: serverTimestamp(),
-      });
-
-      window.location.href = `/track.html?code=${orderId}`;
-    } catch (err) {
-      console.error("Payment recovery failed", err);
-    }
+  } catch (err) {
+    console.error("Recovery failed", err);
   }
 }
 
@@ -121,15 +122,30 @@ paystackBtn.addEventListener("click", () => {
     },
 
     onSuccess: async (reference) => {
-  await updateDoc(doc(db, "orders", orderId), {
-    paid: true,
-    paymentMethod: "paystack",
-    paymentReference: reference,
-    paymentStatus: "verified",
-    paidAt: serverTimestamp(),
-  });
 
-  window.location.href = `/track.html?code=${orderId}`;
+  // 🔐 SAVE FIRST (before Firestore)
+  localStorage.setItem("pending_payment", JSON.stringify({
+    orderId,
+    reference
+  }));
+
+  try {
+    await updateDoc(doc(db, "orders", orderId), {
+      paid: true,
+      paymentMethod: "paystack",
+      paymentReference: reference,
+      paymentStatus: "verified",
+      paidAt: serverTimestamp(),
+    });
+
+    localStorage.removeItem("pending_payment");
+
+    window.location.href = `/track.html?code=${orderId}`;
+
+  } catch (err) {
+    console.error("Payment update failed — will recover on reload", err);
+    window.location.reload();
+  }
 },
     onClose: () => {
       showError("Payment cancelled.");
@@ -160,15 +176,31 @@ flutterwaveBtn.onclick = () => {
 
     callback: async (res) => {
   if (res.status === "successful") {
-    await updateDoc(doc(db, "orders", orderId), {
-  paid: true,
-  paymentMethod: "flutterwave",
-  paymentReference: res.transaction_id,
-  paymentStatus: "verified",
-  paidAt: serverTimestamp(),
-});
 
-    window.location.href = `/track.html?code=${orderId}`;
+    // 🔐 Save first (recovery safety)
+    localStorage.setItem("pending_payment", JSON.stringify({
+      orderId,
+      reference: res.transaction_id,
+      method: "flutterwave"
+    }));
+
+    try {
+      await updateDoc(doc(db, "orders", orderId), {
+        paid: true,
+        paymentMethod: "flutterwave",
+        paymentReference: res.transaction_id,
+        paymentStatus: "verified",
+        paidAt: serverTimestamp(),
+      });
+
+      localStorage.removeItem("pending_payment");
+
+      window.location.href = `/track.html?code=${orderId}`;
+
+    } catch (err) {
+      console.error("Flutterwave update failed — will recover on reload", err);
+      window.location.reload();
+    }
   }
 },
 
