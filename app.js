@@ -1383,8 +1383,8 @@ detailPanel.addEventListener("click", async (e) => {
     // 📧 Optional email
     if (order.customer?.email && window.emailjs) {
       await emailjs.send(
-        "service_b42kpvg",
-        "template_wgethvr",
+        "service_37w08c5",
+        "template_dlo4vr3",
         {
           customer_name: order.customer.name,
           order_id: order.id,
