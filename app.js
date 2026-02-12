@@ -2231,3 +2231,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   el.textContent = hoursByDay[day] || "Closed";
 })();
+
