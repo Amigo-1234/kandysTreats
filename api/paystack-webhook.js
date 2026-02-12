@@ -71,3 +71,18 @@ export default async function handler(req, res) {
     return res.status(500).send("Webhook error");
   }
 }
+
+// TEMP TEST MODE (REMOVE LATER)
+if (req.query.test === "1") {
+  const orderId = req.query.orderId;
+
+  await db.collection("orders").doc(orderId).update({
+    paid: true,
+    paymentProvider: "paystack",
+    paymentRef: "TEST_WEBHOOK",
+    paymentStatus: "confirmed",
+    paidAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
+  return res.status(200).send("TEST OK");
+}
