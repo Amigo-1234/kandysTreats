@@ -1164,6 +1164,8 @@ const renderTable = () => {
   const ordersToShow = getFilteredOrders();
   tbody.innerHTML = "";
 
+  
+
   if (!ordersToShow.length) {
   const tr = document.createElement("tr");
   tr.innerHTML = `
@@ -1176,9 +1178,14 @@ const renderTable = () => {
 }
 
   ordersToShow.forEach((order, index) => {
-    const tr = document.createElement("tr");
-tr.dataset.id = order.id; // ✅ ADD THIS
-    const status = order.status || "New";
+  const tr = document.createElement("tr");
+  tr.dataset.id = order.id;
+
+  const status = order.status || "New";
+
+  const paymentBadge = order.paid
+    ? `<span class="pill paid">PAID</span>`
+    : `<span class="pill unpaid">UNPAID</span>`;
 
     tr.innerHTML = `
   <td>${order.id}</td>
@@ -1201,11 +1208,17 @@ tr.dataset.id = order.id; // ✅ ADD THIS
   <td>${order.fulfilment === "delivery" ? "Delivery" : "Pickup"}</td>
 
   <!-- STATUS -->
-  <td>
-    <span class="status-pill status-${toStatusClass(status)}">
-      ${status}
-    </span>
-  </td>
+  <!-- PAYMENT -->
+<td>
+  ${paymentBadge}
+</td>
+
+<!-- STATUS -->
+<td>
+  <span class="status-pill status-${toStatusClass(status)}">
+    ${status}
+  </span>
+</td>
 `;
 
     tr.addEventListener("click", () => {
@@ -1246,6 +1259,14 @@ if (STATE.selectedOrderId) {
 
   emptyDetail.style.display = "none";
   detailContent.hidden = false;
+
+  if (!order.paid) {
+  showToast("⚠️ This order is NOT PAID");
+}
+
+detailPanel.querySelectorAll(".chip-status").forEach(btn => {
+  btn.disabled = !order.paid;
+});
 
   let el;
 
@@ -1464,7 +1485,6 @@ function sendWhatsApp(order, status) {
 const startOrdersListener = () => {
   const qy = query(
   collection(window.db, "orders"),
-  where("paid", "==", true),
   orderBy("createdAt", "desc")
 );
   unsubscribeOrders = onSnapshot(
