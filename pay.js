@@ -2,9 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/fireba
 import {
   getFirestore,
   doc,
-  getDoc,
-  updateDoc,
-  serverTimestamp
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 /* ================= FIREBASE INIT ================= */
@@ -58,47 +56,20 @@ async function loadOrder() {
 
   orderData = snap.data();
 
+  // 🔒 If already paid, go straight to tracking
   if (orderData.paid) {
     window.location.href = `/track.html?code=${orderId}`;
     return;
   }
 
   orderIdEl.textContent = orderId;
-  amountEl.textContent =
-  Number(orderData.total).toLocaleString("en-NG");
+  amountEl.textContent = Number(orderData.total).toLocaleString("en-NG");
 
   paystackBtn.disabled = false;
   flutterwaveBtn.disabled = false;
 }
 
-async function recoverPaymentIfNeeded() {
-  const saved = localStorage.getItem("pending_payment");
-  if (!saved) return;
-
-  const { orderId: savedOrderId, reference, method } = JSON.parse(saved);
-
-  if (savedOrderId !== orderId) return;
-
-  try {
-    await updateDoc(doc(db, "orders", orderId), {
-      paid: true,
-      paymentMethod: method || "unknown",
-      paymentReference: reference,
-      paymentStatus: "verified",
-      recoveredAt: serverTimestamp(),
-    });
-
-    localStorage.removeItem("pending_payment");
-
-    window.location.href = `/track.html?code=${orderId}`;
-
-  } catch (err) {
-    console.error("Recovery failed", err);
-  }
-}
-
 loadOrder();
-recoverPaymentIfNeeded();
 
 /* ================= PAYSTACK ================= */
 
@@ -112,7 +83,7 @@ paystackBtn.addEventListener("click", () => {
     key: "pk_live_bd05647da5ae5885013df5fdbc07c7545d7adf70",
     email: orderData.customer?.email || "ads.kandystreats@gmail.com",
     amount: Math.round(orderData.total * 100),
-    orderId,
+    reference: orderId,
 
     metadata: {
       custom_fields: [
@@ -121,38 +92,16 @@ paystackBtn.addEventListener("click", () => {
       ]
     },
 
-    onSuccess: async (reference) => {
+    onSuccess: () => {
+      // ✅ DO NOTHING — webhook will confirm payment
+      window.location.href = `/track.html?code=${orderId}&verifying=1`;
+    },
 
-  // 🔐 SAVE FIRST (before Firestore)
-  localStorage.setItem("pending_payment", JSON.stringify({
-    orderId,
-    reference
-  }));
-
-  try {
-    await updateDoc(doc(db, "orders", orderId), {
-      paid: true,
-      paymentMethod: "paystack",
-      paymentReference: reference,
-      paymentStatus: "verified",
-      paidAt: serverTimestamp(),
-    });
-
-    localStorage.removeItem("pending_payment");
-
-    window.location.href = `/track.html?code=${orderId}`;
-
-  } catch (err) {
-    console.error("Payment update failed — will recover on reload", err);
-    window.location.reload();
-  }
-},
     onClose: () => {
       showError("Payment cancelled.");
     }
   });
 });
-
 
 /* ================= FLUTTERWAVE ================= */
 
@@ -174,65 +123,17 @@ flutterwaveBtn.onclick = () => {
       name: orderData.customer?.name,
     },
 
-    callback: async (res) => {
-  if (res.status === "successful") {
-
-    // 🔐 Save first (recovery safety)
-    localStorage.setItem("pending_payment", JSON.stringify({
-      orderId,
-      reference: res.transaction_id,
-      method: "flutterwave"
-    }));
-
-    try {
-      await updateDoc(doc(db, "orders", orderId), {
-        paid: true,
-        paymentMethod: "flutterwave",
-        paymentReference: res.transaction_id,
-        paymentStatus: "verified",
-        paidAt: serverTimestamp(),
-      });
-
-      localStorage.removeItem("pending_payment");
-
-      window.location.href = `/track.html?code=${orderId}`;
-
-    } catch (err) {
-      console.error("Flutterwave update failed — will recover on reload", err);
-      window.location.reload();
-    }
-  }
-},
+    callback: (res) => {
+      if (res.status === "successful") {
+        // ✅ Webhook handles confirmation
+        window.location.href = `/track.html?code=${orderId}&verifying=1`;
+      }
+    },
 
     onclose: () => {
       showError("Payment cancelled.");
     }
   });
-};
-// ================= DEV TEST HELPERS =================
-// ⚠️ Dev only – remove before production if you want
-
-window.__markPaid = async (orderId) => {
-  if (!orderId) {
-    console.error("Order ID required");
-    return;
-  }
-
-  try {
-    await updateDoc(doc(db, "orders", orderId), {
-      paid: true,
-      paymentMethod: "manual-test",
-      paymentReference: "DEV_CONSOLE",
-      paidAt: serverTimestamp(),
-    });
-
-    console.log("✅ Marked as paid:", orderId);
-
-    // simulate real redirect
-    window.location.href = `/track.html?code=${orderId}`;
-  } catch (err) {
-    console.error("❌ Failed to mark paid", err);
-  }
 };
 
 document.getElementById("back-to-cart")?.addEventListener("click", () => {

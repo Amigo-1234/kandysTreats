@@ -1485,6 +1485,7 @@ function sendWhatsApp(order, status) {
 const startOrdersListener = () => {
   const qy = query(
   collection(window.db, "orders"),
+  where("paid", "==", true),
   orderBy("createdAt", "desc")
 );
   unsubscribeOrders = onSnapshot(
