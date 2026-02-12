@@ -11,36 +11,43 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 export default async function handler(req, res) {
   try {
+    const rawBody = await new Promise((resolve) => {
+      let data = "";
+      req.on("data", chunk => (data += chunk));
+      req.on("end", () => resolve(data));
+    });
+
     const signature = req.headers["x-paystack-signature"];
 
     const hash = crypto
       .createHmac("sha512", process.env.PAYSTACK_SECRET_KEY)
-      .update(JSON.stringify(req.body))
+      .update(rawBody)
       .digest("hex");
 
     if (hash !== signature) {
       return res.status(401).send("Invalid signature");
     }
 
-    const event = req.body;
+    const event = JSON.parse(rawBody);
 
     if (event.event !== "charge.success") {
       return res.status(200).send("Ignored");
     }
 
-    const reference = event.data.reference;
-    const orderId = event.data.metadata?.orderId;
-
-    if (!orderId) {
-      return res.status(400).send("Missing orderId");
-    }
+    const orderId = event.data.reference;
 
     await db.collection("orders").doc(orderId).update({
       paid: true,
       paymentProvider: "paystack",
-      paymentRef: reference,
+      paymentRef: orderId,
       paymentStatus: "confirmed",
       paidAt: admin.firestore.FieldValue.serverTimestamp(),
     });
