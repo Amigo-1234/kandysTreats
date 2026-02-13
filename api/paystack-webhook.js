@@ -13,7 +13,6 @@ const db = admin.firestore();
 
 export default async function handler(req, res) {
   try {
-    // 1️⃣ Verify Paystack signature
     const signature = req.headers["x-paystack-signature"];
 
     const hash = crypto
@@ -22,22 +21,22 @@ export default async function handler(req, res) {
       .digest("hex");
 
     if (hash !== signature) {
-      console.error("❌ Invalid Paystack signature");
       return res.status(401).send("Invalid signature");
     }
 
     const event = req.body;
 
-    // 2️⃣ Only handle successful payments
     if (event.event !== "charge.success") {
       return res.status(200).send("Ignored");
     }
 
-    // 🔑 CORRECT: get Firestore order ID from metadata
-    const orderId = event.data.metadata?.orderId;
+    // ✅ WORKS FOR BANK TRANSFER + CARD
+    const orderId =
+      event.data.reference ||
+      event.data.metadata?.orderId;
 
     if (!orderId) {
-      console.error("❌ Missing orderId in metadata");
+      console.error("❌ Missing orderId");
       return res.status(200).send("Missing orderId");
     }
 
@@ -49,16 +48,14 @@ export default async function handler(req, res) {
       return res.status(200).send("Order not found");
     }
 
-    // 3️⃣ Prevent double processing
     if (snap.data().paid === true) {
       return res.status(200).send("Already processed");
     }
 
-    // 4️⃣ Mark order as paid
     await orderRef.update({
       paid: true,
       paymentProvider: "paystack",
-      paymentRef: event.data.reference, // Paystack ref (for records)
+      paymentRef: event.data.reference,
       paymentStatus: "confirmed",
       paidAt: admin.firestore.FieldValue.serverTimestamp(),
     });
