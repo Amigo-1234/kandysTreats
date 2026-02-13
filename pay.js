@@ -5,7 +5,7 @@ import {
   getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-/* ================= FIREBASE INIT ================= */
+/* ================= FIREBASE ================= */
 
 const firebaseConfig = {
   apiKey: "AIzaSyCWDTVJgW5dqcBbnZRb6m_Yz-fB7flO9nU",
@@ -39,6 +39,11 @@ const showError = (msg) => {
   errorEl.hidden = false;
 };
 
+const disableButtons = () => {
+  paystackBtn.disabled = true;
+  flutterwaveBtn.disabled = true;
+};
+
 /* ================= LOAD ORDER ================= */
 
 async function loadOrder() {
@@ -56,8 +61,8 @@ async function loadOrder() {
 
   orderData = snap.data();
 
-  // 🔒 If already paid, go straight to tracking
-  if (orderData.paid) {
+  // 🔒 Already paid → go to tracking
+  if (orderData.paid === true) {
     window.location.href = `/track.html?code=${orderId}`;
     return;
   }
@@ -79,53 +84,70 @@ paystackBtn.addEventListener("click", () => {
     return;
   }
 
+  disableButtons();
+
   window.startPaystackPayment({
     key: "pk_live_bd05647da5ae5885013df5fdbc07c7545d7adf70",
     email: orderData.customer?.email || "ads.kandystreats@gmail.com",
     amount: Math.round(orderData.total * 100),
+
+    // 🔑 CRITICAL
     reference: orderId,
 
     metadata: {
-  orderId: orderId,
-  custom_fields: [
-    {
-      display_name: "Order ID",
-      variable_name: "orderId",
-      value: orderId
+      orderId: orderId,
+      custom_fields: [
+        {
+          display_name: "Order ID",
+          variable_name: "orderId",
+          value: orderId
+        },
+        {
+          display_name: "Customer",
+          value: orderData.customer?.name || ""
+        },
+        {
+          display_name: "Phone",
+          value: orderData.customer?.phone || ""
+        }
+      ]
     },
-    {
-      display_name: "Customer",
-      value: orderData.customer?.name || ""
-    },
-    {
-      display_name: "Phone",
-      value: orderData.customer?.phone || ""
-    }
-  ]
-},
 
     onSuccess: () => {
-      // ✅ DO NOTHING — webhook will confirm payment
+      // ❌ DO NOT UPDATE FIRESTORE HERE
+      // ✅ WEBHOOK WILL CONFIRM
       window.location.href = `/track.html?code=${orderId}&verifying=1`;
     },
 
     onClose: () => {
       showError("Payment cancelled.");
+      paystackBtn.disabled = false;
+      flutterwaveBtn.disabled = false;
     }
   });
 });
 
 /* ================= FLUTTERWAVE ================= */
 
-flutterwaveBtn.onclick = () => {
+flutterwaveBtn.addEventListener("click", () => {
   if (!window.FlutterwaveCheckout) {
     showError("Flutterwave failed to load.");
     return;
   }
 
+  if (!orderData) {
+    showError("Order not ready.");
+    return;
+  }
+
+  disableButtons();
+
   FlutterwaveCheckout({
     public_key: "FLWPUBK-3094f9362789db81b6b2afb5e7c1a080-X",
+
+    // 🔑 MUST MATCH WEBHOOK
     tx_ref: orderId,
+
     amount: orderData.total,
     currency: "NGN",
 
@@ -137,16 +159,21 @@ flutterwaveBtn.onclick = () => {
 
     callback: (res) => {
       if (res.status === "successful") {
-        // ✅ Webhook handles confirmation
+        // ❌ DO NOTHING
+        // ✅ WEBHOOK CONFIRMS
         window.location.href = `/track.html?code=${orderId}&verifying=1`;
       }
     },
 
     onclose: () => {
       showError("Payment cancelled.");
+      paystackBtn.disabled = false;
+      flutterwaveBtn.disabled = false;
     }
   });
-};
+});
+
+/* ================= NAV ================= */
 
 document.getElementById("back-to-cart")?.addEventListener("click", () => {
   window.location.href = "/orders-preview.html";

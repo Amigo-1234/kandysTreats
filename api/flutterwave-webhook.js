@@ -1,5 +1,4 @@
 import admin from "firebase-admin";
-import crypto from "crypto";
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -13,31 +12,27 @@ const db = admin.firestore();
 
 export default async function handler(req, res) {
   try {
-    // 1️⃣ Verify Flutterwave signature
+    // 🔐 Verify Flutterwave signature
     const signature = req.headers["verif-hash"];
-    const secretHash = process.env.FLUTTERWAVE_SECRET_HASH;
 
-    if (!signature || signature !== secretHash) {
+    if (!signature || signature !== process.env.FLUTTERWAVE_SECRET_HASH) {
       console.error("❌ Invalid Flutterwave signature");
-      return res.status(401).send("Invalid signature");
+      return res.status(401).send("Unauthorized");
     }
 
     const event = req.body;
 
-    // 2️⃣ Only handle successful payments
+    // ✅ We only care about successful payments
     if (event.event !== "charge.completed") {
       return res.status(200).send("Ignored");
     }
 
-    const data = event.data;
-
-    // 3️⃣ Ensure payment is successful
-    if (data.status !== "successful") {
-      return res.status(200).send("Payment not successful");
+    if (event.data?.status !== "successful") {
+      return res.status(200).send("Not successful");
     }
 
-    // 4️⃣ tx_ref === orderId (your checkout already enforces this)
-    const orderId = data.tx_ref;
+    // 🔑 tx_ref === orderId (THIS MATCHES YOUR FRONTEND)
+    const orderId = event.data.tx_ref;
 
     if (!orderId) {
       console.error("❌ Missing tx_ref");
@@ -56,11 +51,10 @@ export default async function handler(req, res) {
       return res.status(200).send("Already processed");
     }
 
-    // 5️⃣ Mark order as paid
     await orderRef.update({
       paid: true,
       paymentProvider: "flutterwave",
-      paymentRef: data.flw_ref || data.id,
+      paymentRef: event.data.id,
       paymentStatus: "confirmed",
       paidAt: admin.firestore.FieldValue.serverTimestamp(),
     });
