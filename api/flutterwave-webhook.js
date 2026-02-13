@@ -12,17 +12,20 @@ const db = admin.firestore();
 
 export default async function handler(req, res) {
   try {
-    // 🔐 Verify Flutterwave signature
     const signature = req.headers["verif-hash"];
 
-    if (!signature || signature !== process.env.FLUTTERWAVE_SECRET_HASH) {
+    if (!signature) {
+      console.error("❌ Missing Flutterwave signature");
+      return res.status(401).send("Unauthorized");
+    }
+
+    if (signature !== process.env.FLUTTERWAVE_SECRET_HASH) {
       console.error("❌ Invalid Flutterwave signature");
       return res.status(401).send("Unauthorized");
     }
 
     const event = req.body;
 
-    // ✅ We only care about successful payments
     if (event.event !== "charge.completed") {
       return res.status(200).send("Ignored");
     }
@@ -31,7 +34,6 @@ export default async function handler(req, res) {
       return res.status(200).send("Not successful");
     }
 
-    // 🔑 tx_ref === orderId (THIS MATCHES YOUR FRONTEND)
     const orderId = event.data.tx_ref;
 
     if (!orderId) {
