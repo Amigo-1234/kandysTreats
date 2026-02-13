@@ -12,25 +12,33 @@ const db = admin.firestore();
 
 export default async function handler(req, res) {
   try {
-    // 🔐 Verify Flutterwave signature
     const signature = req.headers["verif-hash"];
-    if (signature !== process.env.FLUTTERWAVE_SECRET_HASH) {
+
+    // 🔐 SECURITY CHECK
+    if (!signature || signature !== process.env.FLUTTERWAVE_SECRET_HASH) {
       console.error("❌ Invalid Flutterwave signature");
       return res.status(401).send("Unauthorized");
     }
 
     const event = req.body;
-    const data = event?.data;
 
-    // ✅ Only process successful payments (card, transfer, etc.)
-    if (!data || data.status !== "successful") {
-      return res.status(200).send("Not successful");
+    console.log("📥 Flutterwave event received:", event.event);
+    console.log("📦 Payload:", JSON.stringify(event.data));
+
+    // ✅ Accept only completed charges
+    if (
+      event.event !== "charge.completed" ||
+      event.data?.status !== "successful"
+    ) {
+      console.log("⚠️ Ignored event:", event.event, event.data?.status);
+      return res.status(200).send("Ignored");
     }
 
-    // 🔑 tx_ref is YOUR order ID
+    const data = event.data;
     const orderId = data.tx_ref;
+
     if (!orderId) {
-      console.error("❌ Missing tx_ref", data);
+      console.error("❌ Missing tx_ref");
       return res.status(200).send("Missing tx_ref");
     }
 
@@ -42,22 +50,24 @@ export default async function handler(req, res) {
       return res.status(200).send("Order not found");
     }
 
-    // 🛑 Idempotency: prevent double updates
+    // 🔁 Idempotency protection
     if (snap.data().paid === true) {
+      console.log("🔁 Already processed:", orderId);
       return res.status(200).send("Already processed");
     }
 
-    // ✅ Mark order as paid
+    // ✅ MARK AS PAID
     await orderRef.update({
       paid: true,
       paymentProvider: "flutterwave",
-      paymentRef: String(data.id || data.flw_ref),
-      paymentType: data.payment_type || data.payment_options || "unknown",
+      paymentRef: String(data.id),
+      paymentType: data.payment_type || "bank_transfer",
       paymentStatus: "confirmed",
       paidAt: admin.firestore.FieldValue.serverTimestamp(),
+      lastStatusUpdateAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    console.log("✅ Flutterwave payment confirmed:", orderId);
+    console.log("✅ Flutterwave payment CONFIRMED:", orderId);
     return res.status(200).send("OK");
   } catch (err) {
     console.error("🔥 Flutterwave webhook error:", err);
