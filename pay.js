@@ -147,35 +147,42 @@ flutterwaveBtn.addEventListener("click", () => {
 
   disableButtons();
 
-  FlutterwaveCheckout({
-    public_key: "FLWPUBK-3094f9362789db81b6b2afb5e7c1a080-X",
+  let flwPaymentCompleted = false;
 
-    // 🔑 MUST MATCH WEBHOOK
-    tx_ref: orderId,
+FlutterwaveCheckout({
+  public_key: "FLWPUBK-3094f9362789db81b6b2afb5e7c1a080-X",
+  tx_ref: orderId,
+  amount: orderData.total,
+  currency: "NGN",
 
-    amount: orderData.total,
-    currency: "NGN",
+  customer: {
+    email: orderData.customer?.email || "ads.kandystreats@gmail.com",
+    phone_number: orderData.customer?.phone,
+    name: orderData.customer?.name,
+  },
 
-    customer: {
-      email: orderData.customer?.email || "ads.kandystreats@gmail.com",
-      phone_number: orderData.customer?.phone,
-      name: orderData.customer?.name,
-    },
+  callback: (res) => {
+    console.log("FLW CALLBACK:", res);
 
-    callback: (res) => {
-      if (res.status === "successful") {
-        // ❌ DO NOTHING
-        // ✅ WEBHOOK CONFIRMS
-        window.location.href = `/track.html?code=${orderId}&verifying=1`;
-      }
-    },
+    if (res.status === "successful") {
+      flwPaymentCompleted = true;
 
-    onclose: () => {
+      // 🚀 Redirect immediately
+      window.location.href = `/track.html?code=${orderId}&verifying=1`;
+    }
+  },
+
+  onclose: () => {
+    console.log("FLW CLOSED");
+
+    // ❌ Only show cancel if payment DID NOT succeed
+    if (!flwPaymentCompleted) {
       showError("Payment cancelled.");
       paystackBtn.disabled = false;
       flutterwaveBtn.disabled = false;
     }
-  });
+  }
+});
 });
 
 /* ================= NAV ================= */
