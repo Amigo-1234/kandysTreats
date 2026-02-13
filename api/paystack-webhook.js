@@ -26,44 +26,41 @@ export default async function handler(req, res) {
 
     const event = req.body;
 
+    // 🔎 LOG EVERYTHING
+    await db.collection("paymentLogs").add({
+      provider: "paystack",
+      event,
+      receivedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
     if (event.event !== "charge.success") {
       return res.status(200).send("Ignored");
     }
 
-    // ✅ ALWAYS USE METADATA FIRST
     const orderId =
       event.data.metadata?.orderId ||
       event.data.metadata?.custom_fields?.find(f => f.variable_name === "orderId")?.value;
 
-    if (!orderId) {
-      console.error("❌ Missing orderId in metadata", event.data.reference);
-      return res.status(200).send("Missing orderId");
-    }
+    if (!orderId) return res.status(200).send("Missing orderId");
 
     const ref = db.collection("orders").doc(orderId);
     const snap = await ref.get();
 
-    if (!snap.exists) {
-      console.error("❌ Order not found:", orderId);
-      return res.status(200).send("Order not found");
-    }
-
-    if (snap.data().paid === true) {
-      return res.status(200).send("Already processed");
-    }
+    if (!snap.exists) return res.status(200).send("Order not found");
+    if (snap.data().paid === true) return res.status(200).send("Already processed");
 
     await ref.update({
       paid: true,
       paymentProvider: "paystack",
-      paymentRef: event.data.reference, // store Paystack ref separately
+      paymentRef: event.data.reference,
       paymentStatus: "confirmed",
       paidAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    console.log("✅ Payment confirmed:", orderId);
+    console.log("✅ Paystack confirmed:", orderId);
     return res.status(200).send("OK");
   } catch (err) {
-    console.error("🔥 Webhook error:", err);
+    console.error("🔥 Paystack webhook error:", err);
     return res.status(500).send("Webhook error");
   }
 }

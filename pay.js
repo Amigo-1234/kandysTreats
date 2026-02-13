@@ -33,6 +33,7 @@ const qs = new URLSearchParams(window.location.search);
 const orderId = qs.get("order");
 
 let orderData = null;
+let flutterwaveCompleted = false;
 
 const showError = (msg) => {
   errorEl.textContent = msg;
@@ -66,7 +67,6 @@ async function loadOrder() {
 
   orderData = snap.data();
 
-  // Already paid → go to tracking
   if (orderData.paid === true) {
     window.location.href = `/track.html?code=${orderId}`;
     return;
@@ -83,10 +83,7 @@ loadOrder();
 /* ================= PAYSTACK ================= */
 
 paystackBtn.addEventListener("click", () => {
-  if (!orderData) {
-    showError("Order not ready.");
-    return;
-  }
+  if (!orderData) return showError("Order not ready.");
 
   disableButtons();
 
@@ -116,18 +113,13 @@ paystackBtn.addEventListener("click", () => {
 
 flutterwaveBtn.addEventListener("click", () => {
   if (!window.FlutterwaveCheckout) {
-    showError("Flutterwave failed to load.");
-    return;
+    return showError("Flutterwave failed to load.");
   }
 
-  if (!orderData) {
-    showError("Order not ready.");
-    return;
-  }
+  if (!orderData) return showError("Order not ready.");
 
   disableButtons();
-
-  let flwPaymentCompleted = false;
+  flutterwaveCompleted = false;
 
   FlutterwaveCheckout({
     public_key: "FLWPUBK-3094f9362789db81b6b2afb5e7c1a080-X",
@@ -142,18 +134,16 @@ flutterwaveBtn.addEventListener("click", () => {
     },
 
     callback: (res) => {
-      console.log("FLUTTERWAVE CALLBACK:", res);
+      console.log("FLW CALLBACK:", res);
 
       if (res.status === "successful") {
-        flwPaymentCompleted = true;
+        flutterwaveCompleted = true;
         window.location.href = `/track.html?code=${orderId}&verifying=1`;
       }
     },
 
     onclose: () => {
-      console.log("FLUTTERWAVE CLOSED");
-
-      if (!flwPaymentCompleted) {
+      if (!flutterwaveCompleted) {
         showError("Payment cancelled.");
         enableButtons();
       }
