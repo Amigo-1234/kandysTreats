@@ -86,11 +86,23 @@ paystackBtn.addEventListener("click", () => {
     reference: orderId,
 
     metadata: {
-      custom_fields: [
-        { display_name: "Customer", value: orderData.customer?.name || "" },
-        { display_name: "Phone", value: orderData.customer?.phone || "" }
-      ]
+  orderId: orderId,
+  custom_fields: [
+    {
+      display_name: "Order ID",
+      variable_name: "orderId",
+      value: orderId
     },
+    {
+      display_name: "Customer",
+      value: orderData.customer?.name || ""
+    },
+    {
+      display_name: "Phone",
+      value: orderData.customer?.phone || ""
+    }
+  ]
+},
 
     onSuccess: () => {
       // ✅ DO NOTHING — webhook will confirm payment

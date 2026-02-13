@@ -30,18 +30,18 @@ export default async function handler(req, res) {
       return res.status(200).send("Ignored");
     }
 
-    // ✅ WORKS FOR BANK TRANSFER + CARD
+    // ✅ ALWAYS USE METADATA FIRST
     const orderId =
-      event.data.reference ||
-      event.data.metadata?.orderId;
+      event.data.metadata?.orderId ||
+      event.data.metadata?.custom_fields?.find(f => f.variable_name === "orderId")?.value;
 
     if (!orderId) {
-      console.error("❌ Missing orderId");
+      console.error("❌ Missing orderId in metadata", event.data.reference);
       return res.status(200).send("Missing orderId");
     }
 
-    const orderRef = db.collection("orders").doc(orderId);
-    const snap = await orderRef.get();
+    const ref = db.collection("orders").doc(orderId);
+    const snap = await ref.get();
 
     if (!snap.exists) {
       console.error("❌ Order not found:", orderId);
@@ -52,10 +52,10 @@ export default async function handler(req, res) {
       return res.status(200).send("Already processed");
     }
 
-    await orderRef.update({
+    await ref.update({
       paid: true,
       paymentProvider: "paystack",
-      paymentRef: event.data.reference,
+      paymentRef: event.data.reference, // store Paystack ref separately
       paymentStatus: "confirmed",
       paidAt: admin.firestore.FieldValue.serverTimestamp(),
     });
