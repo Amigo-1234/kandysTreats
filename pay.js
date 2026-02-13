@@ -31,8 +31,11 @@ const errorEl = document.getElementById("pay-error");
 
 const qs = new URLSearchParams(window.location.search);
 const orderId = qs.get("order");
+window.__ORDER_ID__ = orderId;
+
 
 let orderData = null;
+window.__ORDER_DATA__ = null;
 
 const showError = (msg) => {
   errorEl.textContent = msg;
@@ -60,6 +63,8 @@ async function loadOrder() {
   }
 
   orderData = snap.data();
+  window.__ORDER_DATA__ = orderData;
+
 
   // 🔒 Already paid → go to tracking
   if (orderData.paid === true) {
