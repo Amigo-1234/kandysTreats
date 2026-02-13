@@ -143,11 +143,11 @@ flutterwaveBtn.addEventListener("click", () => {
     },
 
     onclose: () => {
-      if (!flutterwaveCompleted) {
-        showError("Payment cancelled.");
-        enableButtons();
-      }
-    }
+  if (!flwPaymentCompleted) {
+    showError("Payment window closed.");
+    enableButtons();
+  }
+}
   });
 });
 

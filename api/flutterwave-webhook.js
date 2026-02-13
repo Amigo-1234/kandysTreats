@@ -12,29 +12,23 @@ const db = admin.firestore();
 
 export default async function handler(req, res) {
   try {
+    // 🔐 Verify Flutterwave signature
     const signature = req.headers["verif-hash"];
-
-    if (!signature || signature !== process.env.FLUTTERWAVE_SECRET_HASH) {
+    if (signature !== process.env.FLUTTERWAVE_SECRET_HASH) {
       console.error("❌ Invalid Flutterwave signature");
       return res.status(401).send("Unauthorized");
     }
 
     const event = req.body;
+    const data = event?.data;
 
-    // ✅ Only care about completed charges
-    if (event.event !== "charge.completed") {
-      return res.status(200).send("Ignored");
-    }
-
-    const data = event.data;
-
-    // ✅ Must be successful
-    if (data?.status !== "successful") {
+    // ✅ Only process successful payments (card, transfer, etc.)
+    if (!data || data.status !== "successful") {
       return res.status(200).send("Not successful");
     }
 
+    // 🔑 tx_ref is YOUR order ID
     const orderId = data.tx_ref;
-
     if (!orderId) {
       console.error("❌ Missing tx_ref", data);
       return res.status(200).send("Missing tx_ref");
@@ -48,16 +42,17 @@ export default async function handler(req, res) {
       return res.status(200).send("Order not found");
     }
 
-    // ✅ Idempotent protection
+    // 🛑 Idempotency: prevent double updates
     if (snap.data().paid === true) {
       return res.status(200).send("Already processed");
     }
 
+    // ✅ Mark order as paid
     await orderRef.update({
       paid: true,
       paymentProvider: "flutterwave",
-      paymentRef: String(data.id),
-      paymentType: data.payment_type || "unknown",
+      paymentRef: String(data.id || data.flw_ref),
+      paymentType: data.payment_type || data.payment_options || "unknown",
       paymentStatus: "confirmed",
       paidAt: admin.firestore.FieldValue.serverTimestamp(),
     });
