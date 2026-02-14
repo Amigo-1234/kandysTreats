@@ -3724,3 +3724,36 @@ body {
 .section {
   margin-bottom: 24px;
 }
+.val-float-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2; /* 👈 IMPORTANT */
+}
+
+.val-float-layer span {
+  position: absolute;
+  bottom: -30px;
+  font-size: 18px;
+  opacity: 0.3;
+  filter: drop-shadow(0 0 6px rgba(232, 76, 136, 0.4));
+  animation: floatLove 16s ease-in infinite;
+}
+
+@keyframes floatLove {
+  0% {
+    transform: translateY(0) scale(0.9);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.35;
+  }
+  85% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateY(-110vh) scale(1.15);
+    opacity: 0;
+  }
+}

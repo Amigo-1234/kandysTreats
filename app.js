@@ -2038,6 +2038,7 @@ function renderQuickPickCard(id, data) {
       ` : ""}
     </div>
 
+
     <div class="val-body">
       <h3 class="val-title">${data.title}</h3>
       <p class="val-desc">${data.description || "Perfect combo for someone special 💕"}</p>
@@ -2047,6 +2048,8 @@ function renderQuickPickCard(id, data) {
           ${data.items.length} items
         </span>
       </div>
+
+      
 
       <button class="btn btn-primary val-btn">
         Add to cart
@@ -2073,6 +2076,27 @@ function renderQuickPickCard(id, data) {
   return card;
 }
 
+(function spawnValentineHearts() {
+  const layer = document.querySelector(".val-float-layer");
+  if (!layer) return;
+
+  const hearts = ["❤️", "💖", "💗", "💕"];
+
+  setInterval(() => {
+    const span = document.createElement("span");
+    span.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+
+    // Avoid edges — float near cards
+    span.style.left = 10 + Math.random() * 80 + "%";
+
+    span.style.animationDuration =
+      14 + Math.random() * 6 + "s";
+
+    layer.appendChild(span);
+
+    setTimeout(() => span.remove(), 20000);
+  }, 2000); // 👈 slightly more frequent
+})();
 
 // Init
 document.addEventListener("DOMContentLoaded", () => {
