@@ -11,7 +11,7 @@
   <style>
     .qp-layout {
       display: grid;
-      grid-template-columns: 2fr 1fr;
+      grid-template-columns: 2.2fr 1fr;
       gap: 24px;
     }
 
@@ -19,6 +19,35 @@
       .qp-layout {
         grid-template-columns: 1fr;
       }
+    }
+
+    /* HEADER FORM */
+    .qp-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .qp-header input {
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #fff;
+    }
+
+    .qp-header .full {
+      grid-column: 1 / -1;
+    }
+
+    .valentine-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      font-size: 14px;
+      cursor: pointer;
     }
 
     /* FOOD GRID */
@@ -33,22 +62,12 @@
       border-radius: 16px;
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.08);
-      cursor: pointer;
       transition: 0.2s;
     }
 
     .qp-food-card.active {
       border-color: #e84c88;
       background: rgba(232,76,136,0.18);
-    }
-
-    .qp-food-card h4 {
-      margin: 0 0 6px;
-      font-size: 14px;
-    }
-
-    .qp-food-card small {
-      opacity: 0.7;
     }
 
     .qp-qty {
@@ -65,11 +84,10 @@
       border: none;
       background: #e84c88;
       color: #fff;
-      font-size: 16px;
       cursor: pointer;
     }
 
-    /* SUMMARY */
+    /* RIGHT PANEL */
     .qp-summary {
       position: sticky;
       top: 20px;
@@ -79,26 +97,14 @@
       border: 1px solid rgba(255,255,255,0.1);
     }
 
-    .qp-summary h3 {
-      margin-top: 0;
-    }
-
-    .qp-summary ul {
-      padding-left: 16px;
-      margin: 10px 0;
-    }
-
-    .qp-summary li {
-      font-size: 14px;
-      margin-bottom: 4px;
-    }
-
-    .valentine-tag {
-      display: inline-flex;
-      gap: 6px;
+    .saved-card {
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.06);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      margin-top: 10px;
-      font-size: 14px;
     }
   </style>
 </head>
@@ -106,44 +112,58 @@
 <body class="page page-admin">
 <div class="page-shell">
 
-  <header class="section">
-    <div class="section-header inline">
-      <div>
-        <h1>Quick Picks</h1>
-        <p class="muted">Build combos visually — tap to add food</p>
-      </div>
-      <a href="menu-builder.html" class="btn btn-ghost btn-sm">
-        ← Back
-      </a>
+<header class="section">
+  <div class="section-header inline">
+    <div>
+      <h1>Quick Picks</h1>
+      <p class="muted">Build combos visually — tap to add food</p>
     </div>
-  </header>
+    <a href="menu-builder.html" class="btn btn-ghost btn-sm">← Back</a>
+  </div>
+</header>
 
-  <main class="section qp-layout">
+<main class="section qp-layout">
 
-    <!-- LEFT: FOOD PICKER -->
-    <section class="glass-card">
+  <!-- LEFT -->
+  <section class="glass-card">
+
+    <div class="qp-header">
       <input id="qp-title" placeholder="Combo name (e.g. Valentine Lovers Pack)" />
-      <input id="qp-desc" placeholder="Short description" />
       <input id="qp-image" placeholder="Image URL" />
+      <input id="qp-desc" class="full" placeholder="Short description" />
+    </div>
 
-      <label class="valentine-tag">
-        <input type="checkbox" id="qp-valentine">
-        ❤️ Valentine Special
-      </label>
+    <label class="valentine-chip">
+      <input type="checkbox" id="qp-valentine" />
+      ❤️ Valentine Special
+    </label>
 
-      <h3 style="margin-top:20px">Pick foods</h3>
-      <div id="qp-food-grid" class="qp-food-grid"></div>
-    </section>
+    <h3 style="margin-top:20px">Pick foods</h3>
+    <div id="qp-food-grid" class="qp-food-grid"></div>
 
-    <!-- RIGHT: SUMMARY -->
-    <aside class="qp-summary">
+  </section>
+
+  <!-- RIGHT -->
+  <aside class="qp-summary">
+
   <h3>Saved Quick Picks</h3>
 
-  <div id="qp-items" class="qp-saved-list"></div>
+  <div id="qp-saved" class="qp-saved-list">
+    <!-- saved quick picks render here -->
+  </div>
+
+  <div class="qp-save-wrap">
+    <button
+      id="save-quick-pick"
+      class="btn btn-primary qp-save-btn"
+    >
+      Save Quick Pick
+    </button>
+  </div>
+
 </aside>
 
-  </main>
-
+</main>
 </div>
 
 <script src="app.js" type="module"></script>

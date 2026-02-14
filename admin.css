@@ -275,3 +275,41 @@
   display: flex;
   gap: 8px;
 }
+
+/* RIGHT PANEL */
+.qp-summary {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 160px); /* keeps it tall but not crazy */
+  position: sticky;
+  top: 20px;
+}
+
+/* SCROLLABLE SAVED LIST */
+.qp-saved-list {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 6px;
+  margin-bottom: 14px;
+}
+
+/* STICKY SAVE BUTTON */
+.qp-save-wrap {
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(
+    to top,
+    rgba(30, 8, 25, 0.95),
+    rgba(30, 8, 25, 0.6),
+    transparent
+  );
+  padding-top: 14px;
+}
+
+/* BUTTON STYLE (extra polish) */
+.qp-save-btn {
+  width: 100%;
+  border-radius: 18px;
+  font-size: 16px;
+  padding: 14px;
+}

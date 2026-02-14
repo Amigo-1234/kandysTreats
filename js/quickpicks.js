@@ -11,10 +11,10 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 document.addEventListener("DOMContentLoaded", () => {
+
   // ================= ELEMENTS =================
   const grid = document.getElementById("qp-food-grid");
-  const summaryList = document.getElementById("qp-summary-items");
-  const totalEl = document.getElementById("qp-total");
+  const savedWrap = document.getElementById("qp-saved");
   const saveBtn = document.getElementById("save-quick-pick");
 
   const titleInput = document.getElementById("qp-title");
@@ -22,9 +22,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const imageInput = document.getElementById("qp-image");
   const valentineInput = document.getElementById("qp-valentine");
 
+  if (!grid || !saveBtn) return;
+
   const selected = {}; // selected foods
 
-  // ================= LOAD MENU =================
+  // ================= LOAD MENU ITEMS =================
   onSnapshot(collection(window.db, "menus"), snap => {
     grid.innerHTML = "";
 
@@ -64,8 +66,6 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           delete selected[docSnap.id];
         }
-
-        renderSummary();
       }
 
       plus.onclick = () => {
@@ -82,25 +82,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // ================= SUMMARY =================
-  function renderSummary() {
-    summaryList.innerHTML = "";
-    let total = 0;
-
-    Object.values(selected).forEach(i => {
-      total += i.price * i.qty;
-      const li = document.createElement("li");
-      li.textContent = `${i.qty} × ${i.name}`;
-      summaryList.appendChild(li);
-    });
-
-    totalEl.textContent = `₦${total.toLocaleString("en-NG")}`;
-  }
-
   // ================= SAVE QUICK PICK =================
-  saveBtn.addEventListener("click", async (e) => {
-    e.preventDefault();
-
+  saveBtn.onclick = async () => {
     const title = titleInput.value.trim();
     const items = Object.values(selected);
 
@@ -128,14 +111,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       showToast("Quick Pick saved ❤️");
 
-      // reset UI
+      // RESET FORM
       titleInput.value = "";
       descInput.value = "";
       imageInput.value = "";
       valentineInput.checked = false;
 
       Object.keys(selected).forEach(k => delete selected[k]);
-      renderSummary();
 
       document.querySelectorAll(".qp-food-card").forEach(card => {
         card.classList.remove("active");
@@ -146,69 +128,18 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error(err);
       showToast("Failed to save quick pick");
     }
-  });
+  };
 
-  // ================= EXISTING QUICK PICKS (ADMIN CONTROL) =================
-  const qpItems = document.getElementById("qp-items");
-  if (!qpItems) return;
+  // ================= SAVED QUICK PICKS (RIGHT PANEL) =================
+  if (!savedWrap) return;
 
-  onSnapshot(
-    query(collection(window.db, "quickPicks"), orderBy("priority", "desc")),
-    snap => {
-      qpItems.innerHTML = "";
-
-      snap.forEach(docSnap => {
-        const qp = docSnap.data();
-
-        const card = document.createElement("div");
-        card.className = "qp-admin-card";
-
-        card.innerHTML = `
-          <div>
-            <strong>${qp.title}</strong>
-            <div class="muted">${qp.items.length} items</div>
-            ${qp.isValentine ? `<span class="chip">❤️ Valentine</span>` : ""}
-          </div>
-
-          <div class="qp-actions">
-            <button class="btn btn-sm ${qp.active ? "btn-primary" : "btn-outline"}">
-              ${qp.active ? "Active" : "Hidden"}
-            </button>
-            <button class="btn btn-ghost btn-sm">🗑</button>
-          </div>
-        `;
-
-        // toggle active (hide/show)
-        card.querySelector(".btn-sm").onclick = async () => {
-          await updateDoc(doc(window.db, "quickPicks", docSnap.id), {
-            active: !qp.active
-          });
-        };
-
-        // delete
-        card.querySelector(".btn-ghost").onclick = async () => {
-          if (!confirm("Delete this quick pick?")) return;
-          await deleteDoc(doc(window.db, "quickPicks", docSnap.id));
-          showToast("Quick Pick deleted");
-        };
-
-        qpItems.appendChild(card);
-      });
-    }
-  );
-});
-
-
-const qpItems = document.getElementById("qp-items");
-
-if (qpItems) {
   onSnapshot(
     query(collection(window.db, "quickPicks"), orderBy("createdAt", "desc")),
     snap => {
-      qpItems.innerHTML = "";
+      savedWrap.innerHTML = "";
 
       if (snap.empty) {
-        qpItems.innerHTML = `<p class="muted">No quick picks yet</p>`;
+        savedWrap.innerHTML = `<p class="muted">No quick picks yet</p>`;
         return;
       }
 
@@ -216,16 +147,18 @@ if (qpItems) {
         const qp = docSnap.data();
 
         const card = document.createElement("div");
-        card.className = "qp-saved-card";
+        card.className = "saved-card";
 
         card.innerHTML = `
-          <h4>${qp.title}</h4>
-          <div class="qp-meta">
-            ${qp.items.length} items
-            ${qp.isValentine ? " • ❤️ Valentine" : ""}
+          <div>
+            <strong>${qp.title}</strong><br>
+            <small>
+              ${qp.items.length} items
+              ${qp.isValentine ? " • ❤️ Valentine" : ""}
+            </small>
           </div>
 
-          <div class="qp-actions">
+          <div style="display:flex;gap:8px;">
             <button class="btn btn-sm ${qp.active ? "btn-primary" : "btn-outline"}">
               ${qp.active ? "Active" : "Hidden"}
             </button>
@@ -234,21 +167,23 @@ if (qpItems) {
           </div>
         `;
 
-        // Toggle active / hidden
-        card.querySelector(".btn-primary, .btn-outline").onclick = () => {
-          updateDoc(doc(window.db, "quickPicks", docSnap.id), {
+        // TOGGLE ACTIVE / HIDDEN
+        card.querySelector(".btn-sm").onclick = async () => {
+          await updateDoc(doc(window.db, "quickPicks", docSnap.id), {
             active: !qp.active
           });
         };
 
-        // Delete
+        // DELETE
         card.querySelector(".btn-ghost").onclick = async () => {
           if (!confirm("Delete this quick pick?")) return;
           await deleteDoc(doc(window.db, "quickPicks", docSnap.id));
+          showToast("Quick Pick deleted");
         };
 
-        qpItems.appendChild(card);
+        savedWrap.appendChild(card);
       });
     }
   );
-}
+
+});
