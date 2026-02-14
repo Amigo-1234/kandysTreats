@@ -192,19 +192,25 @@ const getRandomImage = () =>
 function normalizePhone(phone) {
   if (!phone) return "";
 
-  let p = phone.replace(/\D/g, "");
+  // Remove spaces, dashes, brackets — keep digits only
+  let p = phone.replace(/[^\d]/g, "");
 
-  // Nigerian local number → add country code
-  if (p.startsWith("0")) {
-    p = "234" + p.slice(1);
+  // 🇳🇬 Nigerian local number: 070..., 080..., 090...
+  if (p.length === 11 && p.startsWith("0")) {
+    return "234" + p.slice(1);
   }
 
-  // Already Nigerian international
-  if (p.startsWith("234")) {
+  // 🇳🇬 Nigerian without leading 0 (705...)
+  if (p.length === 10 && p.startsWith("7")) {
+    return "234" + p;
+  }
+
+  // Already correct Nigerian international
+  if (p.startsWith("234") && p.length === 13) {
     return p;
   }
 
-  // Fallback (already international)
+  // Fallback: return as-is (international)
   return p;
 }
 
@@ -1381,7 +1387,7 @@ detailPanel.addEventListener("click", async (e) => {
   const btn = e.target.closest(".chip-status");
   if (!btn) return;
 
-  // ✅ OPEN TAB IMMEDIATELY (USER CLICK = NOT BLOCKED)
+  // ✅ OPEN WHATSAPP TAB IMMEDIATELY (NO BLOCKING)
   const waTab = window.open("", "_blank");
 
   const id = STATE.selectedOrderId;
@@ -1406,15 +1412,15 @@ detailPanel.addEventListener("click", async (e) => {
   isUpdatingStatus = true;
 
   try {
-    // 🔄 Update Firestore
+    // 🔄 FIRESTORE
     await updateDoc(doc(window.db, "orders", id), {
       status: newStatus,
       lastStatusUpdateAt: serverTimestamp()
     });
 
-    // 📧 Optional email
+    // 📧 EMAIL — STILL HERE, STILL WORKS
     if (order.customer?.email && window.emailjs) {
-      await emailjs.send(
+      emailjs.send(
         "service_37w08c5",
         "template_ux47usd",
         {
@@ -1426,7 +1432,7 @@ detailPanel.addEventListener("click", async (e) => {
       ).catch(() => {});
     }
 
-    // 📲 WhatsApp (NEW TAB – SAFE)
+    // 📲 WHATSAPP (OUTSIDE SITE, INSTANT)
     const phone = normalizePhone(order.customer.phone);
     const msg = buildWhatsAppMessage(order, newStatus);
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
@@ -1441,41 +1447,53 @@ detailPanel.addEventListener("click", async (e) => {
   } finally {
     setTimeout(() => {
       isUpdatingStatus = false;
-    }, 500);
+    }, 400);
   }
 });
-
 function buildWhatsAppMessage(order, status) {
-  const allItems = order.subOrders
+  const items = order.subOrders
     ? order.subOrders.flatMap(sub => sub.items)
-    : [];
+    : order.items || [];
 
-  return `
-Hello ${order.customer.name},
+  const itemsText = items.length
+    ? items.map(i => `• ${i.qty} x ${i.name}`).join("\n")
+    : "• None";
 
-Your order (${order.id}) is now *${status}*.
+  return (
+`Hello ${order.customer.name} 👋
 
-Items:
-${allItems.length
-  ? allItems.map(i => `• ${i.qty} × ${i.name}`).join("\n")
-  : "No items"}
+Order Update from Kandys Treats
 
-Thank you for ordering from Kandys Treats ❤️
-`.trim();
+Order ID: ${order.id}
+Status: ${status}
+
+Order Summary:
+${itemsText}
+
+Total Paid: ₦${Number(order.total || 0).toLocaleString("en-NG")}
+
+Reply here if you need help 🙂
+
+Thank you for choosing Kandys Treats ❤️`
+  );
 }
 
-function sendWhatsApp(order, status) {
-  const phone = normalizePhone(order.customer?.phone);
-  if (!phone) {
-    showToast("Customer phone number missing");
-    return;
-  }
+function openWhatsApp(phone, message) {
+  const encoded = encodeURIComponent(message);
 
-  const message = buildWhatsAppMessage(order, status);
-  const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  // 1️⃣ Try deep link (mobile WhatsApp app)
+  const appLink = `whatsapp://send?phone=${phone}&text=${encoded}`;
 
-  // ✅ NOT blocked by popup blockers
-  window.location.href = url;
+  // 2️⃣ Fallback (official, works everywhere)
+  const webLink = `https://wa.me/${phone}?text=${encoded}`;
+
+  // Attempt app open
+  window.location.href = appLink;
+
+  // Fallback after short delay
+  setTimeout(() => {
+    window.location.href = webLink;
+  }, 800);
 }
 
 
