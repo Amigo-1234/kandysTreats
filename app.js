@@ -2021,29 +2021,40 @@ async function initQuickPicks() {
 }
 function renderQuickPickCard(id, data) {
   const card = document.createElement("article");
-  card.className = "menu-card glass-card interactive-card";
+  card.className = "val-card glass-card";
 
   card.innerHTML = `
-    <div class="menu-card-image"
-      style="background-image:url('${data.image || getRandomImage()}')">
-      ${data.isValentine ? `<span class="val-badge">❤️ Valentine</span>` : ""}
+    <div class="val-image-wrap">
+      <img 
+        src="${data.image || getRandomImage()}" 
+        alt="${data.title}"
+        loading="lazy"
+      />
+
+      ${data.isValentine ? `
+        <span class="val-badge">
+          ❤️ Valentine
+        </span>
+      ` : ""}
     </div>
 
-    <div class="menu-card-body">
-      <h3>${data.title}</h3>
-      <p>${data.description || ""}</p>
+    <div class="val-body">
+      <h3 class="val-title">${data.title}</h3>
+      <p class="val-desc">${data.description || "Perfect combo for someone special 💕"}</p>
 
-      <div class="menu-card-meta">
-        <span class="chip">${data.items.length} items</span>
+      <div class="val-meta">
+        <span class="val-chip">
+          ${data.items.length} items
+        </span>
       </div>
 
-      <button class="btn btn-primary quick-add">
+      <button class="btn btn-primary val-btn">
         Add to cart
       </button>
     </div>
   `;
 
-  card.querySelector("button").onclick = () => {
+  card.querySelector(".val-btn").onclick = () => {
     const cart = readCart();
 
     data.items.forEach(i => {
@@ -2056,12 +2067,11 @@ function renderQuickPickCard(id, data) {
     });
 
     saveCart(cart);
-    showToast(`${data.title} added to cart`);
+    showToast(`${data.title} added to cart ❤️`);
   };
 
   return card;
 }
-
 
 
 // Init
