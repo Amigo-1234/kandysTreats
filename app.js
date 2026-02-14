@@ -2023,6 +2023,12 @@ function renderQuickPickCard(id, data) {
   const card = document.createElement("article");
   card.className = "val-card glass-card";
 
+  // 🔢 CALCULATE TOTAL PRICE
+  const totalPrice = data.items.reduce(
+    (sum, i) => sum + (i.price * i.qty),
+    0
+  );
+
   card.innerHTML = `
     <div class="val-image-wrap">
       <img 
@@ -2032,24 +2038,27 @@ function renderQuickPickCard(id, data) {
       />
 
       ${data.isValentine ? `
-        <span class="val-badge">
-          ❤️ Valentine
-        </span>
+        <span class="val-badge">❤️ Valentine</span>
       ` : ""}
     </div>
 
-
     <div class="val-body">
       <h3 class="val-title">${data.title}</h3>
-      <p class="val-desc">${data.description || "Perfect combo for someone special 💕"}</p>
+
+      <!-- ✅ PRICE NOW VISIBLE -->
+      <p class="val-price">
+        From <strong>${formatPrice(totalPrice)}</strong>
+      </p>
+
+      <p class="val-desc">
+        ${data.description || "Perfect combo for someone special 💕"}
+      </p>
 
       <div class="val-meta">
         <span class="val-chip">
           ${data.items.length} items
         </span>
       </div>
-
-      
 
       <button class="btn btn-primary val-btn">
         Add to cart

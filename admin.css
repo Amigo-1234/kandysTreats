@@ -344,3 +344,9 @@
   border-top: 1px solid rgba(255,255,255,.08);
   font-size: 14px;
 }
+
+.val-price {
+  margin: 6px 0;
+  font-size: 15px;
+  color: #ffb6d9;
+}
