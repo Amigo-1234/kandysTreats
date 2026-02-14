@@ -314,3 +314,33 @@
   padding: 14px;
 }
 
+.qp-preview {
+  margin-bottom: 14px;
+  padding: 14px;
+}
+
+.qp-preview h3 {
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+
+.qp-preview-items {
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.qp-preview-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.qp-preview-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  font-size: 14px;
+}

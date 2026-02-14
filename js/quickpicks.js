@@ -10,9 +10,13 @@ import {
   doc
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
+/* ================= UTIL ================= */
+const formatPrice = (v) =>
+  `₦${Number(v || 0).toLocaleString("en-NG")}`;
+
 document.addEventListener("DOMContentLoaded", () => {
 
-  // ================= ELEMENTS =================
+  /* ================= ELEMENTS ================= */
   const grid = document.getElementById("qp-food-grid");
   const savedWrap = document.getElementById("qp-saved");
   const saveBtn = document.getElementById("save-quick-pick");
@@ -22,11 +26,42 @@ document.addEventListener("DOMContentLoaded", () => {
   const imageInput = document.getElementById("qp-image");
   const valentineInput = document.getElementById("qp-valentine");
 
+  const previewWrap = document.getElementById("qp-preview-items");
+  const previewTotal = document.getElementById("qp-preview-total");
+
   if (!grid || !saveBtn) return;
 
-  const selected = {}; // selected foods
+  /* ================= STATE ================= */
+  const selected = {}; // { menuId: { name, price, qty } }
 
-  // ================= LOAD MENU ITEMS =================
+  /* ================= PREVIEW ================= */
+  function updateQuickPickPreview(items) {
+    if (!previewWrap || !previewTotal) return;
+
+    if (!items.length) {
+      previewWrap.innerHTML = `<p class="muted">No items selected yet</p>`;
+      previewTotal.textContent = "₦0";
+      return;
+    }
+
+    let total = 0;
+
+    previewWrap.innerHTML = items.map(i => {
+      const sum = i.price * i.qty;
+      total += sum;
+
+      return `
+        <div class="qp-preview-item">
+          <span>${i.name} × ${i.qty}</span>
+          <strong>${formatPrice(sum)}</strong>
+        </div>
+      `;
+    }).join("");
+
+    previewTotal.textContent = formatPrice(total);
+  }
+
+  /* ================= LOAD MENU ================= */
   onSnapshot(collection(window.db, "menus"), snap => {
     grid.innerHTML = "";
 
@@ -39,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       card.innerHTML = `
         <h4>${item.name}</h4>
-        <small>₦${item.price.toLocaleString("en-NG")}</small>
+        <small>${formatPrice(item.price)}</small>
 
         <div class="qp-qty">
           <button class="minus">−</button>
@@ -66,6 +101,9 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           delete selected[docSnap.id];
         }
+
+        // 🔥 LIVE PREVIEW UPDATE
+        updateQuickPickPreview(Object.values(selected));
       }
 
       plus.onclick = () => {
@@ -80,9 +118,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       grid.appendChild(card);
     });
+
+    // reset preview on load
+    updateQuickPickPreview([]);
   });
 
-  // ================= SAVE QUICK PICK =================
+  /* ================= SAVE QUICK PICK ================= */
   saveBtn.onclick = async () => {
     const title = titleInput.value.trim();
     const items = Object.values(selected);
@@ -124,13 +165,15 @@ document.addEventListener("DOMContentLoaded", () => {
         card.querySelector("span").textContent = "0";
       });
 
+      updateQuickPickPreview([]);
+
     } catch (err) {
       console.error(err);
       showToast("Failed to save quick pick");
     }
   };
 
-  // ================= SAVED QUICK PICKS (RIGHT PANEL) =================
+  /* ================= SAVED QUICK PICKS ================= */
   if (!savedWrap) return;
 
   onSnapshot(
@@ -162,19 +205,16 @@ document.addEventListener("DOMContentLoaded", () => {
             <button class="btn btn-sm ${qp.active ? "btn-primary" : "btn-outline"}">
               ${qp.active ? "Active" : "Hidden"}
             </button>
-
             <button class="btn btn-ghost btn-sm">🗑</button>
           </div>
         `;
 
-        // TOGGLE ACTIVE / HIDDEN
         card.querySelector(".btn-sm").onclick = async () => {
           await updateDoc(doc(window.db, "quickPicks", docSnap.id), {
             active: !qp.active
           });
         };
 
-        // DELETE
         card.querySelector(".btn-ghost").onclick = async () => {
           if (!confirm("Delete this quick pick?")) return;
           await deleteDoc(doc(window.db, "quickPicks", docSnap.id));
@@ -185,5 +225,4 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   );
-
 });
