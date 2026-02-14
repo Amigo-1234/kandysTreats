@@ -5,167 +5,148 @@
   <title>Quick Picks | Kandys Treats</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Shared styles -->
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="admin.css" />
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#e84c88">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <!-- Page-only tweaks -->
   <style>
-    .quickpick-layout {
+    .qp-layout {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 2fr 1fr;
       gap: 24px;
     }
 
     @media (max-width: 900px) {
-      .quickpick-layout {
+      .qp-layout {
         grid-template-columns: 1fr;
       }
     }
 
-    .quickpick-form input {
-      width: 100%;
+    /* FOOD GRID */
+    .qp-food-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 14px;
+    }
+
+    .qp-food-card {
       padding: 14px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.04);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.08);
-      color: #fff;
-      margin-bottom: 14px;
-    }
-
-    .qp-food-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      max-height: 340px;
-      overflow-y: auto;
-      padding-right: 6px;
-    }
-
-    .qp-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 12px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .qp-row label {
-      display: flex;
-      align-items: center;
-      gap: 10px;
       cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .qp-food-card.active {
+      border-color: #e84c88;
+      background: rgba(232,76,136,0.18);
+    }
+
+    .qp-food-card h4 {
+      margin: 0 0 6px;
       font-size: 14px;
     }
 
-    .qp-row input[type="number"] {
-      width: 70px;
-      text-align: center;
-      border-radius: 10px;
-      padding: 8px;
-      background: rgba(0,0,0,0.35);
+    .qp-food-card small {
+      opacity: 0.7;
+    }
+
+    .qp-qty {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .qp-qty button {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: none;
+      background: #e84c88;
       color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    /* SUMMARY */
+    .qp-summary {
+      position: sticky;
+      top: 20px;
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.07);
       border: 1px solid rgba(255,255,255,0.1);
     }
 
-    .qp-card {
-      display: flex;
-      gap: 14px;
-      padding: 14px;
-      border-radius: 16px;
-      background: linear-gradient(
-        145deg,
-        rgba(255,255,255,0.06),
-        rgba(255,255,255,0.02)
-      );
-      border: 1px solid rgba(255,255,255,0.08);
-      margin-bottom: 14px;
+    .qp-summary h3 {
+      margin-top: 0;
     }
 
-    .qp-card img {
-      width: 90px;
-      height: 90px;
-      object-fit: cover;
-      border-radius: 12px;
+    .qp-summary ul {
+      padding-left: 16px;
+      margin: 10px 0;
     }
 
-    .qp-card h4 {
-      margin: 0 0 6px;
+    .qp-summary li {
+      font-size: 14px;
+      margin-bottom: 4px;
     }
 
-    .qp-card-actions {
-      margin-left: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    .valentine-tag {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      margin-top: 10px;
+      font-size: 14px;
     }
   </style>
 </head>
 
 <body class="page page-admin">
-  <div class="page-shell">
+<div class="page-shell">
 
-    <!-- Header -->
-    <header class="section">
-      <div class="section-header inline">
-        <div>
-          <h1>Quick Picks</h1>
-          <p class="muted">
-            Create ready-made combos customers can add to cart instantly
-          </p>
-        </div>
-
-        <a href="menu-builder.html" class="btn btn-ghost btn-sm">
-          ← Back to Menu Builder
-        </a>
+  <header class="section">
+    <div class="section-header inline">
+      <div>
+        <h1>Quick Picks</h1>
+        <p class="muted">Build combos visually — tap to add food</p>
       </div>
-    </header>
+      <a href="menu-builder.html" class="btn btn-ghost btn-sm">
+        ← Back
+      </a>
+    </div>
+  </header>
 
-    <!-- Content -->
-    <main class="section quickpick-layout">
+  <main class="section qp-layout">
 
-      <!-- CREATE QUICK PICK -->
-      <section class="glass-card">
-        <h3>Create New Quick Pick</h3>
+    <!-- LEFT: FOOD PICKER -->
+    <section class="glass-card">
+      <input id="qp-title" placeholder="Combo name (e.g. Valentine Lovers Pack)" />
+      <input id="qp-desc" placeholder="Short description" />
+      <input id="qp-image" placeholder="Image URL" />
 
-        <form id="quick-pick-form" class="quickpick-form">
-          <input id="qp-title" placeholder="Combo name (e.g. Late Night Special)" required />
-          <input id="qp-desc" placeholder="Short description" />
-          <input id="qp-image" placeholder="Image URL" />
+      <label class="valentine-tag">
+        <input type="checkbox" id="qp-valentine">
+        ❤️ Valentine Special
+      </label>
 
-          <h4 style="margin:18px 0 10px;">Select foods</h4>
+      <h3 style="margin-top:20px">Pick foods</h3>
+      <div id="qp-food-grid" class="qp-food-grid"></div>
+    </section>
 
-          <div id="qp-menu-list" class="qp-food-list">
-            <!-- populated from Firestore -->
-          </div>
+    <!-- RIGHT: SUMMARY -->
+    <aside class="qp-summary">
+  <h3>Saved Quick Picks</h3>
 
-          <button class="btn btn-primary" style="margin-top:18px;">
-            Save Quick Pick
-          </button>
-        </form>
-      </section>
+  <div id="qp-items" class="qp-saved-list"></div>
+</aside>
 
-      <!-- EXISTING QUICK PICKS -->
-      <section class="glass-card">
-        <h3>Existing Quick Picks</h3>
+  </main>
 
-        <div id="qp-items">
-          <!-- quick picks rendered here -->
-        </div>
-      </section>
+</div>
 
-    </main>
-  </div>
-
-  <!-- Scripts -->
-  <script src="app.js" type="module"></script>
-  <script src="js/quickpicks.js" type="module"></script>
+<script src="app.js" type="module"></script>
+<script src="js/quickpicks.js" type="module"></script>
 </body>
 </html>

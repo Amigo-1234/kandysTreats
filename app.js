@@ -2026,6 +2026,7 @@ function renderQuickPickCard(id, data) {
   card.innerHTML = `
     <div class="menu-card-image"
       style="background-image:url('${data.image || getRandomImage()}')">
+      ${data.isValentine ? `<span class="val-badge">❤️ Valentine</span>` : ""}
     </div>
 
     <div class="menu-card-body">

@@ -246,3 +246,32 @@
 .menu-table tr.saved {
   outline: 1px solid #22c55e;
 }
+.qp-saved-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.qp-saved-card {
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.qp-saved-card h4 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+
+.qp-meta {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-bottom: 8px;
+}
+
+.qp-actions {
+  display: flex;
+  gap: 8px;
+}

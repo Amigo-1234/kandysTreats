@@ -3604,3 +3604,14 @@ body {
   text-align: right;
   font-variant-numeric: tabular-nums; /* perfect number alignment */
 }
+
+.val-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #e84c88;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
