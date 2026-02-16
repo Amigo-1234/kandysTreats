@@ -65,6 +65,13 @@
       </div>
     </section>
 
+    <div class="date-filters">
+  <button class="chip is-active" data-range="today">Today</button>
+  <button class="chip" data-range="yesterday">Yesterday</button>
+  <button class="chip" data-range="7days">Last 7 days</button>
+  <button class="chip" data-range="all">All</button>
+</div>
+
     <!-- ================= TOOLBAR ================= -->
     <section class="admin-toolbar glass-card">
       <input
@@ -111,40 +118,41 @@
           Select an order to view details.
         </p>
 
-        <div id="order-detail-content" hidden>
-          <p><strong>Order ID:</strong> <span data-detail-id></span></p>
-          <p><strong>Name:</strong> <span data-detail-name></span></p>
-          <p><strong>Phone:</strong> <span data-detail-phone></span></p>
-          <p><strong>Type:</strong> <span data-detail-type></span></p>
-          <p><strong>Address:</strong> <span data-detail-address></span></p>
-          <p><strong>Total:</strong> <span data-detail-total></span></p>
+        <div id="order-detail-content" hidden class="order-detail-body">
 
-          <hr />
+  <div class="detail-block">
+    <div><span>Order ID</span><strong data-detail-id></strong></div>
+    <div><span>Name</span><strong data-detail-name></strong></div>
+    <div><span>Phone</span><strong data-detail-phone></strong></div>
+    <div><span>Type</span><strong data-detail-type></strong></div>
+    <div><span>Address</span><strong data-detail-address></strong></div>
+    <div class="detail-total">
+      <span>Total</span>
+      <strong data-detail-total></strong>
+    </div>
+  </div>
 
-          <strong>Items</strong>
-          <div data-detail-items class="order-items-list"></div>
+  <div class="detail-section">
+    <h4>Items</h4>
+    <div data-detail-items class="order-items-list"></div>
+  </div>
 
-          <hr />
+  <div class="detail-section">
+    <h4>Status</h4>
+    <p class="current-status" id="current-status-text"></p>
 
-          <p>
-            <strong>Status:</strong>
-            <span id="current-status-text"></span>
-          </p>
+    <div class="status-buttons">
+      <button class="chip chip-status" data-status="New">New</button>
+      <button class="chip chip-status" data-status="Preparing">Preparing</button>
+      <button class="chip chip-status" data-status="Out">Out</button>
+      <button class="chip chip-status" data-status="Completed">Completed</button>
+    </div>
+  </div>
 
-          <div class="status-buttons">
-            <button class="chip chip-status" data-status="New">New</button>
-            <button class="chip chip-status" data-status="Preparing">Preparing</button>
-            <button class="chip chip-status" data-status="Out">Out</button>
-            <button class="chip chip-status" data-status="Completed">Completed</button>
-          </div>
-
-          <button
-            id="print-receipt"
-            class="btn btn-primary btn-block btn-sm"
-          >
-            Print Receipt
-          </button>
-        </div>
+  <button id="print-receipt" class="btn btn-primary btn-block btn-sm">
+    Print Receipt
+  </button>
+</div>
       </aside>
 
     </main>
@@ -174,7 +182,7 @@
   <!-- EmailJS stays -->
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <script>
-    emailjs.init("LW-k1vZHvWJA4Ieem");
+    emailjs.init("b9ka2VH56jloBCl0R");
   </script>
 
   <!-- Admin logic (already working) -->

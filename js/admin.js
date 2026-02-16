@@ -1,8 +1,7 @@
 // ===============================
-// ADMIN.JS — Kandys Treats (CLEAN)
+// ADMIN.JS — Kandys Treats (UI-SYNCED)
 // ===============================
 
-// Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
   getFirestore,
@@ -12,7 +11,9 @@ import {
   where,
   onSnapshot,
   doc,
-  getDoc
+  updateDoc,
+  getDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 import {
@@ -21,9 +22,9 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-// ===============================
-// FIREBASE INIT
-// ===============================
+/* ===============================
+   FIREBASE
+================================ */
 const firebaseConfig = {
   apiKey: "AIzaSyCWDTVJgW5dqcBbnZRb6m_Yz-fB7flO9nU",
   authDomain: "kandystreat-840b1.firebaseapp.com",
@@ -37,13 +38,15 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// ===============================
-// DOM
-// ===============================
+/* ===============================
+   DOM
+================================ */
 const tbody = document.getElementById("orders-tbody");
 const searchInput = document.getElementById("order-search");
 const filters = document.getElementById("status-filters");
 const logoutBtn = document.getElementById("admin-logout");
+const soundBtn = document.getElementById("toggle-sound");
+const printBtn = document.getElementById("print-receipt");
 
 const statTotal = document.getElementById("stat-total");
 const statNew = document.getElementById("stat-new");
@@ -51,24 +54,65 @@ const statPreparing = document.getElementById("stat-preparing");
 const statCompleted = document.getElementById("stat-completed");
 const statRevenue = document.getElementById("stat-revenue");
 
-// ===============================
-// STATE
-// ===============================
+const detailPanel = document.getElementById("order-detail-panel");
+const detailEmpty = document.getElementById("order-detail-empty");
+const detailContent = document.getElementById("order-detail-content");
+
+
+/* ===============================
+   STATE
+================================ */
 const STATE = {
   orders: [],
+  selectedId: null,
   filter: "All",
   search: "",
-  unsubscribe: null
+  dateRange: "today",
+  soundOn: true,
+  unsubscribe: null,
+
+  acknowledged: new Set(), // 👈 NEW
 };
 
-// ===============================
-// HELPERS
-// ===============================
+/* ===============================
+   SOUND ENGINE
+================================ */
+const alertAudio = new Audio("/sounds/order-alert.mp3");
+alertAudio.loop = true;
+alertAudio.volume = 0.9;
+
+const SOUND = {
+  playing: false,
+};
+
+function startAlertSound() {
+  if (!STATE.soundOn || SOUND.playing) return;
+
+  alertAudio.play()
+    .then(() => {
+      SOUND.playing = true;
+      console.log("🔔 Order alert sound started");
+    })
+    .catch(() => {});
+}
+
+function stopAlertSound() {
+  if (!SOUND.playing) return;
+
+  alertAudio.pause();
+  alertAudio.currentTime = 0;
+  SOUND.playing = false;
+  console.log("🔕 Order alert sound stopped");
+}
+
+/* ===============================
+   HELPERS
+================================ */
 const formatPrice = (n) =>
   `₦${Number(n || 0).toLocaleString("en-NG")}`;
 
-const formatDate = (ts) =>
-  ts?.toDate().toLocaleString("en-NG") || "—";
+const toStatusClass = (s) =>
+  String(s || "New").toLowerCase();
 
 const isToday = (ts) => {
   if (!ts) return false;
@@ -81,44 +125,50 @@ const isToday = (ts) => {
   );
 };
 
-// ===============================
-// AUTH GATE (NO LOGIN UI HERE)
-// ===============================
+function normalizePhone(phone) {
+  if (!phone) return "";
+  let p = phone.replace(/[^\d]/g, "");
+  if (p.length === 11 && p.startsWith("0")) return "234" + p.slice(1);
+  if (p.startsWith("234")) return p;
+  return p;
+}
+
+function getUnacknowledgedNewOrders() {
+  return STATE.orders.filter(o =>
+    o.status === "New" &&
+    !STATE.acknowledged.has(o.id)
+  );
+}
+
+/* ===============================
+   AUTH
+================================ */
 onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "admin-login.html";
-    return;
-  }
+  if (!user) return location.href = "admin-login.html";
 
   const snap = await getDoc(doc(db, "users", user.uid));
   if (!snap.exists()) {
     await signOut(auth);
-    window.location.href = "admin-login.html";
-    return;
+    return location.href = "admin-login.html";
   }
 
   const { role } = snap.data();
-  if (role !== "staff" && role !== "superAdmin") {
+  if (!["staff", "superAdmin"].includes(role)) {
     await signOut(auth);
-    window.location.href = "admin-login.html";
-    return;
+    return location.href = "admin-login.html";
   }
 
-  // ✅ AUTH OK → START DATA
   startOrdersListener();
 });
 
-// ===============================
-// LOGOUT
-// ===============================
 logoutBtn?.addEventListener("click", async () => {
   await signOut(auth);
-  window.location.href = "admin-login.html";
+  location.href = "admin-login.html";
 });
 
-// ===============================
-// FIRESTORE LISTENER
-// ===============================
+/* ===============================
+   ORDERS LISTENER
+================================ */
 function startOrdersListener() {
   if (STATE.unsubscribe) return;
 
@@ -129,38 +179,53 @@ function startOrdersListener() {
   );
 
   STATE.unsubscribe = onSnapshot(q, (snap) => {
-    STATE.orders = snap.docs.map(d => d.data());
-    render();
-    updateStats();
-  });
+  STATE.orders = snap.docs.map(d => d.data());
+
+  renderTable();
+  updateStats();
+
+  // 🔔 SOUND LOGIC
+  const pending = getUnacknowledgedNewOrders();
+
+  if (pending.length > 0) {
+    startAlertSound();
+  } else {
+    stopAlertSound();
+  }
+
+  // re-sync detail panel
+  if (STATE.selectedId) {
+    const o = STATE.orders.find(x => x.id === STATE.selectedId);
+    if (o) renderDetails(o);
+  }
+});
 }
 
-// ===============================
-// FILTERS
-// ===============================
+/* ===============================
+   FILTERS
+================================ */
 filters?.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-filter]");
   if (!btn) return;
 
   STATE.filter = btn.dataset.filter;
-
   [...filters.children].forEach(b =>
     b.classList.toggle("is-active", b === btn)
   );
-
-  render();
+  renderTable();
 });
 
-searchInput?.addEventListener("input", (e) => {
+searchInput?.addEventListener("input", e => {
   STATE.search = e.target.value.toLowerCase();
-  render();
+  renderTable();
 });
 
-// ===============================
-// RENDER
-// ===============================
+/* ===============================
+   TABLE
+================================ */
 function getVisibleOrders() {
   let list = [...STATE.orders];
+  list = list.filter(inDateRange);
 
   if (STATE.filter !== "All") {
     list = list.filter(o => (o.status || "New") === STATE.filter);
@@ -177,9 +242,8 @@ function getVisibleOrders() {
   return list;
 }
 
-function render() {
+function renderTable() {
   tbody.innerHTML = "";
-
   const list = getVisibleOrders();
 
   if (!list.length) {
@@ -189,7 +253,7 @@ function render() {
 
   list.forEach(order => {
     const tr = document.createElement("tr");
-    tr.dataset.id = order.id; // 🔑 important
+    tr.dataset.id = order.id;
 
     tr.innerHTML = `
       <td>${order.id}</td>
@@ -197,83 +261,238 @@ function render() {
       <td>${order.customer?.name || "-"}</td>
       <td>${formatPrice(order.total)}</td>
       <td>${order.fulfilment === "delivery" ? "Delivery" : "Pickup"}</td>
-      <td>${order.status || "New"}</td>
+      <td>
+        <span class="status-pill status-${toStatusClass(order.status)}">
+          ${order.status || "New"}
+        </span>
+      </td>
     `;
 
-    // 👉 CLICK HANDLER
-    tr.addEventListener("click", () => {
-      STATE.selectedOrderId = order.id;
+    tr.onclick = () => {
+  STATE.selectedId = order.id;
 
-      // highlight row
-      [...tbody.children].forEach(r => r.classList.remove("active"));
-      tr.classList.add("active");
+  // ✅ mark as acknowledged
+  STATE.acknowledged.add(order.id);
 
-      renderOrderDetails(order);
-    });
+  [...tbody.children].forEach(r => r.classList.remove("active"));
+  tr.classList.add("active");
+
+  renderDetails(order);
+
+  // 🔕 re-check sound state
+  const pending = getUnacknowledgedNewOrders();
+  if (pending.length === 0) {
+    stopAlertSound();
+  }
+};
 
     tbody.appendChild(tr);
 
-    // animation visibility
-    requestAnimationFrame(() => tr.classList.add("visible"));
+// 👇 FORCE VISIBILITY (matches your CSS)
+requestAnimationFrame(() => {
+  tr.classList.add("visible");
+});
   });
 }
 
-function renderOrderDetails(order) {
-  const empty = document.getElementById("order-detail-empty");
-  const content = document.getElementById("order-detail-content");
+/* ===============================
+   DETAILS
+================================ */
+function renderDetails(order) {
+  detailEmpty.style.display = "none";
+  detailContent.hidden = false;
 
-  if (!content || !empty) return;
-
-  empty.style.display = "none";
-  content.hidden = false;
-
-  content.querySelector("[data-detail-id]").textContent = order.id;
-  content.querySelector("[data-detail-name]").textContent =
-    order.customer?.name || "—";
-  content.querySelector("[data-detail-phone]").textContent =
-    order.customer?.phone || "—";
-  content.querySelector("[data-detail-type]").textContent =
+  detailContent.querySelector("[data-detail-id]").textContent = order.id;
+  detailContent.querySelector("[data-detail-name]").textContent = order.customer?.name || "—";
+  detailContent.querySelector("[data-detail-phone]").textContent = order.customer?.phone || "—";
+  detailContent.querySelector("[data-detail-type]").textContent =
     order.fulfilment === "delivery" ? "Delivery" : "Pickup";
-  content.querySelector("[data-detail-address]").textContent =
+  detailContent.querySelector("[data-detail-address]").textContent =
     order.fulfilment === "delivery"
-      ? (order.customer?.address || "—")
-      : "Pickup (no address)";
-  content.querySelector("[data-detail-total]").textContent =
+      ? order.customer?.address || "—"
+      : "Pickup";
+  detailContent.querySelector("[data-detail-total]").textContent =
     formatPrice(order.total);
 
-  // ITEMS
-  const itemsWrap = content.querySelector("[data-detail-items]");
+  const itemsWrap = detailContent.querySelector("[data-detail-items]");
   itemsWrap.innerHTML = "";
 
-  if (order.items?.length) {
-    order.items.forEach(i => {
-      const div = document.createElement("div");
-      div.textContent = `${i.qty} × ${i.name}`;
-      itemsWrap.appendChild(div);
-    });
+  order.subOrders?.forEach((sub, i) => {
+    const box = document.createElement("div");
+    box.className = "admin-suborder";
+    box.innerHTML = `
+  <strong>Order ${i + 1}</strong>
+
+  ${sub.notes ? `
+    <div class="note">
+      <strong>Note:</strong> <br>${sub.notes}
+    </div>
+  ` : ""}
+
+  <ul class="suborder-items">
+    ${sub.items.map(it => `
+      <li>${it.qty} × ${it.name}</li>
+    `).join("")}
+  </ul>
+`;
+    itemsWrap.appendChild(box);
+  });
+
+  document.getElementById("current-status-text").textContent =
+    order.status || "New";
+
+  detailContent.querySelectorAll(".chip-status").forEach(btn =>
+    btn.classList.toggle("is-current", btn.dataset.status === order.status)
+  );
+}
+
+/* ===============================
+   STATUS UPDATE
+================================ */
+detailPanel?.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".chip-status");
+  if (!btn || !STATE.selectedId) return;
+
+  const order = STATE.orders.find(o => o.id === STATE.selectedId);
+  if (!order || order.status === btn.dataset.status) return;
+
+
+
+  const waTab = window.open("", "_blank");
+
+  await updateDoc(doc(db, "orders", order.id), {
+    status: btn.dataset.status,
+    lastStatusUpdateAt: serverTimestamp()
+  });
+
+    // ===============================
+// EMAIL NOTIFICATION
+// ===============================
+if (order.customer?.email && window.emailjs) {
+  emailjs.send(
+    "service_m12snos",
+    "template_7o73g4h",
+    {
+      customer_name: order.customer.name,
+      order_id: order.id,
+      status: btn.dataset.status,
+      customer_email: order.customer.email,
+    }
+  ).catch(() => {});
+}
+
+  const phone = normalizePhone(order.customer.phone);
+
+// Build order items summary
+const itemsSummary = order.subOrders
+  ?.map(sub =>
+    sub.items
+      .map(it => `• ${it.qty} x ${it.name}`)
+      .join("\n")
+  )
+  .join("\n") || "• No items";
+
+// 🔗 Track link (CHANGE domain/path if needed)
+const trackLink = `https://kandystreats.com/track.html?id=${order.id}`;
+
+const msg = `Hello ${order.customer.name} 👋
+
+*Order Update from Kandys Treats*
+
+*Order ID:* ${order.id}
+*Status:* *${btn.dataset.status}*
+
+*Order Summary:*
+${itemsSummary}
+
+*Total Paid:* ${formatPrice(order.total)}
+
+📍 *Track your order:*
+${trackLink}
+
+Reply here if you need help 💬
+
+Thank you for choosing Kandys Treats ❤️`;
+
+waTab.location.href =
+  `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+});
+
+
+
+/* ===============================
+   STATS
+================================ */
+function updateStats() {
+  const o = STATE.orders;
+
+  statTotal.textContent = o.length;
+  statNew.textContent = o.filter(x => x.status === "New").length;
+  statPreparing.textContent = o.filter(x => x.status === "Preparing").length;
+  statCompleted.textContent = o.filter(x => x.status === "Completed").length;
+
+  statRevenue.textContent = formatPrice(
+    o.filter(x => isToday(x.createdAt))
+     .reduce((s, x) => s + (x.netAmount || 0), 0)
+  );
+}
+
+/* ===============================
+   PRINT
+================================ */
+printBtn?.addEventListener("click", () => window.print());
+
+/* ===============================
+   SOUND TOGGLE (UI ONLY)
+================================ */
+soundBtn?.addEventListener("click", () => {
+  STATE.soundOn = !STATE.soundOn;
+  soundBtn.textContent = STATE.soundOn ? "Sound: On" : "Sound: Off";
+
+  if (!STATE.soundOn) {
+    stopAlertSound();
   } else {
-    itemsWrap.textContent = "No items";
+    const pending = getUnacknowledgedNewOrders();
+    if (pending.length > 0) {
+      startAlertSound();
+    }
+  }
+});
+
+function inDateRange(order) {
+  if (!order.createdAt) return false;
+
+  const d = order.createdAt.toDate();
+  const now = new Date();
+
+  if (STATE.dateRange === "today") {
+    return d.toDateString() === now.toDateString();
   }
 
-  // STATUS
-  const statusText = document.getElementById("current-status-text");
-  if (statusText) statusText.textContent = order.status || "New";
+  if (STATE.dateRange === "yesterday") {
+    const y = new Date();
+    y.setDate(now.getDate() - 1);
+    return d.toDateString() === y.toDateString();
+  }
+
+  if (STATE.dateRange === "7days") {
+    const past = new Date();
+    past.setDate(now.getDate() - 7);
+    return d >= past;
+  }
+
+  return true; // all
 }
 
-// ===============================
-// STATS
-// ===============================
-function updateStats() {
-  const orders = STATE.orders;
+document.querySelector(".date-filters")?.addEventListener("click", e => {
+  const btn = e.target.closest("[data-range]");
+  if (!btn) return;
 
-  statTotal.textContent = orders.length;
-  statNew.textContent = orders.filter(o => o.status === "New").length;
-  statPreparing.textContent = orders.filter(o => o.status === "Preparing").length;
-  statCompleted.textContent = orders.filter(o => o.status === "Completed").length;
+  STATE.dateRange = btn.dataset.range;
 
-  const todayRevenue = orders
-    .filter(o => isToday(o.createdAt))
-    .reduce((sum, o) => sum + (o.netAmount || 0), 0);
+  document
+    .querySelectorAll(".date-filters .chip")
+    .forEach(b => b.classList.toggle("is-active", b === btn));
 
-  statRevenue.textContent = formatPrice(todayRevenue);
-}
+  renderTable();
+});

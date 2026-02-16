@@ -304,3 +304,160 @@ html[data-page="admin"] .bottom-nav {
 html[data-page="admin"] body {
   padding-bottom: 0;
 }
+
+/* admin.css */
+.orders-table tbody tr {
+  opacity: 1;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.orders-table tbody tr:hover {
+  background: rgba(232, 76, 136, 0.12);
+  cursor: pointer;
+}
+
+.orders-table tbody tr.active {
+  background: rgba(232, 76, 136, 0.18);
+}
+
+.order-detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-block div {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.detail-block span {
+  opacity: 0.6;
+}
+
+.detail-total {
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+.detail-section h4 {
+  margin-bottom: 8px;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.order-items-list .admin-suborder {
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.05);
+  margin-bottom: 10px;
+}
+
+.order-items-list ul {
+  padding-left: 16px;
+}
+
+.orders-table tbody tr {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.orders-table tbody tr.visible {
+  opacity: 1;
+}
+
+/* ===============================
+   STICKY ORDER DETAILS PANEL
+================================ */
+.order-detail-panel {
+  position: sticky;
+  top: 96px; /* below top bar */
+  height: calc(100vh - 120px);
+  align-self: flex-start;
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* Allow internal scroll, not page scroll */
+#order-detail-content {
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* ===============================
+   ORDER ITEM CARD CLEANUP
+================================ */
+.admin-suborder {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Note styling (quiet, readable) */
+.admin-suborder .note {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  padding: 6px 8px;
+  border-left: 3px solid rgba(232, 76, 136, 0.5);
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+}
+
+/* Item list */
+.suborder-items {
+  margin: 4px 0 0;
+  padding-left: 16px;
+}
+
+.suborder-items li {
+  margin: 2px 0;
+}
+/* ===============================
+   STICKY ORDER DETAILS
+================================ */
+
+.order-detail-panel {
+  position: sticky;
+  top: 90px; /* below top bar */
+  height: calc(100vh - 120px);
+  overflow-y: auto;
+
+  scrollbar-gutter: stable;
+}
+/* ===============================
+   SCROLLBAR — SOFT & QUIET
+================================ */
+
+/* Chrome / Edge / Safari */
+.order-detail-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.order-detail-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.order-detail-panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
+.order-detail-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Firefox */
+.order-detail-panel {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+.order-detail-panel {
+  scrollbar-color: transparent transparent;
+}
+
+.order-detail-panel:hover {
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}

@@ -2294,3 +2294,10 @@ document.addEventListener("DOMContentLoaded", () => {
   el.textContent = hoursByDay[day] || "Closed";
 })();
 
+const params = new URLSearchParams(window.location.search);
+const orderId = params.get("id");
+
+if (orderId) {
+  // auto-load order
+  loadOrder(orderId);
+}
