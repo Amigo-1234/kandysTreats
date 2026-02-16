@@ -109,6 +109,9 @@ body.dashboard {
   display: flex;
   flex-direction: column;
   gap: 22px;
+
+  height: 100vh;          /* 🔥 lock height */
+  overflow: hidden;       /* 🔥 prevent double scroll */
 }
 
 /* ===============================
@@ -116,6 +119,10 @@ body.dashboard {
    =============================== */
 
 .dashboard-header {
+  position: sticky;
+  top: 0;
+  z-index: 50; /* above cards, tables, charts */
+
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -125,12 +132,12 @@ body.dashboard {
 
   background: linear-gradient(
     180deg,
-    rgba(20,20,28,0.9),
-    rgba(20,20,28,0.65)
+    rgba(20,20,28,0.92),
+    rgba(20,20,28,0.82)
   );
 
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(255,255,255,0.06);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
 .dashboard-header h1 {
@@ -150,6 +157,17 @@ body.dashboard {
 
 .dashboard-content {
   flex: 1;
+  overflow-y: auto;       /* 🔥 scrolling happens here */
+  padding-bottom: 40px;   /* breathing room */
+}
+
+.dashboard-header {
+  box-shadow: 0 0 0 rgba(0,0,0,0);
+  transition: box-shadow 0.25s ease;
+}
+
+.dashboard-content:has(:hover) ~ .dashboard-header {
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
 
 /* ===============================
