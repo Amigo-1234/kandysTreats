@@ -1231,7 +1231,7 @@ const renderTable = () => {
       STATE.selectedOrderId = order.id;
       [...tbody.children].forEach((row) => row.classList.remove("active"));
       tr.classList.add("active");
-      renderDetail(order);
+      renderDetail(order);      
     });
 
     tbody.appendChild(tr);

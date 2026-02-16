@@ -233,6 +233,11 @@ function renderTransactions(transactions) {
         </span>
       </td>
     `;
+
+    tr.addEventListener("click", () => {
+      openOrderModal(o);
+    });
+
     tableBody.appendChild(tr);
   });
 }
@@ -244,6 +249,8 @@ function startFinanceListener() {
     orderBy("createdAt", "desc")
   );
 
+  let unpaidCount = 0;
+
   onSnapshot(q, snap => {
     let totalRevenue = 0;
     let todayRevenue = 0;
@@ -252,22 +259,30 @@ function startFinanceListener() {
 
     snap.forEach(docSnap => {
       const o = docSnap.data();
-      if (!o.paid) return;
+      if (!o.paid) {
+        unpaidCount++;
+        return;
+      } 
 
       totalRevenue += o.total || 0;
       if (isToday(o.createdAt)) {
   todayRevenue += o.total || 0;
 }
 
+
+
       allTransactions.push({
-        id: o.id,
-        createdAt: o.createdAt,
-        customer: o.customer,
-        total: o.total,
-        status: o.status,
-        paid: o.paid
-      });
+  id: o.id,
+  createdAt: o.createdAt,
+  customer: o.customer,
+  total: o.total,
+  status: o.status,
+  paid: o.paid,
+  items: o.items || [],
+  subOrders: o.subOrders || []
+});
     });
+
 
     totalRevenueEl.textContent = formatPrice(totalRevenue);
     todayRevenueEl.textContent = formatPrice(todayRevenue);
@@ -339,6 +354,73 @@ document.getElementById("export-csv").onclick = () => {
 
   URL.revokeObjectURL(url);
 };
+
+
+
+const modal = document.getElementById("order-modal");
+const modalContent = document.getElementById("modal-content");
+const modalOrderId = document.getElementById("modal-order-id");
+
+function openOrderModal(order) {
+  modalOrderId.textContent = order.id;
+
+  const items =
+    order.subOrders?.length
+      ? order.subOrders.flatMap(s => s.items)
+      : order.items || [];
+
+  modalContent.innerHTML = `
+    <p><strong>Status:</strong> ${order.status}</p>
+    <p><strong>Customer:</strong> ${order.customer?.name}</p>
+    <p><strong>Phone:</strong> ${order.customer?.phone}</p>
+
+    <h4>Items</h4>
+    <ul>
+      ${
+        items.length
+          ? items.map(i => `<li>${i.qty} × ${i.name}</li>`).join("")
+          : "<li>No items</li>"
+      }
+    </ul>
+
+    <p><strong>Total:</strong> ${formatPrice(order.total)}</p>
+  `;
+
+  modal.classList.remove("hidden");
+}
+document.getElementById("close-modal").onclick = () =>
+  modal.classList.add("hidden");
+
+modal.addEventListener("click", (e) => {
+  if (e.target === modal) {
+    modal.classList.add("hidden");
+  }
+});
+
+// ===============================
+// DASHBOARD NAVIGATION
+// ===============================
+const navButtons = document.querySelectorAll(".nav-item");
+const views = document.querySelectorAll(".dashboard-view");
+
+navButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    const target = btn.dataset.view;
+
+    // Sidebar active state
+    navButtons.forEach(b => b.classList.remove("is-active"));
+    btn.classList.add("is-active");
+
+    // Switch views
+    views.forEach(view => {
+      view.classList.toggle(
+        "hidden",
+        view.dataset.view !== target
+      );
+    });
+  });
+});
+
 
 /* ================= SEARCH ================= */
 

@@ -7,156 +7,117 @@
 
   <!-- MAIN APP STYLES -->
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="super-admin.css" />
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#e84c88">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 
-<body data-page="super-admin">
+<body data-page="super-admin" class="dashboard">
 
-  <!-- HEADER -->
-  <header class="app-header glass-card">
-    <div>
-      <h1>Super Admin</h1>
-      <p class="muted">Owner finance & transaction control</p>
+  <!-- SIDEBAR -->
+  <aside class="sidebar glass-card">
+    <div class="sidebar-brand">
+      <h2>Kandys</h2>
+      <span class="muted">Super Admin</span>
     </div>
 
-    <a href="admin.html" 
-        class="btn btn-ghost">
-        Admin  →
-      </a>
+    <nav class="sidebar-nav">
+      <button class="nav-item is-active" data-view="overview">Overview</button>
+      <button class="nav-item" data-view="transactions">Transactions</button>
+      <button class="nav-item" data-view="announcements">Announcements</button>
+      <button class="nav-item" data-view="export">Exports</button>
+    </nav>
 
-    <button id="super-logout" class="btn btn-ghost">
-      Logout
-    </button>
-  </header>
+    <div class="sidebar-footer">
+      <button id="super-logout" class="btn btn-outline btn-sm">
+        Logout
+      </button>
+    </div>
+  </aside>
 
-  <!-- LOGIN -->
-  <section id="owner-login" class="section glass-card" >
-    <h2>Owner Login</h2>
-  <form id="owner-login-form">
-    <input name="email" type="email" />
-    <input name="password" type="password" />
-    <button type="submit">Sign in</button>
-  </form>
-</section>
+  <!-- MAIN -->
+  <div class="dashboard-main">
 
-
-  <!-- PANEL -->
-  <main id="super-admin-panel" hidden>
-
-    <!-- STATS -->
-    <section class="section">
-      <div class="card-grid">
-
-        <div class="glass-card stat-card revenue">
-          <h3>Total Revenue</h3>
-          <div class="value" id="stat-total-revenue">₦0</div>
-        </div>
-
-        <div class="glass-card stat-card revenue">
-          <h3>Today</h3>
-          <div class="value" id="stat-today-revenue">₦0</div>
-        </div>
-
-        <div class="glass-card stat-card revenue">
-          <h3>Total Orders</h3>
-          <div class="value" id="stat-total-orders">0</div>
-        </div>
-
-        <div class="glass-card stat-card revenue">
-          <h3>Unpaid</h3>
-          <div class="value" id="stat-unpaid">0</div>
-        </div>
-
+    <!-- TOP BAR -->
+    <header class="dashboard-header glass-card">
+      <div>
+        <h1 id="dashboard-title">Overview</h1>
+        <p class="muted">Owner finance & transaction control</p>
       </div>
-    </section>
 
-   <section class="section glass-card">
-  <h2>Site Announcements</h2>
+      <a href="admin.html" class="btn btn-ghost">
+        Admin →
+      </a>
+    </header>
 
-  <div class="announcement-layout">
-    <!-- LEFT -->
-    <div class="announcement-form">
-      <textarea
-        id="new-announcement"
-        placeholder="Type announcement here..."
-        rows="4"></textarea>
+    <!-- CONTENT -->
+    <main class="dashboard-content">
 
-      <button id="add-announcement" class="btn btn-primary">
-        Add Announcement
-      </button>
-    </div>
+      <!-- ===== OVERVIEW ===== -->
+  <!-- OVERVIEW -->
+  <section class="dashboard-view" data-view="overview">
+    <!-- stats cards -->
+    <!-- revenue, today, total orders -->
+  </section>
 
-    <!-- RIGHT -->
-    <ul id="announcement-list" class="announcement-list"></ul>
-  </div>
-</section>
+  <!-- TRANSACTIONS -->
+  <section class="dashboard-view hidden" data-view="transactions">
+    <!-- transactions table -->
+  </section>
 
-    <!-- ACTION BAR -->
-    <section class="section glass-card">
-      <button id="export-csv" class="btn btn-outline">
-        Export CSV
-      </button>
-    </section>
+  <!-- ANNOUNCEMENTS -->
+  <section class="dashboard-view hidden" data-view="announcements">
+    <!-- announcements UI -->
+  </section>
 
-
-
-
-    <!-- TRANSACTIONS -->
-   <section class="section transactions-section">
-
-  <!-- STICKY BAR (OUTSIDE glass-card) -->
-  <div class="transactions-bar"style="margin-bottom: 30px;">
-    <div class="transactions-bar-inner glass-card">
-      <h2>Transactions</h2>
-
-      <div class="transactions-actions">
-
-  <div class="date-filters">
-    <button class="is-active" data-range="today">Today</button>
-    <button data-range="7">Last 7 days</button>
-    <button data-range="30">This month</button>
-  </div>
-
-  <input
-    id="transaction-search"
-    class="transaction-search"
-    placeholder="Search Order ID…"
-    type="search"
-  />
-
-  <button id="print-transactions" class="btn btn-outline btn-sm">
-    Print
-  </button>
+  <!-- EXPORTS -->
+  <section class="dashboard-view hidden" data-view="exports">
+    <!-- export CSV button -->
+  </section>
 
 </div>
 
-  <!-- TABLE CARD -->
-  <div class="glass-card">
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Order ID</th>
-            <th>Date</th>
-            <th>Customer</th>
-            <th>Amount</th>
-            <th>Status</th>
-            <th>Paid</th>
-          </tr>
-        </thead>
-        <tbody id="transactions-body"></tbody>
-      </table>
+      <!-- ===== TRANSACTIONS ===== -->
+      <section class="dashboard-view hidden" data-view="transactions">
+
+        <!-- 🔁 move your transactions section here -->
+        <!-- search, filters, table stays the same -->
+
+      </section>
+
+      <!-- ===== ANNOUNCEMENTS ===== -->
+      <section class="dashboard-view hidden" data-view="announcements">
+
+        <!-- 🔁 move your announcements section here -->
+
+      </section>
+
+      <!-- ===== EXPORT ===== -->
+      <section class="dashboard-view hidden" data-view="export">
+
+        <button id="export-csv" class="btn btn-primary">
+          Export CSV
+        </button>
+
+      </section>
+
+    </main>
+
+  <!-- MODAL (UNCHANGED) -->
+  <div id="order-modal" class="modal-overlay hidden">
+    <div class="modal glass-card">
+      <div class="modal-header">
+        <h3 id="modal-order-id">Order</h3>
+        <button id="close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="modal-content"></div>
+      </div>
     </div>
   </div>
 
-</section>
-
-  </main>
-
-  <!-- JS (isolated on purpose) -->
   <script type="module" src="js/super-admin.js"></script>
 </body>
 </html>
