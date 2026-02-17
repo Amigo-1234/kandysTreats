@@ -1,73 +1,62 @@
 <!DOCTYPE html>
-<html lang="en" data-page="admin">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Menu Builder | Kandys Treats</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="admin.css" />
   <link rel="stylesheet" href="menu-builder.css" />
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#e84c88">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
 </head>
-<body class="page page-admin">
-  <div class="page-shell">
 
-    <header class="section">
-      <h1>Menu Builder</h1>
-      <p class="muted">Manage menu sections, prices, availability & images</p>
-    </header>
+<body>
+  <div class="app">
 
-    <a href="quickpick.html" class="btn btn-outline btn-sm">
-  Manage Quick Picks →
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div>
+        <h1>Menu Builder</h1>
+        <p>Manage food items, prices & availability</p>
+      </div>
+
+      <div class="top-actions">
+
+  <div class="nav-group">
+    <a href="admin.html" class="nav-btn ghost">
+      ← Admin
     </a>
 
-     <a href="admin.html" class="btn btn-ghost btn-sm">
-          ← Back to Admin Dashboard
-        </a>
+    <a href="quickpick.html" class="nav-btn ghost">
+      Quick Picks →
+    </a>
+  </div>
 
-    <main class="section">
-      <section class="glass-card menu-builder">
+  <div class="action-group">
+    <button id="add-menu-section" class="primary-btn">
+      + Section
+    </button>
+    <button id="add-menu-item" class="outline-btn">
+      + Item
+    </button>
+  </div>
 
-        <div class="section-header inline">
-          <h2 id="active-menu-title">Menu</h2>
+</div>
+    </header>
 
-          <div>
-            <button id="add-menu-section" class="btn btn-primary btn-sm">
-              + Add Menu Section
-            </button>
-            <button id="add-menu-item" class="btn btn-outline btn-sm">
-              + Add Item
-            </button>
-          </div>
-        </div>
+    <!-- MAIN -->
+    <main class="layout">
 
-        <div class="menu-builder-layout">
-          <aside class="menu-sections" id="menu-sections"></aside>
+      <!-- SECTIONS -->
+      <aside class="sections" id="menu-sections"></aside>
 
-          <div class="menu-items">
-            <table class="menu-table">
-              <thead>
-                <tr>
-                  <th>Dish</th>
-                  <th>Price</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="menu-item-list"></tbody>
-            </table>
-          </div>
-        </div>
-
+      <!-- ITEMS -->
+      <section class="items">
+        <h2 id="active-menu-title">Menu</h2>
+        <div id="menu-item-list" class="item-list"></div>
       </section>
+
     </main>
   </div>
 
   <script src="app.js" type="module"></script>
-<script src="js/menu-builder.js" type="module"></script>
+  <script src="js/menu-builder.js" type="module"></script>
 </body>
 </html>

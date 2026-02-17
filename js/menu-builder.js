@@ -58,61 +58,79 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function renderItems() {
-    itemsEl.innerHTML = "";
-    const items = menuItems.filter(i => i.section === activeSection);
+function renderItems() {
+  itemsEl.innerHTML = "";
 
-    items.forEach(item => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td><input value="${item.name}" class="name-input"></td>
-        <td><input type="number" value="${item.price}" class="price-input"></td>
-        <td>
-          <button class="status-toggle ${item.status === "available" ? "on" : "off"}">
-            ${item.status === "available" ? "Available" : "Sold out"}
-          </button>
-        </td>
-        <td>
-          <button class="btn btn-sm save-btn">Save</button>
-          <button class="btn btn-sm delete-btn">🗑️</button>
-        </td>
-      `;
+  const items = menuItems.filter(i => i.section === activeSection);
 
-      const nameInput = tr.querySelector(".name-input");
-      const priceInput = tr.querySelector(".price-input");
-      const statusBtn = tr.querySelector(".status-toggle");
-
-      let draft = { ...item };
-
-      nameInput.oninput = () => draft.name = nameInput.value.trim();
-      priceInput.oninput = () => draft.price = Number(priceInput.value);
-
-      statusBtn.onclick = () => {
-        draft.status = draft.status === "available" ? "sold-out" : "available";
-        statusBtn.textContent =
-          draft.status === "available" ? "Available" : "Sold out";
-        statusBtn.classList.toggle("on");
-        statusBtn.classList.toggle("off");
-      };
-
-      tr.querySelector(".save-btn").onclick = async () => {
-        await updateDoc(doc(window.db, "menus", item.id), {
-          name: draft.name,
-          price: draft.price,
-          status: draft.status,
-          updatedAt: serverTimestamp()
-        });
-      };
-
-      tr.querySelector(".delete-btn").onclick = async () => {
-        if (!confirm(`Delete ${item.name}?`)) return;
-        await deleteDoc(doc(window.db, "menus", item.id));
-      };
-
-      itemsEl.appendChild(tr);
-    });
+  if (!items.length) {
+    itemsEl.innerHTML = `<p style="opacity:.5">No items in this section</p>`;
+    return;
   }
 
+  items.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "menu-item";
+
+    card.innerHTML = `
+      <img src="${item.image || 'https://via.placeholder.com/80'}" />
+
+      <div class="item-info">
+        <input class="name" value="${item.name}" />
+        <input class="price" type="number" value="${item.price}" />
+        <input class="image" placeholder="Image URL" value="${item.image || ""}" />
+      </div>
+
+      <div class="item-actions">
+        <button class="status ${item.status}">
+          ${item.status === "available" ? "Available" : "Sold out"}
+        </button>
+        <button class="outline-btn save">Save</button>
+        <button class="outline-btn delete">Delete</button>
+      </div>
+    `;
+
+    const nameInput = card.querySelector(".name");
+    const priceInput = card.querySelector(".price");
+    const imageInput = card.querySelector(".image");
+    const statusBtn = card.querySelector(".status");
+    const saveBtn = card.querySelector(".save");
+    const deleteBtn = card.querySelector(".delete");
+    const img = card.querySelector("img");
+
+    let draft = { ...item };
+
+    nameInput.oninput = () => draft.name = nameInput.value.trim();
+    priceInput.oninput = () => draft.price = Number(priceInput.value);
+    imageInput.oninput = () => {
+      draft.image = imageInput.value.trim();
+      img.src = draft.image || "https://via.placeholder.com/80";
+    };
+
+    statusBtn.onclick = () => {
+      draft.status = draft.status === "available" ? "sold-out" : "available";
+      statusBtn.textContent = draft.status === "available" ? "Available" : "Sold out";
+      statusBtn.className = `status ${draft.status}`;
+    };
+
+    saveBtn.onclick = async () => {
+      await updateDoc(doc(window.db, "menus", item.id), {
+        name: draft.name,
+        price: draft.price,
+        image: draft.image || "",
+        status: draft.status,
+        updatedAt: serverTimestamp()
+      });
+    };
+
+    deleteBtn.onclick = async () => {
+      if (!confirm(`Delete ${item.name}?`)) return;
+      await deleteDoc(doc(window.db, "menus", item.id));
+    };
+
+    itemsEl.appendChild(card);
+  });
+}
   addSectionBtn.onclick = async () => {
     const name = prompt("Menu section name?");
     if (!name) return;
@@ -125,6 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
       price: 0,
       status: "available",
       section: name,
+      image: "",
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
@@ -138,6 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
       price: 0,
       status: "available",
       section: activeSection,
+      image: "",
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });

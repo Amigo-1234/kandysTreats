@@ -3820,3 +3820,17 @@ body {
 .modal-body {
   font-size: 14px;
 }
+
+.menu-thumb img {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.image-input {
+  width: 140px;
+  font-size: 12px;
+}

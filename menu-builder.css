@@ -1,181 +1,254 @@
-.menu-builder {
-  margin-top: 20px;
+/* ===============================
+   RESET + BASE
+================================ */
+* {
+  box-sizing: border-box;
+  font-family: Inter, system-ui, sans-serif;
 }
 
-.menu-builder-layout {
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* 🔒 lock page scroll */
+  background: #0b0b10;
+  color: #fff;
+}
+
+/* ===============================
+   APP WRAPPER
+================================ */
+.app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+}
+
+/* ===============================
+   TOP BAR (FIXED FEEL)
+================================ */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.topbar p {
+  margin: 4px 0 0;
+  opacity: 0.6;
+  font-size: 13px;
+}
+
+.top-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* ===============================
+   BUTTONS
+================================ */
+.primary-btn {
+  background: linear-gradient(135deg, #e84c88, #ff7aa2);
+  border: none;
+  padding: 10px 16px;
+  border-radius: 999px;
+  color: white;
+  cursor: pointer;
+}
+
+.outline-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 10px 16px;
+  border-radius: 999px;
+  color: white;
+  cursor: pointer;
+}
+
+.ghost-btn {
+  opacity: 0.7;
+  text-decoration: none;
+  color: white;
+}
+
+/* ===============================
+   MAIN LAYOUT
+================================ */
+.layout {
+  flex: 1;
   display: grid;
   grid-template-columns: 220px 1fr;
-  gap: 16px;
+  gap: 24px;
+  overflow: hidden; /* 🔑 only children scroll */
 }
 
-.menu-sections {
+/* ===============================
+   SECTIONS (LEFT — FIXED)
+================================ */
+.sections {
+  height: 100%;
+  background: rgba(255,255,255,0.04);
+  border-radius: 16px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.menu-section {
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  background: transparent;
+  color: white;
+  border: none;
+  text-align: left;
+}
+
+.menu-section.is-active {
+  background: linear-gradient(135deg, #e84c88, #ff7aa2);
+  font-weight: 600;
+}
+
+/* ===============================
+   ITEMS (RIGHT — SCROLLABLE)
+================================ */
+.items {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.items h2 {
+  margin-top: 0;
+}
+
+/* Scrollbar polish */
+.items::-webkit-scrollbar {
+  width: 6px;
+}
+
+.items::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+  border-radius: 999px;
+}
+
+/* ===============================
+   ITEM LIST
+================================ */
+.item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ===============================
+   ITEM CARD
+================================ */
+.menu-item {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.05);
+}
+
+.menu-item img {
+  width: 72px;
+  height: 72px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: #111;
+}
+
+/* ===============================
+   ITEM INFO
+================================ */
+.item-info input {
+  display: block;
+  width: 100%;
+  margin-bottom: 8px;
+  background: rgba(0,0,0,0.3);
+  border: none;
+  border-radius: 10px;
+  padding: 8px 10px;
+  color: white;
+}
+
+/* ===============================
+   ITEM ACTIONS
+================================ */
+.item-actions {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.menu-section {
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.12);
-  color: var(--text-muted);
-  cursor: pointer;
-  text-align: left;
-}
-
-.menu-section.is-active {
-  color: var(--accent);
-  border-color: rgba(255,59,167,.6);
-  box-shadow: 0 0 12px rgba(255,59,167,.35);
-}
-
-.menu-items {
-  background: rgba(15,23,42,.6);
-  border-radius: 14px;
-  padding: 14px;
-}
-
-.menu-items-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.menu-item-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.menu-item-row {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr auto;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(255,255,255,.04);
-  align-items: center;
-  font-size: 0.85rem;
-}
-
-.menu-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.menu-table th,
-.menu-table td {
-  padding: 10px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  text-align: left;
-}
-
-.price-input {
-  width: 100px;
-  padding: 6px;
-  border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.2);
-  background: transparent;
-  color: inherit;
-}
-
-.status-toggle {
-  padding: 6px 10px;
+.status {
+  padding: 6px 14px;
   border-radius: 999px;
+  font-size: 12px;
   border: none;
   cursor: pointer;
 }
 
-.status-toggle.on {
-  background: #16a34a;
+.status.available {
+  background: #22c55e;
+  color: #022c12;
+}
+
+.status.sold-out {
+  background: #ef4444;
   color: white;
 }
 
-.status-toggle.off {
-  background: #dc2626;
-  color: white;
-}
-
-.menu-table tr.saved {
-  outline: 1px solid #22c55e;
-}
-
-/* ================= IMAGE CELL ================= */
-.image-cell {
+/* ===============================
+   TOP NAV BUTTONS
+================================ */
+.top-actions {
   display: flex;
   align-items: center;
+  gap: 16px;
+}
+
+/* Grouping */
+.nav-group,
+.action-group {
+  display: flex;
   gap: 10px;
-  min-width: 260px;
 }
 
-/* Thumbnail */
-.menu-thumb {
-  width: 64px;
-  height: 64px;
-  border-radius: 10px;
-  object-fit: cover;
-  background: #f2f2f2;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  flex-shrink: 0;
-}
-
-/* Image URL input */
-.image-url-input {
-  flex: 1;
-  min-width: 160px;
-  padding: 6px 8px;
+/* Nav buttons */
+.nav-btn {
+  padding: 8px 14px;
+  border-radius: 999px;
   font-size: 13px;
-  border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  outline: none;
-}
-
-.image-url-input:focus {
-  border-color: #000;
-}
-
-/* Actions spacing */
-.image-cell .btn {
+  text-decoration: none;
   white-space: nowrap;
+  transition: all 0.2s ease;
 }
 
-.menu-thumb {
-  cursor: pointer;
-  transition: transform 120ms ease, box-shadow 120ms ease;
+.nav-btn.ghost {
+  color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.15);
+  background: transparent;
 }
 
-.menu-thumb:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+.nav-btn.ghost:hover {
+  color: white;
+  border-color: rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.05);
 }
 
-/* ================= FIX TABLE SCROLL ================= */
-
-/* Allow horizontal scrolling for wide tables */
-.menu-items {
-  overflow-x: auto;
-  max-width: 100%;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Ensure table does not shrink */
-.menu-table {
-  min-width: 900px; /* forces scroll instead of squish */
-  width: 100%;
-}
-
-/* Keep headers visible */
-.menu-table thead th {
-  position: sticky;
-  top: 0;
-  background: rgba(15, 23, 42, 0.95);
-  z-index: 2;
-}
-
-/* Action column should never wrap */
-.menu-table td:last-child,
-.menu-table th:last-child {
-  white-space: nowrap;
+.nav-group {
+  margin-right: 6px;
 }
