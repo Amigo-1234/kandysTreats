@@ -74,6 +74,17 @@ const STATE = {
   acknowledged: new Set(), // 👈 NEW
 };
 
+const ACK_KEY = "admin_acknowledged_orders";
+
+STATE.acknowledged = new Set(
+  JSON.parse(localStorage.getItem(ACK_KEY) || "[]")
+);
+
+function acknowledge(id) {
+  STATE.acknowledged.add(id);
+  localStorage.setItem(ACK_KEY, JSON.stringify([...STATE.acknowledged]));
+}
+
 /* ===============================
    SOUND ENGINE
 ================================ */
@@ -173,10 +184,10 @@ function startOrdersListener() {
   if (STATE.unsubscribe) return;
 
   const q = query(
-    collection(db, "orders"),
-    where("paid", "==", true),
-    orderBy("createdAt", "desc")
-  );
+  collection(db, "orders"),
+  where("paid", "==", true),
+  orderBy("createdAtMs", "desc")
+);
 
   STATE.unsubscribe = onSnapshot(q, (snap) => {
   STATE.orders = snap.docs.map(d => d.data());
@@ -272,7 +283,7 @@ function renderTable() {
   STATE.selectedId = order.id;
 
   // ✅ mark as acknowledged
-  STATE.acknowledged.add(order.id);
+  acknowledge(order.id);
 
   [...tbody.children].forEach(r => r.classList.remove("active"));
   tr.classList.add("active");

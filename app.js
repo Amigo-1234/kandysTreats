@@ -1068,7 +1068,8 @@ const order = {
   paid: false,
   status: "New",
 
-  createdAt: serverTimestamp()
+  createdAt: serverTimestamp(),
+  createdAtMs: Date.now() // 👈 ADD THIS
 };
 
   await setDoc(doc(window.db, "orders", orderId), order);
