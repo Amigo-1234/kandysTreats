@@ -186,7 +186,7 @@ function startOrdersListener() {
   const q = query(
   collection(db, "orders"),
   where("paid", "==", true),
-  orderBy("createdAtMs", "desc")
+  orderBy("createdAt", "desc")
 );
 
   STATE.unsubscribe = onSnapshot(q, (snap) => {
