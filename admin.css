@@ -461,3 +461,11 @@ html[data-page="admin"] body {
 .order-detail-panel:hover {
   scrollbar-color: rgba(255,255,255,0.2) transparent;
 }
+
+.live-indicator.offline {
+  opacity: 0.6;
+}
+
+.live-indicator.offline .dot {
+  background: red;
+}

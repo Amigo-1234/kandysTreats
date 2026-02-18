@@ -13,14 +13,19 @@ import {
   doc,
   updateDoc,
   getDoc,
+  getDocs,          // ✅ ADD THIS
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+import { setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 import {
   getAuth,
   signOut,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+import { writeBatch } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 /* ===============================
    FIREBASE
@@ -57,6 +62,9 @@ const statRevenue = document.getElementById("stat-revenue");
 const detailPanel = document.getElementById("order-detail-panel");
 const detailEmpty = document.getElementById("order-detail-empty");
 const detailContent = document.getElementById("order-detail-content");
+
+const liveBtn = document.getElementById("toggle-live");
+const liveText = document.getElementById("live-text");
 
 
 /* ===============================
@@ -175,6 +183,52 @@ onAuthStateChanged(auth, async (user) => {
 logoutBtn?.addEventListener("click", async () => {
   await signOut(auth);
   location.href = "admin-login.html";
+});
+
+const storeRef = doc(db, "settings", "store");
+
+onSnapshot(storeRef, snap => {
+  if (!snap.exists()) return;
+
+  const { isLive } = snap.data();
+
+  liveText.textContent = isLive ? "Live" : "Offline";
+  liveBtn.classList.toggle("offline", !isLive);
+});
+
+async function setAllMenuStatus(status) {
+  const q = query(collection(db, "menus"));
+  const snap = await getDocs(q);
+
+  const batch = writeBatch(db);
+
+  snap.docs.forEach(docSnap => {
+    batch.update(docSnap.ref, {
+      status,
+      updatedAt: serverTimestamp()
+    });
+  });
+
+  await batch.commit();
+}
+
+liveBtn?.addEventListener("click", async () => {
+  const snap = await getDoc(storeRef);
+  const isLive = snap.data()?.isLive ?? true;
+
+  const next = !isLive;
+
+  await setDoc(
+  storeRef,
+  {
+    isLive: next,
+    updatedAt: serverTimestamp()
+  },
+  { merge: true }
+);
+
+  // Sync menu availability
+  await setAllMenuStatus(next ? "available" : "sold-out");
 });
 
 /* ===============================
