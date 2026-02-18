@@ -472,15 +472,23 @@ onSnapshot(menusQuery, (snapshot) => {
 
     initLazyImages();
 
-    const filtered = MENU_ITEMS.filter((item) => {
-      const matchesCat = activeCategory === "All" || item.category === activeCategory;
-      const matchesQuery =
-  !queryText ||
-  item.name.toLowerCase().includes(queryText) ||
-  (item.description || "").toLowerCase().includes(queryText);
+    const filtered = MENU_ITEMS
+  .filter((item) => {
+    const matchesCat =
+      activeCategory === "All" || item.category === activeCategory;
 
-      return matchesCat && matchesQuery;
-    });
+    const matchesQuery =
+      !queryText ||
+      item.name.toLowerCase().includes(queryText) ||
+      (item.description || "").toLowerCase().includes(queryText);
+
+    return matchesCat && matchesQuery;
+  })
+  .sort((a, b) => {
+    // Available first, sold-out last
+    if (a.soldOut === b.soldOut) return 0;
+    return a.soldOut ? 1 : -1;
+  });
 
     if (!filtered.length) {
       const p = document.createElement("p");
