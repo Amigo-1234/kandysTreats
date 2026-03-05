@@ -25,6 +25,12 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
+import {
+  getMessaging,
+  getToken,
+  onMessage
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-messaging.js";
+
 import { writeBatch } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 /* ===============================
@@ -42,6 +48,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+const messaging = getMessaging(app);
 
 /* ===============================
    DOM
@@ -561,3 +568,27 @@ document.querySelector(".date-filters")?.addEventListener("click", e => {
 
   renderTable();
 });
+
+
+async function enableAdminNotifications() {
+
+  const permission = await Notification.requestPermission();
+
+  if (permission !== "granted") {
+    console.log("Notification permission denied");
+    return;
+  }
+
+  // REGISTER SERVICE WORKER
+  const registration = await navigator.serviceWorker.register("./firebase-messaging-sw.js");
+
+  const token = await getToken(messaging, {
+    vapidKey: "BDOZiSxAx_7P0JoHWv_UQOW8xIdpez_4RTAwnYTE-QNJAPS6CRmM2XbbT3K409uwDoCu4ebxPjXFRqQoMyRcGwg",
+    serviceWorkerRegistration: registration
+  });
+
+  console.log("Admin push token:", token);
+
+}
+
+enableAdminNotifications();
