@@ -73,6 +73,7 @@ const detailContent = document.getElementById("order-detail-content");
 const liveBtn = document.getElementById("toggle-live");
 const liveText = document.getElementById("live-text");
 
+const enableNotifBtn = document.getElementById("enable-notifications");
 
 /* ===============================
    STATE
@@ -605,18 +606,17 @@ document.querySelector(".date-filters")?.addEventListener("click", e => {
 async function enableAdminNotifications() {
 
   if (!("Notification" in window)) {
-  console.log("Notifications not supported");
-  return;
-}
-
-const permission = await Notification.requestPermission();
-
-  if (permission !== "granted") {
-    console.log("Notification permission denied");
+    alert("Notifications not supported on this device");
     return;
   }
 
-  // REGISTER SERVICE WORKER
+  const permission = await Notification.requestPermission();
+
+  if (permission !== "granted") {
+    alert("Notification permission denied");
+    return;
+  }
+
   const registration = await navigator.serviceWorker.register("./firebase-messaging-sw.js");
 
   const token = await getToken(messaging, {
@@ -624,13 +624,18 @@ const permission = await Notification.requestPermission();
     serviceWorkerRegistration: registration
   });
 
+  await setDoc(doc(db, "adminTokens", token), {
+    token: token,
+    createdAt: serverTimestamp()
+  });
+
   console.log("Admin push token:", token);
+
+  enableNotifBtn.textContent = "Notifications Enabled ✅";
 
 }
 
 
-
-enableAdminNotifications();
 
 onMessage(messaging, (payload) => {
 
@@ -645,4 +650,8 @@ onMessage(messaging, (payload) => {
 
   }
 
+});
+
+enableNotifBtn?.addEventListener("click", () => {
+  enableAdminNotifications();
 });
