@@ -257,8 +257,11 @@ snap.docChanges().forEach(change => {
 
   if (change.type === "added") {
 
-    const order = change.doc.data();
-    const orderId = change.doc.id;
+  const order = change.doc.data();
+  const orderId = change.doc.id;
+
+  // Only notify if order is paid
+  if (!order.paid) return;
 
     // Skip if already acknowledged
     if (STATE.acknowledged.has(orderId)) return;
@@ -601,7 +604,12 @@ document.querySelector(".date-filters")?.addEventListener("click", e => {
 
 async function enableAdminNotifications() {
 
-  const permission = await Notification.requestPermission();
+  if (!("Notification" in window)) {
+  console.log("Notifications not supported");
+  return;
+}
+
+const permission = await Notification.requestPermission();
 
   if (permission !== "granted") {
     console.log("Notification permission denied");
@@ -620,4 +628,21 @@ async function enableAdminNotifications() {
 
 }
 
+
+
 enableAdminNotifications();
+
+onMessage(messaging, (payload) => {
+
+  console.log("Foreground message:", payload);
+
+  if (Notification.permission === "granted") {
+
+    new Notification(payload.notification.title, {
+      body: payload.notification.body,
+      icon: "/images/logo.png"
+    });
+
+  }
+
+});
