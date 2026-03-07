@@ -253,27 +253,34 @@ function startOrdersListener() {
   STATE.unsubscribe = onSnapshot(q, (snap) => {
 
   // Detect new orders
-  snap.docChanges().forEach(change => {
+snap.docChanges().forEach(change => {
 
-    if (change.type === "added") {
+  if (change.type === "added") {
 
-      const order = change.doc.data();
+    const order = change.doc.data();
+    const orderId = change.doc.id;
 
-      // PHONE NOTIFICATION
-      if (Notification.permission === "granted") {
+    // Skip if already acknowledged
+    if (STATE.acknowledged.has(orderId)) return;
 
-        new Notification("New Order Received 🛍", {
-          body: `Order #${order.id} worth NGN ${order.total}`,
-          icon: "/images/logo.png"
-        });
+    // PHONE NOTIFICATION
+    if (Notification.permission === "granted") {
 
-      }
+      new Notification("New Order Received 🛍", {
+        body: `Order #${orderId} worth NGN ${order.total}`,
+        icon: "/images/logo.png"
+      });
 
     }
 
-  });
+  }
 
-  STATE.orders = snap.docs.map(d => d.data());
+});
+
+  STATE.orders = snap.docs.map(d => ({
+  id: d.id,
+  ...d.data()
+}));
 
   renderTable();
   updateStats();
