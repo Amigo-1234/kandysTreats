@@ -1315,11 +1315,7 @@ if (waBtn) {
   const msg = `Hello, I need help with my order ${order.id}`;
   waBtn.href = `https://wa.me/+2348134641796?text=${encodeURIComponent(msg)}`;
 }
-
-if (codeFromUrl) {
-  input.value = codeFromUrl;
-  form.dispatchEvent(new Event("submit"));
-}
+ 
 
 };
 
