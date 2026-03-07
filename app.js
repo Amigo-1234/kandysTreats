@@ -1315,6 +1315,12 @@ if (waBtn) {
   const msg = `Hello, I need help with my order ${order.id}`;
   waBtn.href = `https://wa.me/+2348134641796?text=${encodeURIComponent(msg)}`;
 }
+
+if (codeFromUrl) {
+  input.value = codeFromUrl;
+  form.dispatchEvent(new Event("submit"));
+}
+
 };
 
 
@@ -1719,10 +1725,3 @@ document.addEventListener("DOMContentLoaded", () => {
   el.textContent = hoursByDay[day] || "Closed";
 })();
 
-const params = new URLSearchParams(window.location.search);
-const orderId = params.get("id");
-
-if (orderId) {
-  // auto-load order
-  loadOrder(orderId);
-}
