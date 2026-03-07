@@ -87,7 +87,9 @@ const STATE = {
   soundOn: true,
   unsubscribe: null,
 
-  acknowledged: new Set(), // 👈 NEW
+  acknowledged: new Set(),
+
+  initialized: false
 };
 
 const ACK_KEY = "admin_acknowledged_orders";
@@ -251,60 +253,57 @@ function startOrdersListener() {
   orderBy("createdAt", "desc")
 );
 
-  STATE.unsubscribe = onSnapshot(q, (snap) => {
 
-  // Detect new orders
-snap.docChanges().forEach(change => {
+STATE.unsubscribe = onSnapshot(q, (snap) => {
 
-  if (change.type === "added") {
+  if (!STATE.initialized) {
 
-  const order = change.doc.data();
-  const orderId = change.doc.id;
+    STATE.orders = snap.docs.map(d => ({
+      id: d.id,
+      ...d.data()
+    }));
 
-  // Only notify if order is paid
-  if (!order.paid) return;
+    STATE.initialized = true;
 
-    // Skip if already acknowledged
-    if (STATE.acknowledged.has(orderId)) return;
+    renderTable();
+    updateStats();
+    return;
+  }
 
-    // PHONE NOTIFICATION
-    if (Notification.permission === "granted") {
+  snap.docChanges().forEach(change => {
+
+    if (change.type === "added") {
+
+      const order = change.doc.data();
+      const orderId = change.doc.id;
+
+      if (!order.paid) return;
+      if (STATE.acknowledged.has(orderId)) return;
 
       new Notification("New Order Received 🛍", {
         body: `Order #${orderId} worth NGN ${order.total}`,
-        icon: "/images/logo.png"
+        icon: "logo.png"
       });
 
     }
 
-  }
-
-});
+  });
 
   STATE.orders = snap.docs.map(d => ({
-  id: d.id,
-  ...d.data()
-}));
+    id: d.id,
+    ...d.data()
+  }));
 
   renderTable();
   updateStats();
 
-  // SOUND ALERT
-  const pending = getUnacknowledgedNewOrders();
-
-  if (pending.length > 0) {
-    startAlertSound();
-  } else {
-    stopAlertSound();
-  }
-
-  if (STATE.selectedId) {
-    const o = STATE.orders.find(x => x.id === STATE.selectedId);
-    if (o) renderDetails(o);
-  }
-
 });
+
 }
+
+
+
+
 
 /* ===============================
    FILTERS
