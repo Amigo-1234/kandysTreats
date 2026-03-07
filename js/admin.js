@@ -251,12 +251,34 @@ function startOrdersListener() {
 );
 
   STATE.unsubscribe = onSnapshot(q, (snap) => {
+
+  // Detect new orders
+  snap.docChanges().forEach(change => {
+
+    if (change.type === "added") {
+
+      const order = change.doc.data();
+
+      // PHONE NOTIFICATION
+      if (Notification.permission === "granted") {
+
+        new Notification("New Order Received 🛍", {
+          body: `Order #${order.id} worth NGN ${order.total}`,
+          icon: "/images/logo.png"
+        });
+
+      }
+
+    }
+
+  });
+
   STATE.orders = snap.docs.map(d => d.data());
 
   renderTable();
   updateStats();
 
-  // 🔔 SOUND LOGIC
+  // SOUND ALERT
   const pending = getUnacknowledgedNewOrders();
 
   if (pending.length > 0) {
@@ -265,11 +287,11 @@ function startOrdersListener() {
     stopAlertSound();
   }
 
-  // re-sync detail panel
   if (STATE.selectedId) {
     const o = STATE.orders.find(x => x.id === STATE.selectedId);
     if (o) renderDetails(o);
   }
+
 });
 }
 
