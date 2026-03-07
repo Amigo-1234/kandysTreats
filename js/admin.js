@@ -497,7 +497,7 @@ const itemsSummary = order.subOrders
   .join("\n") || "• No items";
 
 // 🔗 Track link (CHANGE domain/path if needed)
-const trackLink = `https://kandystreats.com.ng/track.html?id=${order.id}`;
+const trackLink = `https://kandystreats.com.ng/track.html?id=${order.orderCode}`;
 
 const msg = `Hello ${order.customer.name} 👋
 
