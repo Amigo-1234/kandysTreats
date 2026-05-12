@@ -986,3 +986,39 @@ body.auth-page {
 .chart-placeholder {
   height: 220px;
 }
+
+.orders-grid{
+  display:grid;
+  gap:18px;
+}
+
+.unpaid-card{
+  padding:20px;
+}
+
+.unpaid-top{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+}
+
+.amount{
+  font-size:28px;
+  font-weight:700;
+  color:#ff4da6;
+}
+
+.unpaid-actions{
+  margin-top:18px;
+}
+
+.unpaid-link{
+  text-decoration:none;
+  color:inherit;
+  cursor:pointer;
+  transition:.2s ease;
+}
+
+.unpaid-link:hover{
+  transform:translateY(-3px);
+}
