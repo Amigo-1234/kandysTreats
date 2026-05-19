@@ -517,8 +517,34 @@ Reply here if you need help 💬
 
 Thank you for choosing Kandys Treats ❤️`;
 
-waTab.location.href =
-  `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+const cleanPhone = normalizePhone(order.customer.phone);
+
+const appLink =
+  `whatsapp://send?phone=${cleanPhone}&text=${encodeURIComponent(msg)}`;
+
+const webLink =
+  `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
+
+const isMobile =
+  /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+if (isMobile) {
+
+  // Try opening WhatsApp app first
+  window.location.href = appLink;
+
+  // Fallback to web after delay
+  setTimeout(() => {
+    window.location.href = webLink;
+  }, 1200);
+
+} else {
+
+  // Desktop
+  waTab.location.href = webLink;
+
+}
+
 });
 
 
