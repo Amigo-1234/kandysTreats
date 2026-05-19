@@ -530,8 +530,8 @@ const isMobile =
 
 if (isMobile) {
 
-  // Open WhatsApp directly
-  window.open(webLink, "_blank");
+  // Mobile devices
+  window.location.href = webLink;
 
 } else {
 
