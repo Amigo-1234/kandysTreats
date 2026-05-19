@@ -462,8 +462,6 @@ detailPanel?.addEventListener("click", async (e) => {
 
 
 
-  const waTab = window.open("", "_blank");
-
   await updateDoc(doc(db, "orders", order.id), {
     status: btn.dataset.status,
     lastStatusUpdateAt: serverTimestamp()
@@ -519,9 +517,6 @@ Thank you for choosing Kandys Treats ❤️`;
 
 const cleanPhone = normalizePhone(order.customer.phone);
 
-const appLink =
-  `whatsapp://send?phone=${cleanPhone}&text=${encodeURIComponent(msg)}`;
-
 const webLink =
   `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
 
@@ -536,7 +531,7 @@ if (isMobile) {
 } else {
 
   // Desktop
-  waTab.location.href = webLink;
+  window.open(webLink, "_blank");
 
 }
 
