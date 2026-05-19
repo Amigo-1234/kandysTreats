@@ -530,13 +530,8 @@ const isMobile =
 
 if (isMobile) {
 
-  // Try opening WhatsApp app first
-  window.location.href = appLink;
-
-  // Fallback to web after delay
-  setTimeout(() => {
-    window.location.href = webLink;
-  }, 1200);
+  // Open WhatsApp directly
+  window.open(webLink, "_blank");
 
 } else {
 
